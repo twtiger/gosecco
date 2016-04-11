@@ -1,4 +1,4 @@
-package native_constants
+package constants
 
 import "syscall"
 
