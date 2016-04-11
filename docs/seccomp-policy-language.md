@@ -6,14 +6,41 @@ Each line is its own unit of parsing - there exists no way of extending expressi
 
 Every line can be one of several types - specifically, they can be assignments, rules or comments.
 
+In general, each line will be parsed and understood in the context of only the previous lines. That means that variables and macros have to be defined before used. This also stops recursive actions from being possible.    
+
+
 ## Comments
 
 A comment will start with a literal octothorpe (#) in column 0, and continues until the end of the line
 No processing of comments will happen.
 
-## Assignments
+## Default actions
 
-(TODO)
+Each rule can generate a positive or a negative action, depending on whether the boolean result of that rule is positive or negative. When compiling the program it is possible to set the defaults that should be used. This might not always be the most convenient option though, so the language also supports defining default actions inside of the file itself. These can be specified by assigning the special values DEFAULT_POSITIVE and DEFAULT_NEGATIVE in the usual manner of assignment. The standard actions available have mnemonic names as well. These are  "trap", "kill", "allow", "trace". If a number is given, this will be interpreted as returning an ERRNO action for that number:
+
+  DEFAULT_POSITIVE = trace
+  DEFAULT_NEGATIVE = 42
+
+It is suggested to define these at the top of the file to minimize confusion. It is theoretically possible to change the default actions through the file, but that is discouraged.
+
+## Assignments
+  
+Assignments allow the policy writer to simplify and extract complex arithmetic operations. The operational semantics of the assignment is as if the expression had been put inline at the place where the variable is referenced. The expression defining the variable has to be well formed in isolation, but can refer to previously defined variables. The compiler will perform arithmetic simplification on all expressions in order to reduce the number of operations needed at runtime.
+
+  var1 = 412 * 3
+
+## Macros
+
+If a variable expression refers to any of the special argument variables, or contains any boolean operators or the return operator, the assignment will instead refer to a macro. The operational semantics for a macro is the same as for variables. Any expression that refers to a macro becomes a macro.
+
+Macros can take arguments - the argument list follows the usual rules and the evaluation will use simple alpha renaming before compilation.
+
+  var2 = arg0 == 5 && arg1 == 42; return 6
+  f(x) = x == 5
+  g(y) = y == 6
+
+  read: f(arg0) || g(arg0) || g(arg1) 
+  read: var2
 
 ## Rules
 
@@ -32,7 +59,13 @@ The third form combines these two, in such a way that if the given expression is
 
   read: arg0==1; return 55
 
-(TODO, continue here)
+Rules can specify their own custom positive and negative actions that differ from the default. This uses the same naming convention as the default actions described above. The syntax for describing them is simple:
+
+  read[+trace, -kill] : 1 == 2
+  read[+42] : arg0 == 1
+  read[-55] : arg0 > 1
+  
+The order of the actions is arbitrary, and either part can be left out. The plus sign signifies the positive action, and the minus the negative action. If no actions are specified, the square brackets can be left off, and the default actions for the file will be used.
 
 ## Syntax of numbers
 
