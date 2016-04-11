@@ -19,7 +19,7 @@ func surround(s string) string {
 // 	parseRule(surround("arg0 != 42"))
 // }
 
-func parseRule(s string) BooleanExpression {
+func parseRule(s string) booleanExpression {
 	tr, _ := parser.ParseExpr(surround(s))
 	return translateBooleanExpression(tr)
 }
@@ -37,7 +37,7 @@ func unwrapIgnored(x ast.Node) ast.Node {
 	}
 }
 
-func translateBooleanExpression(x ast.Node) BooleanExpression {
+func translateBooleanExpression(x ast.Node) booleanExpression {
 	x = unwrapIgnored(x)
 
 	switch f := x.(type) {
