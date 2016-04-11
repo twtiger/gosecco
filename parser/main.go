@@ -1,4 +1,4 @@
-package main
+package parser
 
 import (
 	"fmt"
@@ -11,13 +11,13 @@ func surround(s string) string {
 	return "func() { " + s + "}"
 }
 
-func main() {
-	fs := token.NewFileSet()
-	tr, _ := parser.ParseExpr(surround("arg0 == 42"))
-	ast.Print(fs, tr)
+// func main() {
+// 	fs := token.NewFileSet()
+// 	tr, _ := parser.ParseExpr(surround("arg0 == 42"))
+// 	ast.Print(fs, tr)
 
-	parseRule(surround("arg0 != 42"))
-}
+// 	parseRule(surround("arg0 != 42"))
+// }
 
 func parseRule(s string) BooleanExpression {
 	tr, _ := parser.ParseExpr(surround(s))
