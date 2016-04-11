@@ -22,10 +22,6 @@ type rule struct {
 	expression expression
 }
 
-func doParse(source string) ([]rule, error) {
-	return nil, nil
-}
-
 type booleanExpression interface {
 	String() string
 	Repr() string
@@ -93,17 +89,30 @@ func (l literalNode) String() string {
 }
 
 func (l literalNode) Repr() string {
-	return l.String()
+	return fmt.Sprintf("%d", l.value)
+}
+
+type comparison struct{
+	left, right integerExpression
+	cmp string
+}
+
+func (c comparison) String() string {
+	return fmt.Sprintf("(%s %s %s)", c.cmp, c.left.String(), c.right.String())
+}
+
+func (c comparison) Repr() string {
+	return fmt.Sprintf("%s %s %s", c.left.Repr(), c.cmp, c.right.Repr())
 }
 
 type addition struct {
-	left, right integerExpression
+    left, right integerExpression
 }
 
 func (a addition) String() string {
 	return fmt.Sprintf("(+ %s %s)", a.left.String(), a.right.String())
-}
+ }
 
 func (a addition) Repr() string {
-	return fmt.Sprintf("%s + %s", a.left.Repr(), a.right.Repr())
-}
+   return fmt.Sprintf("%s + %s", a.left.Repr(), a.right.Repr())
+ }

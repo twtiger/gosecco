@@ -1,26 +1,99 @@
 package parser
 
-// import (
-// 	"testing"
-//   . "gopkg.in/check.v1"
-// )
+import (
+	"fmt"
+  . "gopkg.in/check.v1"
+)
 
-// func Test(t *testing.T) { TestingT(t) }
+type RulesSuite struct{}
 
-// type RulesSuite struct{}
+var _ = Suite(&RulesSuite{})
 
-// var _ = Suite(&RulesSuite{})
+func (s *RulesSuite) Test_parsesSimpleRule(c *C) {
+	result, _ := parseRule("read: 1")
 
-// func (s *RulesSuite) Test_parsesSimpleRule(c *C) {
-// 	result, _ := doParse("read: 1")
+	c.Assert(result, DeepEquals, rule{
+			syscall: "read",
+			expression: trueLiteral{},
+		},
+	)
+}
 
-// 	c.Assert(result, DeepEquals, []rule{
-// 		rule{
-// 			syscall: "read",
-// 			expression: trueLiteral{},
-// 		},
-// 	})
-// }
+func (s *RulesSuite) Test_parsesAlmostSimpleRule(c *C) {
+	result, _ := parseRule("read2: arg0 > 0")
+
+	c.Assert(result, DeepEquals, rule{
+		syscall: "read2",
+		expression: comparison {
+			left: argumentNode{index: 0},
+			cmp: "gt",
+			right: literalNode{value: 0},
+		},
+	})
+}
+
+func (s *RulesSuite) Test_parseAnotherRule(c *C) {
+	result, _ := parseRule("read3: arg0 == 4")
+	fmt.Printf("%#v\n", result)
+
+	c.Assert(result, DeepEquals, rule{
+		syscall: "read3",
+		expression: comparison {
+			left: argumentNode{index: 0},
+			cmp: "eq",
+			right: literalNode{value: 4},
+		},
+	})
+}
+
+func (s *RulesSuite) Test_parseYetAnotherRule(c *C) {
+	result, _ := parseRule("read4: arg0 == 4 || arg0 == 5")
+	//fmt.Printf("%#v\n", result)
+
+	c.Assert(result, DeepEquals, rule{
+		syscall: "read4",
+		expression: orExpr {
+			left: comparison{
+				left: argumentNode{index: 0},
+				cmp: "eq",
+				right: literalNode{value: 4},
+			},
+			right: comparison{
+				left: argumentNode{index: 0},
+				cmp: "eq",
+				right: literalNode{value: 5},
+			},
+		},
+	})
+}
+
+/*
+func (s *RulesSuite) Test_parseARuleWithArithmetic(c *C) {
+	result, _ := parseRule("read5: arg0 = 12 * 3")
+	//fmt.Printf("%#v\n", result)
+
+	c.Assert(result, DeepEquals, rule{
+		syscall: "read4",
+		expression: orExpr {
+			left: comparison{
+				left: argumentNode{index: 0},
+				cmp: "eq",
+				right: literalNode{value: 4},
+			},
+			right: comparison{
+				left: argumentNode{index: 0},
+				cmp: "eq",
+				right: literalNode{value: 5},
+			},
+		},
+	})
+}
+*/
+
+//	result, _ := doParse("read2: arg0 > 0")
+
+//	c.Assert(result.String(), DeepEquals, "(read2 (gt (arg 0) (literal 0)))")
+
 
 // func (s *RulesSuite) Test_parsesSlightlyMoreComplicatedRule(c *C) {
 // 	result, _ := doParse("write: arg1 == 42 || arg0 + 1 == 15 && (arg3 == 1 || arg4 == 2)")

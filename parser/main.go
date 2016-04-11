@@ -5,47 +5,78 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"strings"
+	 "strconv"
 )
 
 func surround(s string) string {
 	return "func() { " + s + "}"
 }
 
-// func main() {
-// 	fs := token.NewFileSet()
-// 	tr, _ := parser.ParseExpr(surround("arg0 == 42"))
-// 	ast.Print(fs, tr)
 
-// 	parseRule(surround("arg0 != 42"))
-// }
-
-func parseRule(s string) booleanExpression {
-	tr, _ := parser.ParseExpr(surround(s))
-	return translateBooleanExpression(tr)
+func parseRule(s string) (rule, error) {
+	p := strings.SplitN(s, ":", 2)
+	name, rl := p[0], p[1]
+	fs := token.NewFileSet()
+	tr, _ := parser.ParseExpr(surround(rl))
+	ast.Print(fs, tr)
+	return rule{name, unwrapToplevel(tr)}, nil
 }
 
-func unwrapIgnored(x ast.Node) ast.Node {
+func unwrapToplevel(x ast.Node) expression {
 	switch f := x.(type) {
 	case *ast.FuncLit:
-		return unwrapIgnored(f.Body)
+		return unwrapToplevel(f.Body)
 	case *ast.BlockStmt:
-		return unwrapIgnored(f.List[0])
+		return unwrapToplevel(f.List[0])
 	case *ast.ExprStmt:
-		return unwrapIgnored(f.X)
+		return unwrapBooleanExpression(f.X)
 	default:
-		return x
+		panic("Not a valid top level statement")
 	}
 }
 
-func translateBooleanExpression(x ast.Node) booleanExpression {
-	x = unwrapIgnored(x)
-
+func unwrapIntegerExpression(x ast.Node) integerExpression {
 	switch f := x.(type) {
+    case *ast.Ident:
+    	switch f.Name {
+    	case "arg0":
+    		return argumentNode{0}
+    	}
+    case *ast.BasicLit:
+    	i, _ := strconv.Atoi(f.Value)
+    	return literalNode{i}
+	default:
+		panic("No integer")
+	}
+	panic("Not a valid integer expression")
+}
+
+func unwrapBooleanExpression(x ast.Node) booleanExpression {
+	switch f := x.(type) {
+	case *ast.BasicLit:
+		switch f.Value {
+		case "1":
+			return trueLiteral{}
+		}
 	case *ast.BinaryExpr:
 		switch f.Op {
-		case token.EQL:
-			fmt.Printf("WOOT EQUALS\n")
+			case token.LOR:
+				left := unwrapBooleanExpression(f.X)
+				right := unwrapBooleanExpression(f.Y)
+				return orExpr{left, right}
 		}
+
+		var cmp string;
+		switch f.Op {
+			case token.GTR: cmp = "gt"
+			case token.EQL: cmp = "eq"
+		}
+		left := unwrapIntegerExpression(f.X)
+		right := unwrapIntegerExpression(f.Y)
+		return comparison{left, right, cmp}
+	default:
+		panic(fmt.Sprintf("can't do this with %#v", x))
 	}
-	return nil
+	panic("Not a valid boolean expression")
 }
