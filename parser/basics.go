@@ -92,9 +92,9 @@ func (l literalNode) Repr() string {
 	return fmt.Sprintf("%d", l.value)
 }
 
-type comparison struct{
+type comparison struct {
 	left, right integerExpression
-	cmp string
+	cmp         string
 }
 
 func (c comparison) String() string {
@@ -105,14 +105,15 @@ func (c comparison) Repr() string {
 	return fmt.Sprintf("%s %s %s", c.left.Repr(), c.cmp, c.right.Repr())
 }
 
-type addition struct {
-    left, right integerExpression
+type arithmetic struct {
+	left, right integerExpression
+	op          string
 }
 
-func (a addition) String() string {
-	return fmt.Sprintf("(+ %s %s)", a.left.String(), a.right.String())
- }
+func (a arithmetic) String() string {
+	return fmt.Sprintf("(%s %s %s)", a.op, a.left.String(), a.right.String())
+}
 
-func (a addition) Repr() string {
-   return fmt.Sprintf("%s + %s", a.left.Repr(), a.right.Repr())
- }
+func (a arithmetic) Repr() string {
+	return fmt.Sprintf("%s %s %s", a.left.Repr(), a.op, a.right.Repr())
+}

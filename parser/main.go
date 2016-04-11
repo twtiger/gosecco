@@ -5,8 +5,8 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"strconv"
 	"strings"
-	 "strconv"
 )
 
 var tokenTypes = make(map[token.Token]string)
@@ -19,11 +19,9 @@ func init() {
 	tokenTypes[token.EQL] = "integerArguments"
 }
 
-
 func surround(s string) string {
 	return "func() { " + s + "}"
 }
-
 
 func parseRule(s string) (rule, error) {
 	p := strings.SplitN(s, ":", 2)
@@ -49,14 +47,23 @@ func unwrapToplevel(x ast.Node) expression {
 
 func unwrapIntegerExpression(x ast.Node) integerExpression {
 	switch f := x.(type) {
-    case *ast.Ident:
-    	switch f.Name {
-    	case "arg0":
-    		return argumentNode{0}
-    	}
-    case *ast.BasicLit:
-    	i, _ := strconv.Atoi(f.Value)
-    	return literalNode{i}
+	case *ast.Ident:
+		switch f.Name {
+		case "arg0":
+			return argumentNode{0}
+		}
+	case *ast.BasicLit:
+		i, _ := strconv.Atoi(f.Value)
+		return literalNode{i}
+	case *ast.BinaryExpr:
+		left := unwrapIntegerExpression(f.X)
+		right := unwrapIntegerExpression(f.Y)
+		var op string
+		switch f.Op {
+		case token.MUL:
+			op = "*"
+		}
+		return arithmetic{left, right, op}
 	default:
 		panic("No integer")
 	}
@@ -87,10 +94,12 @@ func unwrapBooleanExpression(x ast.Node) booleanExpression {
 				return orExpr{left, right}
 			}
 		} else if takesIntegerArguments(f) {
-			var cmp string;
+			var cmp string
 			switch f.Op {
-				case token.GTR: cmp = "gt"
-				case token.EQL: cmp = "eq"
+			case token.GTR:
+				cmp = "gt"
+			case token.EQL:
+				cmp = "eq"
 			}
 			left := unwrapIntegerExpression(f.X)
 			right := unwrapIntegerExpression(f.Y)

@@ -30,12 +30,18 @@ func (s *BasicsSuite) Test_argumentNode_Repr(c *C) {
 	c.Assert(argumentNode{2}.Repr(), Equals, "arg2")
 }
 
-func (s *BasicsSuite) Test_addition_String(c *C) {
-	c.Assert(addition{literalNode{42}, literalNode{15}}.String(), Equals, "(+ 42 15)")
+func (s *BasicsSuite) Test_arithmetic_String(c *C) {
+	left := literalNode{42}
+	right := literalNode{15}
+	op := "+"
+	c.Assert(arithmetic{left, right, op}.String(), Equals, "(+ 42 15)")
 }
 
-func (s *BasicsSuite) Test_addition_Repr(c *C) {
-	c.Assert(addition{argumentNode{2}, literalNode{15}}.Repr(), Equals, "arg2 + 15")
+func (s *BasicsSuite) Test_arithmetic_Repr(c *C) {
+	left := argumentNode{2}
+	right := literalNode{15}
+	op := "+"
+	c.Assert(arithmetic{left, right, op}.Repr(), Equals, "arg2 + 15")
 }
 
 func (s *BasicsSuite) Test_equalsComparison_String(c *C) {
