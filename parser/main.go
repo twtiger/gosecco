@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"fmt"
 )
 
 func surround(s string) string {

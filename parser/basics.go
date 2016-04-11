@@ -5,7 +5,7 @@ type expression interface{}
 type trueLiteral struct{}
 
 type rule struct {
-	syscall string
+	syscall    string
 	expression expression
 }
 
@@ -21,22 +21,22 @@ type IntegerExpression interface {
 	EvaluateInt() int
 }
 
-type orExpr struct{
+type orExpr struct {
 	left, right BooleanExpression
 }
-type andExpr struct{
+type andExpr struct {
 	left, right BooleanExpression
 }
-type equalsComparison struct{
+type equalsComparison struct {
 	left, right IntegerExpression
 }
-type argumentNode struct{
+type argumentNode struct {
 	index int
 }
-type literalNode struct{
+type literalNode struct {
 	value int
 }
-type addition struct{
+type addition struct {
 	left, right IntegerExpression
 }
 
