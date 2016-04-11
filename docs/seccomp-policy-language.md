@@ -122,9 +122,8 @@ The outcome of every rule will be defined by boolean operations. These primarily
 - Inclusion:
   in(arg0, 1,2,3,4)
   notIn(arg0, 1, 2, 3, 4)
-  There are no general arrays in the language - square brackets can only be used in conjunction with the in and not in operator
-  the in/not in operators are not case sensitive. Any valid value or name can be used inside the square brackets. Values have to be separated
-  by commas, and arbitrary amount of whitespace (tabs or spaces). The in/not in operator is the only binary operator where the two sides are not equivalent.
+  the in/not in operators are not case sensitive. Any valid value or name can be used inside the brackets. Values have to be separated
+  by commas, and arbitrary amount of whitespace (tabs or spaces). The in/notIn operator is the function like application that is not actually a function
 
 These can all be arbitrarily nested.
 
