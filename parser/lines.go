@@ -2,6 +2,7 @@ package parser
 
 import "strings"
 
+// LineType represents the different types of lines available in a policy file
 type LineType int
 
 const (
