@@ -23,4 +23,16 @@ func (s *RuleSuite) Test_parseRuleHead_parsesValidRuleHeads(c *C) {
 	parseRuleHeadCheck(c, " fcntl[ -kill, +trace] ", ruleHead{syscall: "fcntl", negative: "kill", positive: "trace"})
 	parseRuleHeadCheck(c, " fcntl[+trace,-kill] ", ruleHead{syscall: "fcntl", negative: "kill", positive: "trace"})
 	parseRuleHeadCheck(c, " fcntl[+trace,-42] ", ruleHead{syscall: "fcntl", negative: "42", positive: "trace"})
+
+	_, ok := parseRuleHead("")
+	c.Assert(ok, Equals, false)
+
+	_, ok = parseRuleHead("fcntl[+trace,+42]")
+	c.Assert(ok, Equals, false)
+
+	_, ok = parseRuleHead("fcntl[-trace,-42]")
+	c.Assert(ok, Equals, false)
+
+	_, ok = parseRuleHead("fcntl[hm]")
+	c.Assert(ok, Equals, false)
 }
