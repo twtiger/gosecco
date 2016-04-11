@@ -9,6 +9,17 @@ import (
 	 "strconv"
 )
 
+var tokenTypes = make(map[token.Token]string)
+
+func init() {
+	tokenTypes[token.LOR] = "booleanArguments"
+	tokenTypes[token.LAND] = "booleanArguments"
+
+	tokenTypes[token.GTR] = "integerArguments"
+	tokenTypes[token.EQL] = "integerArguments"
+}
+
+
 func surround(s string) string {
 	return "func() { " + s + "}"
 }
@@ -52,6 +63,14 @@ func unwrapIntegerExpression(x ast.Node) integerExpression {
 	panic("Not a valid integer expression")
 }
 
+func takesBooleanArguments(f *ast.BinaryExpr) bool {
+	return tokenTypes[f.Op] == "booleanArguments"
+}
+
+func takesIntegerArguments(f *ast.BinaryExpr) bool {
+	return tokenTypes[f.Op] == "integerArguments"
+}
+
 func unwrapBooleanExpression(x ast.Node) booleanExpression {
 	switch f := x.(type) {
 	case *ast.BasicLit:
@@ -60,21 +79,24 @@ func unwrapBooleanExpression(x ast.Node) booleanExpression {
 			return trueLiteral{}
 		}
 	case *ast.BinaryExpr:
-		switch f.Op {
+		if takesBooleanArguments(f) {
+			switch f.Op {
 			case token.LOR:
 				left := unwrapBooleanExpression(f.X)
 				right := unwrapBooleanExpression(f.Y)
 				return orExpr{left, right}
-		}
+			}
+		} else if takesIntegerArguments(f) {
+			var cmp string;
+			switch f.Op {
+				case token.GTR: cmp = "gt"
+				case token.EQL: cmp = "eq"
+			}
+			left := unwrapIntegerExpression(f.X)
+			right := unwrapIntegerExpression(f.Y)
+			return comparison{left, right, cmp}
 
-		var cmp string;
-		switch f.Op {
-			case token.GTR: cmp = "gt"
-			case token.EQL: cmp = "eq"
 		}
-		left := unwrapIntegerExpression(f.X)
-		right := unwrapIntegerExpression(f.Y)
-		return comparison{left, right, cmp}
 	default:
 		panic(fmt.Sprintf("can't do this with %#v", x))
 	}
