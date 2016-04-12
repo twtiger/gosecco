@@ -77,69 +77,62 @@ func (s *RulesSuite) Test_parseAExpressionWithAddition(c *C) {
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithDivision(c *C) {
-	c.Skip("not yet implemented")
 	result, _ := parseExpression("arg0 == 12 / 3")
 	c.Assert(result.String(), Equals, "(eq arg0 (quo 12 3))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithSubtraction(c *C) {
-	c.Skip("not yet implemented")
 	result, _ := parseExpression("arg0 == 12 - 3")
 	c.Assert(result.String(), Equals, "(eq arg0 (sub 12 3))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionBinaryAnd(c *C) {
-	c.Skip("not yet implemented")
 	result, _ := parseExpression("arg0 == 0 & 1")
 	c.Assert(result.String(), Equals, "(eq arg0 (and 0 1))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionBinaryOr(c *C) {
-	c.Skip("not yet implemented")
 	result, _ := parseExpression("arg0 == 0 | 1")
 	c.Assert(result.String(), Equals, "(eq arg0 (or 0 1))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionBinaryXor(c *C) {
-	c.Skip("not yet implemented")
 	result, _ := parseExpression("arg0 == 0 ^ 1")
 	c.Assert(result.String(), Equals, "(eq arg0 (xor 0 1))")
 }
 
-func (s *RulesSuite) Test_parseAExpressionBinaryNot(c *C) {
-	c.Skip("not yet implemented, validate syntax")
+func (s *RulesSuite) Test_parseAExpressionBinaryNegation(c *C) {
+	c.Skip("not yet implemented, check binary negation syntax")
 	result, _ := parseExpression("arg0 == ^0")
 	c.Assert(result.String(), Equals, "(eq arg0 (bnot 0))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionLeftShift(c *C) {
-	c.Skip("not yet implemented, validate syntax")
 	result, _ := parseExpression("arg0 == 2 << 1")
 	c.Assert(result.String(), Equals, "(eq arg0 (shl 2 1))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionRightShift(c *C) {
-	c.Skip("not yet implemented")
 	result, _ := parseExpression("arg0 == 2 >> 1")
 	c.Assert(result.String(), Equals, "(eq arg0 (shr 2 1))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithModulo(c *C) {
-	c.Skip("not yet implemented")
 	result, _ := parseExpression("arg0 == 12 % 3")
 	c.Assert(result.String(), Equals, "(eq arg0 (rem 12 3))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithBooleanAnd(c *C) {
-	c.Skip("not yet implemented")
-	result, _ := parseExpression("arg0 && arg1")
-	c.Assert(result.String(), Equals, "(land arg0 arg1")
+	// is this the expected syntax for this or should we ever
+	// consider cases like arg0 && arg1
+	result, _ := parseExpression("arg0 == 0 && arg1 == 0")
+	c.Assert(result.String(), Equals, "(land (eq arg0 0) (eq arg1 0))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithBooleanNegation(c *C) {
 	c.Skip("not yet implemented")
-	result, _ := parseExpression("! arg0")
-	c.Assert(result.String(), Equals, "(not arg0")
+	result, _ := parseExpression("!arg0")
+	c.Assert(result.String(), Equals, "(not arg0)")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithNotEqual(c *C) {
@@ -230,6 +223,12 @@ func (s *RulesSuite) Test_parseAExpressionWithNestedOperators(c *C) {
 	c.Skip("not yet implemented")
 	result, _ := parseExpression("arg0 == 12 + 3 * 2")
 	c.Assert(result.String(), Equals, "(eq arg0 (+ 12 (* 3 2)))")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithInvalidArithmeticOperator(c *C) {
+	c.Skip("not yet implemented, error handling")
+	result, _ := parseExpression("arg0 == 12 _ 3")
+	c.Assert(result.String(), Equals, "(eq arg0 (add 12 3))")
 }
 
 //	result, _ := doParse("read2: arg0 > 0")

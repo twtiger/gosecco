@@ -56,6 +56,11 @@ func (a andExpr) Repr() string {
 	return fmt.Sprintf("%s && %s", a.left.Repr(), a.right.Repr())
 }
 
+type unaryExpr struct {
+	x  integerExpression
+	op string
+}
+
 type equalsComparison struct {
 	left, right integerExpression
 }

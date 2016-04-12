@@ -14,7 +14,15 @@ var arithmeticOps = make(map[token.Token]string)
 
 func buildArithmeticOps() {
 	arithmeticOps[token.ADD] = "add"
+	arithmeticOps[token.SUB] = "sub"
 	arithmeticOps[token.MUL] = "mul"
+	arithmeticOps[token.QUO] = "quo"
+	arithmeticOps[token.REM] = "rem"
+	arithmeticOps[token.AND] = "and"
+	arithmeticOps[token.OR] = "or"
+	arithmeticOps[token.XOR] = "xor"
+	arithmeticOps[token.SHL] = "shl"
+	arithmeticOps[token.SHR] = "shr"
 }
 
 func init() {
@@ -39,9 +47,9 @@ func parseRule(s string) (rule, error) {
 }
 
 func parseExpression(expr string) (expression, error) {
-	//fs := token.NewFileSet()
+	fs := token.NewFileSet()
 	tr, _ := parser.ParseExpr(surround(expr))
-	//ast.Print(fs, tr)
+	ast.Print(fs, tr)
 	return unwrapToplevel(tr), nil
 }
 
@@ -63,7 +71,9 @@ func unwrapIntegerExpression(x ast.Node) integerExpression {
 	case *ast.Ident:
 		switch f.Name {
 		case "arg0":
-			return argumentNode{0}
+			return argumentNode{index: 0}
+		case "arg1":
+			return argumentNode{index: 1}
 		}
 	case *ast.BasicLit:
 		i, _ := strconv.Atoi(f.Value)
@@ -101,6 +111,10 @@ func unwrapBooleanExpression(x ast.Node) booleanExpression {
 				left := unwrapBooleanExpression(f.X)
 				right := unwrapBooleanExpression(f.Y)
 				return orExpr{left, right}
+			case token.LAND:
+				left := unwrapBooleanExpression(f.X)
+				right := unwrapBooleanExpression(f.Y)
+				return andExpr{left, right}
 			}
 		} else if takesIntegerArguments(f) {
 			var cmp string
