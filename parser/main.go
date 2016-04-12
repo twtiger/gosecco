@@ -10,6 +10,12 @@ import (
 )
 
 var tokenTypes = make(map[token.Token]string)
+var arithmeticOps = make(map[token.Token]string)
+
+func buildArithmeticOps() {
+	arithmeticOps[token.ADD] = "add"
+	arithmeticOps[token.MUL] = "mul"
+}
 
 func init() {
 	tokenTypes[token.LOR] = "booleanArguments"
@@ -17,6 +23,8 @@ func init() {
 
 	tokenTypes[token.GTR] = "integerArguments"
 	tokenTypes[token.EQL] = "integerArguments"
+
+	buildArithmeticOps()
 }
 
 func surround(s string) string {
@@ -31,9 +39,9 @@ func parseRule(s string) (rule, error) {
 }
 
 func parseExpression(expr string) (expression, error) {
-	fs := token.NewFileSet()
+	//fs := token.NewFileSet()
 	tr, _ := parser.ParseExpr(surround(expr))
-	ast.Print(fs, tr)
+	//ast.Print(fs, tr)
 	return unwrapToplevel(tr), nil
 }
 
@@ -63,11 +71,7 @@ func unwrapIntegerExpression(x ast.Node) integerExpression {
 	case *ast.BinaryExpr:
 		left := unwrapIntegerExpression(f.X)
 		right := unwrapIntegerExpression(f.Y)
-		var op string
-		switch f.Op {
-		case token.MUL:
-			op = "*"
-		}
+		op, _ := arithmeticOps[f.Op]
 		return arithmetic{left, right, op}
 	default:
 		panic("No integer")

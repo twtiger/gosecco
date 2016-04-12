@@ -37,7 +37,7 @@ type orExpr struct {
 }
 
 func (a orExpr) String() string {
-	return fmt.Sprintf("(or %s %s)", a.left.String(), a.right.String())
+	return fmt.Sprintf("(lor %s %s)", a.left.String(), a.right.String())
 }
 
 func (a orExpr) Repr() string {
@@ -49,7 +49,7 @@ type andExpr struct {
 }
 
 func (a andExpr) String() string {
-	return fmt.Sprintf("(and %s %s)", a.left.String(), a.right.String())
+	return fmt.Sprintf("(land %s %s)", a.left.String(), a.right.String())
 }
 
 func (a andExpr) Repr() string {

@@ -48,7 +48,7 @@ func (s *RulesSuite) Test_parseYetAnotherRule(c *C) {
 	result, _ := parseRule("read4: arg0 == 4 || arg0 == 5")
 	//fmt.Printf("%#v\n", result)
 
-	c.Assert(result.expression.String(), Equals, "(or (eq arg0 4) (eq arg0 5))")
+	c.Assert(result.expression.String(), Equals, "(lor (eq arg0 4) (eq arg0 5))")
 	c.Assert(result, DeepEquals, rule{
 		syscall: "read4",
 		expression: orExpr{
@@ -68,13 +68,168 @@ func (s *RulesSuite) Test_parseYetAnotherRule(c *C) {
 
 func (s *RulesSuite) Test_parseExpressionWithMultiplication(c *C) {
 	result, _ := parseExpression("arg0 == 12 * 3")
-	c.Assert(result.String(), Equals, "(eq arg0 (* 12 3))")
+	c.Assert(result.String(), Equals, "(eq arg0 (mul 12 3))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithAddition(c *C) {
-	c.Skip("not yet implemented")
 	result, _ := parseExpression("arg0 == 12 + 3")
-	c.Assert(result.String(), Equals, "arg0 (+ 12 3)")
+	c.Assert(result.String(), Equals, "(eq arg0 (add 12 3))")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithDivision(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 == 12 / 3")
+	c.Assert(result.String(), Equals, "(eq arg0 (quo 12 3))")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithSubtraction(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 == 12 - 3")
+	c.Assert(result.String(), Equals, "(eq arg0 (sub 12 3))")
+}
+
+func (s *RulesSuite) Test_parseAExpressionBinaryAnd(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 == 0 & 1")
+	c.Assert(result.String(), Equals, "(eq arg0 (and 0 1))")
+}
+
+func (s *RulesSuite) Test_parseAExpressionBinaryOr(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 == 0 | 1")
+	c.Assert(result.String(), Equals, "(eq arg0 (or 0 1))")
+}
+
+func (s *RulesSuite) Test_parseAExpressionBinaryXor(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 == 0 ^ 1")
+	c.Assert(result.String(), Equals, "(eq arg0 (xor 0 1))")
+}
+
+func (s *RulesSuite) Test_parseAExpressionBinaryNot(c *C) {
+	c.Skip("not yet implemented, validate syntax")
+	result, _ := parseExpression("arg0 == ^0")
+	c.Assert(result.String(), Equals, "(eq arg0 (bnot 0))")
+}
+
+func (s *RulesSuite) Test_parseAExpressionLeftShift(c *C) {
+	c.Skip("not yet implemented, validate syntax")
+	result, _ := parseExpression("arg0 == 2 << 1")
+	c.Assert(result.String(), Equals, "(eq arg0 (shl 2 1))")
+}
+
+func (s *RulesSuite) Test_parseAExpressionRightShift(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 == 2 >> 1")
+	c.Assert(result.String(), Equals, "(eq arg0 (shr 2 1))")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithModulo(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 == 12 % 3")
+	c.Assert(result.String(), Equals, "(eq arg0 (rem 12 3))")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithBooleanAnd(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 && arg1")
+	c.Assert(result.String(), Equals, "(land arg0 arg1")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithBooleanNegation(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("! arg0")
+	c.Assert(result.String(), Equals, "(not arg0")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithNotEqual(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 != arg1")
+	c.Assert(result.String(), Equals, "(neq arg0 arg1")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithGreaterThanOrEqualTo(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 >= arg1")
+	c.Assert(result.String(), Equals, "(geq arg0 arg1")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithLessThan(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 < arg1")
+	c.Assert(result.String(), Equals, "(lss arg0 arg1")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithLessThanOrEqualTo(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 <= arg1")
+	c.Assert(result.String(), Equals, "(leq arg0")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithBitSets(c *C) {
+	c.Skip("not yet implemented, check syntax against how we use binary and")
+	result, _ := parseExpression("arg0 & val")
+	c.Assert(result.String(), Equals, "(set arg0")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithInclusion(c *C) {
+	c.Skip("not yet implemented, check syntax about set")
+	result, _ := parseExpression("in(arg0, 1, 2)")
+	c.Assert(result.String(), Equals, "(in arg0 {1, 2}")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithInclusionLargerSet(c *C) {
+	c.Skip("not yet implemented, check syntax about set syntax")
+	result, _ := parseExpression("in(arg0, 1, 2, 3, 4)")
+	c.Assert(result.String(), Equals, "(in arg0 {1, 2, 3, 4}")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithInclusionWithWhitespace(c *C) {
+	c.Skip("not yet implemented, check syntax about set syntax")
+	result, _ := parseExpression("in(arg0, 1,   2,   3,   4)")
+	c.Assert(result.String(), Equals, "(in arg0 {1, 2, 3, 4}")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithNotInclusion(c *C) {
+	c.Skip("not yet implemented, check syntax about set syntax")
+	result, _ := parseExpression("notIn(arg0, 1, 2)")
+	c.Assert(result.String(), Equals, "(notIn arg0 {1, 2, 3, 4}")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithNotInclusionLargerSet(c *C) {
+	c.Skip("not yet implemented, check syntax about set syntax")
+	result, _ := parseExpression("notin(arg0, 1, 2, 3, 4)")
+	c.Assert(result.String(), Equals, "(notin arg0 {1, 2, 3, 4}")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithTrue(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("true")
+	c.Assert(result.String(), Equals, "1")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithFalse(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("false")
+	c.Assert(result.String(), Equals, "0")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWith0AsFalse(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("0")
+	c.Assert(result.String(), Equals, "0")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithNestedOperatorsWithParens(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 == (12 + 3) * 2")
+	c.Assert(result.String(), Equals, "(eq arg0 (* (+ 12 3) 2)))")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithNestedOperators(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 == 12 + 3 * 2")
+	c.Assert(result.String(), Equals, "(eq arg0 (+ 12 (* 3 2)))")
 }
 
 //	result, _ := doParse("read2: arg0 > 0")

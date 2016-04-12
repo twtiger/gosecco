@@ -53,7 +53,7 @@ func (s *BasicsSuite) Test_equalsComparison_Repr(c *C) {
 }
 
 func (s *BasicsSuite) Test_orExpr_String(c *C) {
-	c.Assert(orExpr{equalsComparison{argumentNode{2}, literalNode{15}}, trueLiteral{}}.String(), Equals, "(or (== arg2 15) 1)")
+	c.Assert(orExpr{equalsComparison{argumentNode{2}, literalNode{15}}, trueLiteral{}}.String(), Equals, "(lor (== arg2 15) 1)")
 }
 
 func (s *BasicsSuite) Test_orExpr_Repr(c *C) {
@@ -61,7 +61,7 @@ func (s *BasicsSuite) Test_orExpr_Repr(c *C) {
 }
 
 func (s *BasicsSuite) Test_andExpr_String(c *C) {
-	c.Assert(andExpr{equalsComparison{argumentNode{2}, literalNode{15}}, trueLiteral{}}.String(), Equals, "(and (== arg2 15) 1)")
+	c.Assert(andExpr{equalsComparison{argumentNode{2}, literalNode{15}}, trueLiteral{}}.String(), Equals, "(land (== arg2 15) 1)")
 }
 
 func (s *BasicsSuite) Test_andExpr_Repr(c *C) {
