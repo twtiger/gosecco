@@ -1,4 +1,4 @@
-package ast
+package tree
 
 // ArithmeticType specifies the different possible arithmetic operations
 type ArithmeticType int
@@ -29,6 +29,20 @@ var ArithmeticNames = map[ArithmeticType]string{
 	LSH:    "<<",
 	RSH:    ">>",
 	MOD:    "%",
+}
+
+// ArithmeticSymbols maps the types to names for symbolic processing
+var ArithmeticSymbols = map[ArithmeticType]string{
+	PLUS:   "plus",
+	MINUS:  "minus",
+	MULT:   "mul",
+	DIV:    "div",
+	BINAND: "binand",
+	BINOR:  "binor",
+	BINXOR: "binxor",
+	LSH:    "lsh",
+	RSH:    "rsh",
+	MOD:    "mod",
 }
 
 // Arithmetic represents an arithmetic operation

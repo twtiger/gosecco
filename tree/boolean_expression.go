@@ -1,4 +1,4 @@
-package ast
+package tree
 
 // Or represents an alternative
 type Or struct {

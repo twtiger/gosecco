@@ -1,4 +1,4 @@
-package ast
+package tree
 
 import "fmt"
 
@@ -21,7 +21,7 @@ func (sv *StringVisitor) String() string {
 
 // AcceptAnd implements Visitor
 func (sv *StringVisitor) AcceptAnd(v And) {
-	sv.result = fmt.Sprintf("%s(&& ", sv.result)
+	sv.result = fmt.Sprintf("%s(and ", sv.result)
 	v.Left.Accept(sv)
 	sv.result += " "
 	v.Right.Accept(sv)
@@ -35,7 +35,7 @@ func (sv *StringVisitor) AcceptArgument(v Argument) {
 
 // AcceptArithmetic implements Visitor
 func (sv *StringVisitor) AcceptArithmetic(v Arithmetic) {
-	sv.result = fmt.Sprintf("%s(%s ", sv.result, ArithmeticNames[v.Op])
+	sv.result = fmt.Sprintf("%s(%s ", sv.result, ArithmeticSymbols[v.Op])
 	v.Left.Accept(sv)
 	sv.result += " "
 	v.Right.Accept(sv)
@@ -44,8 +44,9 @@ func (sv *StringVisitor) AcceptArithmetic(v Arithmetic) {
 
 // AcceptBinaryNegation implements Visitor
 func (sv *StringVisitor) AcceptBinaryNegation(v BinaryNegation) {
-	sv.result += "^"
+	sv.result += "(binNeg "
 	v.Operand.Accept(sv)
+	sv.result += ")"
 }
 
 // AcceptBooleanLiteral implements Visitor
@@ -59,19 +60,17 @@ func (sv *StringVisitor) AcceptBooleanLiteral(v BooleanLiteral) {
 
 // AcceptCall implements Visitor
 func (sv *StringVisitor) AcceptCall(v Call) {
-	sv.result += v.Name + "("
-	sep := ""
+	sv.result += "(" + v.Name
 	for _, a := range v.Args {
-		sv.result += sep
+		sv.result += " "
 		a.Accept(sv)
-		sep = ", "
 	}
 	sv.result += ")"
 }
 
 // AcceptComparison implements Visitor
 func (sv *StringVisitor) AcceptComparison(v Comparison) {
-	sv.result = fmt.Sprintf("%s(%s ", sv.result, ComparisonNames[v.Op])
+	sv.result = fmt.Sprintf("%s(%s ", sv.result, ComparisonSymbols[v.Op])
 	v.Left.Accept(sv)
 	sv.result += " "
 	v.Right.Accept(sv)
@@ -84,9 +83,9 @@ func (sv *StringVisitor) AcceptInclusion(v Inclusion) {
 	if !v.Positive {
 		name = "notIn"
 	}
-	sv.result += name + "("
+	sv.result += "(" + name + " "
 	v.Left.Accept(sv)
-	sep := ", "
+	sep := " "
 	for _, a := range v.Rights {
 		sv.result += sep
 		a.Accept(sv)
@@ -96,8 +95,9 @@ func (sv *StringVisitor) AcceptInclusion(v Inclusion) {
 
 // AcceptNegation implements Visitor
 func (sv *StringVisitor) AcceptNegation(v Negation) {
-	sv.result += "!"
+	sv.result += "(not "
 	v.Operand.Accept(sv)
+	sv.result += ")"
 }
 
 // AcceptNumericLiteral implements Visitor
@@ -107,7 +107,7 @@ func (sv *StringVisitor) AcceptNumericLiteral(v NumericLiteral) {
 
 // AcceptOr implements Visitor
 func (sv *StringVisitor) AcceptOr(v Or) {
-	sv.result = fmt.Sprintf("%s(|| ", sv.result)
+	sv.result = fmt.Sprintf("%s(or ", sv.result)
 	v.Left.Accept(sv)
 	sv.result += " "
 	v.Right.Accept(sv)

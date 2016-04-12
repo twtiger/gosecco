@@ -1,4 +1,4 @@
-package ast
+package tree
 
 // BooleanLiteral represents a boolean literal
 type BooleanLiteral struct {

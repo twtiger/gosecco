@@ -1,4 +1,4 @@
-package ast
+package tree
 
 // Boolean represents a boolean expression
 type Boolean interface {

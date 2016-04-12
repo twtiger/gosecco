@@ -1,4 +1,4 @@
-package ast
+package tree
 
 // Argument represents an argment given to the syscall
 type Argument struct {

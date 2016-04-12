@@ -1,4 +1,4 @@
-package ast
+package tree
 
 // Visitor is a visitor for all parse nodes
 type Visitor interface {

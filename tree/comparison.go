@@ -1,4 +1,4 @@
-package ast
+package tree
 
 // ComparisonType specifies the possible comparison types
 type ComparisonType int
@@ -23,6 +23,17 @@ var ComparisonNames = map[ComparisonType]string{
 	LT:   "<",
 	LTE:  "<=",
 	BIT:  "&",
+}
+
+// ComparisonSymbols maps types to names for symbolic processing
+var ComparisonSymbols = map[ComparisonType]string{
+	EQL:  "eq",
+	NEQL: "neq",
+	GT:   "gt",
+	GTE:  "gte",
+	LT:   "lt",
+	LTE:  "lte",
+	BIT:  "bitSet",
 }
 
 // Comparison represents a comparison

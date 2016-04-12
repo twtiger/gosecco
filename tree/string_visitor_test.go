@@ -1,4 +1,4 @@
-package ast
+package tree
 
 import . "gopkg.in/check.v1"
 
@@ -45,13 +45,13 @@ func (s *StringVisitorSuite) Test_Comparison(c *C) {
 
 	Comparison{Op: GT, Left: NumericLiteral{42}, Right: NumericLiteral{1}}.Accept(sv)
 
-	c.Assert(sv.String(), Equals, "(> 42 1)")
+	c.Assert(sv.String(), Equals, "(gt 42 1)")
 
 	sv = &StringVisitor{}
 
 	Comparison{Op: EQL, Left: Argument{1}, Right: NumericLiteral{1}}.Accept(sv)
 
-	c.Assert(sv.String(), Equals, "(== arg1 1)")
+	c.Assert(sv.String(), Equals, "(eq arg1 1)")
 }
 
 func (s *StringVisitorSuite) Test_Arithmetic(c *C) {
@@ -59,13 +59,13 @@ func (s *StringVisitorSuite) Test_Arithmetic(c *C) {
 
 	Arithmetic{Op: LSH, Left: NumericLiteral{42}, Right: NumericLiteral{3}}.Accept(sv)
 
-	c.Assert(sv.String(), Equals, "(<< 42 3)")
+	c.Assert(sv.String(), Equals, "(lsh 42 3)")
 
 	sv = &StringVisitor{}
 
 	Arithmetic{Op: PLUS, Left: Argument{42}, Right: NumericLiteral{1}}.Accept(sv)
 
-	c.Assert(sv.String(), Equals, "(+ arg42 1)")
+	c.Assert(sv.String(), Equals, "(plus arg42 1)")
 }
 
 func (s *StringVisitorSuite) Test_BinaryNegation(c *C) {
@@ -73,7 +73,7 @@ func (s *StringVisitorSuite) Test_BinaryNegation(c *C) {
 
 	BinaryNegation{Operand: NumericLiteral{42}}.Accept(sv)
 
-	c.Assert(sv.String(), Equals, "^42")
+	c.Assert(sv.String(), Equals, "(binNeg 42)")
 }
 
 func (s *StringVisitorSuite) Test_Call(c *C) {
@@ -81,7 +81,7 @@ func (s *StringVisitorSuite) Test_Call(c *C) {
 
 	Call{Name: "foo1", Args: []Any{BinaryNegation{NumericLiteral{42}}, BooleanLiteral{false}, Argument{3}}}.Accept(sv)
 
-	c.Assert(sv.String(), Equals, "foo1(^42, false, arg3)")
+	c.Assert(sv.String(), Equals, "(foo1 (binNeg 42) false arg3)")
 }
 
 func (s *StringVisitorSuite) Test_Inclusion(c *C) {
@@ -89,7 +89,7 @@ func (s *StringVisitorSuite) Test_Inclusion(c *C) {
 
 	Inclusion{Positive: false, Left: BinaryNegation{Argument{0}}, Rights: []Numeric{NumericLiteral{23}, Argument{3}}}.Accept(sv)
 
-	c.Assert(sv.String(), Equals, "notIn(^arg0, 23, arg3)")
+	c.Assert(sv.String(), Equals, "(notIn (binNeg arg0) 23 arg3)")
 }
 
 func (s *StringVisitorSuite) Test_And(c *C) {
@@ -97,7 +97,7 @@ func (s *StringVisitorSuite) Test_And(c *C) {
 
 	And{Left: Comparison{Op: GT, Left: NumericLiteral{42}, Right: NumericLiteral{1}}, Right: Comparison{Op: EQL, Left: NumericLiteral{42}, Right: NumericLiteral{42}}}.Accept(sv)
 
-	c.Assert(sv.String(), Equals, "(&& (> 42 1) (== 42 42))")
+	c.Assert(sv.String(), Equals, "(and (gt 42 1) (eq 42 42))")
 }
 
 func (s *StringVisitorSuite) Test_Or(c *C) {
@@ -105,7 +105,7 @@ func (s *StringVisitorSuite) Test_Or(c *C) {
 
 	Or{Left: Comparison{Op: GT, Left: NumericLiteral{42}, Right: Argument{1}}, Right: Comparison{Op: EQL, Left: NumericLiteral{42}, Right: NumericLiteral{42}}}.Accept(sv)
 
-	c.Assert(sv.String(), Equals, "(|| (> 42 arg1) (== 42 42))")
+	c.Assert(sv.String(), Equals, "(or (gt 42 arg1) (eq 42 42))")
 }
 
 func (s *StringVisitorSuite) Test_Negation(c *C) {
@@ -113,5 +113,5 @@ func (s *StringVisitorSuite) Test_Negation(c *C) {
 
 	Negation{Or{Left: Comparison{Op: GT, Left: NumericLiteral{42}, Right: Argument{1}}, Right: Comparison{Op: EQL, Left: NumericLiteral{42}, Right: NumericLiteral{42}}}}.Accept(sv)
 
-	c.Assert(sv.String(), Equals, "!(|| (> 42 arg1) (== 42 42))")
+	c.Assert(sv.String(), Equals, "(not (or (gt 42 arg1) (eq 42 42)))")
 }

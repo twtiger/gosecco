@@ -1,4 +1,4 @@
-package ast
+package tree
 
 // EvaluatorVisitor will generate an unambigious representation of an expression
 type EvaluatorVisitor struct {

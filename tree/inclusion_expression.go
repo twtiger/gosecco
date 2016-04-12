@@ -1,4 +1,4 @@
-package ast
+package tree
 
 // Inclusion represents either a positive or a negative inclusion operation
 type Inclusion struct {

@@ -1,4 +1,4 @@
-package ast
+package tree
 
 // Call represents an application of a method/macro
 type Call struct {
