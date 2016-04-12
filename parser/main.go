@@ -25,11 +25,16 @@ func surround(s string) string {
 
 func parseRule(s string) (rule, error) {
 	p := strings.SplitN(s, ":", 2)
-	name, rl := p[0], p[1]
+	name, expr := p[0], p[1]
+	e, _ := parseExpression(expr)
+	return rule{name, e}, nil
+}
+
+func parseExpression(expr string) (expression, error) {
 	fs := token.NewFileSet()
-	tr, _ := parser.ParseExpr(surround(rl))
+	tr, _ := parser.ParseExpr(surround(expr))
 	ast.Print(fs, tr)
-	return rule{name, unwrapToplevel(tr)}, nil
+	return unwrapToplevel(tr), nil
 }
 
 func unwrapToplevel(x ast.Node) expression {

@@ -66,9 +66,15 @@ func (s *RulesSuite) Test_parseYetAnotherRule(c *C) {
 	})
 }
 
-func (s *RulesSuite) Test_parseARuleWithArithmetic(c *C) {
-	result, _ := parseRule("read5: arg0 == 12 * 3")
-	c.Assert(result.expression.String(), Equals, "(eq arg0 (* 12 3))")
+func (s *RulesSuite) Test_parseExpressionWithMultiplication(c *C) {
+	result, _ := parseExpression("arg0 == 12 * 3")
+	c.Assert(result.String(), Equals, "(eq arg0 (* 12 3))")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithAddition(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("arg0 == 12 + 3")
+	c.Assert(result.String(), Equals, "arg0 (+ 12 3)")
 }
 
 //	result, _ := doParse("read2: arg0 > 0")
