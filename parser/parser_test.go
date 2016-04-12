@@ -53,9 +53,14 @@ func (s *RulesSuite) Test_parseYetAnotherRule(c *C) {
 	})
 }
 
+func parseExpectSuccess(c *C, str string) string {
+	result, err := parseExpression(str)
+	c.Assert(err, IsNil)
+	return tree.ExpressionString(result)
+}
+
 func (s *RulesSuite) Test_parseExpressionWithMultiplication(c *C) {
-	result, _ := parseExpression("arg0 == 12 * 3")
-	c.Assert(tree.ExpressionString(result), Equals, "(eq arg0 (mul 12 3))")
+	c.Assert(parseExpectSuccess(c, "arg0 == 12 * 3"), Equals, "(eq arg0 (mul 12 3))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithAddition(c *C) {
@@ -89,9 +94,7 @@ func (s *RulesSuite) Test_parseAExpressionBinaryXor(c *C) {
 }
 
 func (s *RulesSuite) Test_parseAExpressionBinaryNegation(c *C) {
-	c.Skip("not yet implemented, check binary negation syntax")
-	result, _ := parseExpression("arg0 == ^0")
-	c.Assert(tree.ExpressionString(result), Equals, "(eq arg0 (bnot 0))")
+	c.Assert(parseExpectSuccess(c, "arg0 == ^0"), Equals, "(eq arg0 (binNeg 0))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionLeftShift(c *C) {
@@ -100,7 +103,7 @@ func (s *RulesSuite) Test_parseAExpressionLeftShift(c *C) {
 }
 
 func (s *RulesSuite) Test_parseAExpressionRightShift(c *C) {
-	result, _ := parseExpression("arg0 == 2 >> 1")
+	result, _ := parseExpression("arg0 == (2 >> 1)")
 	c.Assert(tree.ExpressionString(result), Equals, "(eq arg0 (rsh 2 1))")
 }
 
@@ -115,9 +118,7 @@ func (s *RulesSuite) Test_parseAExpressionWithBooleanAnd(c *C) {
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithBooleanNegation(c *C) {
-	c.Skip("not yet implemented")
-	result, _ := parseExpression("!arg0")
-	c.Assert(tree.ExpressionString(result), Equals, "(not arg0)")
+	c.Assert(parseExpectSuccess(c, "!(arg0 == 1)"), Equals, "(not (eq arg0 1))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithNotEqual(c *C) {
@@ -216,41 +217,14 @@ func (s *RulesSuite) Test_parseAExpressionWithInvalidArithmeticOperator(c *C) {
 	c.Assert(tree.ExpressionString(result), Equals, "(eq arg0 (add 12 3))")
 }
 
-//	result, _ := doParse("read2: arg0 > 0")
+func (s *RulesSuite) Test_parseArgumentsCorrectly_andIncorrectly(c *C) {
+	c.Assert(parseExpectSuccess(c, "arg0 == 0"), Equals, "(eq arg0 0)")
+	c.Assert(parseExpectSuccess(c, "arg5 == 0"), Equals, "(eq arg5 0)")
 
-//	c.Assert(tree.ExpressionString(result), DeepEquals, "(read2 (gt (arg 0) (literal 0)))")
-
-// func (s *RulesSuite) Test_parsesSlightlyMoreComplicatedRule(c *C) {
-// 	result, _ := doParse("write: arg1 == 42 || arg0 + 1 == 15 && (arg3 == 1 || arg4 == 2)")
-
-// 	c.Assert(result, DeepEquals, []rule{
-// 		rule{
-// 			syscall: "write",
-// 			expression: orExpr{
-// 				Left: equalsComparison{
-// 					Left: argumentNode{index: 1},
-// 					Right: literalNode{value: 42},
-// 				},
-// 				Right: andExpr{
-// 					Left: equalsComparison{
-// 						Left: addition{
-// 							Left: argumentNode{index: 0},
-// 							Right: literalNode{value: 1},
-// 						},
-// 						Right: literalNode{value: 15},
-// 					},
-// 					Right: orExpr{
-// 						Left: equalsComparison{
-// 							Left: argumentNode{index: 3},
-// 							Right: literalNode{value: 1},
-// 						},
-// 						Right: equalsComparison{
-// 							Left: argumentNode{index: 4},
-// 							Right: literalNode{value: 2},
-// 						},
-// 					},
-// 				},
-// 			},
-// 		},
-// 	})
-// }
+	result, _ := parseExpression("arg6 == 0")
+	c.Assert(result, DeepEquals, tree.Comparison{
+		Left:  tree.Variable{"arg6"},
+		Op:    tree.EQL,
+		Right: tree.NumericLiteral{0},
+	})
+}

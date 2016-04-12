@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"regexp"
 	"strconv"
 
 	"github.com/twtiger/go-seccomp/tree"
@@ -49,7 +50,7 @@ func init() {
 	}
 
 	for k := range comparisonOps {
-		tokenTypes[k] = "integerArguments"
+		tokenTypes[k] = "numericArguments"
 	}
 }
 
@@ -80,44 +81,80 @@ func unwrapToplevel(x ast.Node) tree.Expression {
 	case *ast.ExprStmt:
 		return unwrapBooleanExpression(f.X)
 	default:
-		panic("Not a valid top level statement")
+		panicWithInfo(x)
 	}
+	return nil
 }
 
-func unwrapIntegerExpression(x ast.Node) tree.Numeric {
+var argRegexpRE = regexp.MustCompile(`^arg([0-5])$`)
+
+func identExpression(f *ast.Ident) tree.Numeric {
+	if match := argRegexpRE.FindStringSubmatch(f.Name); match != nil {
+		ix, _ := strconv.Atoi(match[1])
+		return tree.Argument{ix}
+	}
+	return tree.Variable{f.Name}
+}
+
+func unwrapNumericExpression(x ast.Node) tree.Numeric {
 	switch f := x.(type) {
 	case *ast.Ident:
-		switch f.Name {
-		case "arg0":
-			return tree.Argument{0}
-		case "arg1":
-			return tree.Argument{1}
-		}
-		// TODO: More arguments here
-		// TODO: variables possible here
+		// Ensure ident doesn't contain stupidness like packages and stuff
+		return identExpression(f)
 	case *ast.BasicLit:
 		// TODO: errors here
 		i, _ := strconv.Atoi(f.Value)
 		return tree.NumericLiteral{uint32(i)}
 	case *ast.BinaryExpr:
-		left := unwrapIntegerExpression(f.X)
-		right := unwrapIntegerExpression(f.Y)
+		left := unwrapNumericExpression(f.X)
+		right := unwrapNumericExpression(f.Y)
 		op := arithmeticOps[f.Op]
 		// TODO: handle operators we don't support here
-
 		return tree.Arithmetic{Left: left, Right: right, Op: op}
+	case *ast.ParenExpr:
+		return unwrapNumericExpression(f.X)
+	case *ast.UnaryExpr:
+		operand := unwrapNumericExpression(f.X)
+		if f.Op == token.XOR {
+			return tree.BinaryNegation{operand}
+		}
+		// TODO: Fail in a good way here
 	default:
-		panic("No integer")
+		panicWithInfo(x)
 	}
-	panic("Not a valid integer expression")
+	return nil
+}
+
+func panicWithInfo(x interface{}) {
+	panic(fmt.Sprintf("sadness: %#v", x))
 }
 
 func takesBooleanArguments(f *ast.BinaryExpr) bool {
 	return tokenTypes[f.Op] == "booleanArguments"
 }
 
-func takesIntegerArguments(f *ast.BinaryExpr) bool {
-	return tokenTypes[f.Op] == "integerArguments"
+func takesNumericArguments(f *ast.BinaryExpr) bool {
+	return tokenTypes[f.Op] == "numericArguments"
+}
+
+func booleanArgExpression(f *ast.BinaryExpr) tree.Boolean {
+	left := unwrapBooleanExpression(f.X)
+	right := unwrapBooleanExpression(f.Y)
+	switch f.Op {
+	case token.LOR:
+		return tree.Or{Left: left, Right: right}
+	case token.LAND:
+		return tree.And{Left: left, Right: right}
+	}
+	panic("Not recognized operator for boolean arg expression. This shouldn't be possible")
+}
+
+func numericArgExpression(f *ast.BinaryExpr) tree.Boolean {
+	cmp := comparisonOps[f.Op]
+	// TODO: handle incorrect thingy here
+	left := unwrapNumericExpression(f.X)
+	right := unwrapNumericExpression(f.Y)
+	return tree.Comparison{Left: left, Right: right, Op: cmp}
 }
 
 func unwrapBooleanExpression(x ast.Node) tree.Boolean {
@@ -131,25 +168,20 @@ func unwrapBooleanExpression(x ast.Node) tree.Boolean {
 		// TODO: handle failure here
 	case *ast.BinaryExpr:
 		if takesBooleanArguments(f) {
-			switch f.Op {
-			case token.LOR:
-				left := unwrapBooleanExpression(f.X)
-				right := unwrapBooleanExpression(f.Y)
-				return tree.Or{Left: left, Right: right}
-			case token.LAND:
-				left := unwrapBooleanExpression(f.X)
-				right := unwrapBooleanExpression(f.Y)
-				return tree.And{Left: left, Right: right}
-			}
-		} else if takesIntegerArguments(f) {
-			cmp := comparisonOps[f.Op]
-			// TODO: handle incorrect thingy here
-			left := unwrapIntegerExpression(f.X)
-			right := unwrapIntegerExpression(f.Y)
-			return tree.Comparison{Left: left, Right: right, Op: cmp}
+			return booleanArgExpression(f)
+		} else if takesNumericArguments(f) {
+			return numericArgExpression(f)
 		}
+	case *ast.ParenExpr:
+		return unwrapBooleanExpression(f.X)
+	case *ast.UnaryExpr:
+		operand := unwrapBooleanExpression(f.X)
+		if f.Op == token.NOT {
+			return tree.Negation{operand}
+		}
+		// TODO: Fail in a good way here
 	default:
-		panic(fmt.Sprintf("can't do this with %#v", x))
+		panicWithInfo(x)
 	}
-	panic("Not a valid boolean expression")
+	return nil
 }
