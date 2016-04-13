@@ -14,6 +14,7 @@ type EvaluatorSuite struct{}
 var _ = Suite(&EvaluatorSuite{})
 
 func (s *EvaluatorSuite) Test_bla(c *C) {
+	c.Skip("Not necessary for now")
 	eval := &EvaluatorVisitor{}
 	a := Arithmetic{Op: MINUS, Left: NumericLiteral{42}, Right: NumericLiteral{23}}
 	a.Accept(eval)

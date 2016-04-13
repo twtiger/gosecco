@@ -1,28 +1,31 @@
 package parser
 
-import . "gopkg.in/check.v1"
+import (
+	"github.com/twtiger/go-seccomp/tree"
+	. "gopkg.in/check.v1"
+)
 
 type RuleSuite struct{}
 
 var _ = Suite(&RuleSuite{})
 
-func parseRuleHeadCheck(c *C, s string, r ruleHead) {
+func parseRuleHeadCheck(c *C, s string, r tree.Rule) {
 	res, ok := parseRuleHead(s)
 	c.Assert(ok, Equals, true)
 	c.Check(res, Equals, r)
 }
 
 func (s *RuleSuite) Test_parseRuleHead_parsesValidRuleHeads(c *C) {
-	parseRuleHeadCheck(c, "read", ruleHead{syscall: "read"})
-	parseRuleHeadCheck(c, "write", ruleHead{syscall: "write"})
-	parseRuleHeadCheck(c, "\t write  ", ruleHead{syscall: "write"})
-	parseRuleHeadCheck(c, "fcntl[]", ruleHead{syscall: "fcntl"})
-	parseRuleHeadCheck(c, "fcntl [ ] ", ruleHead{syscall: "fcntl"})
-	parseRuleHeadCheck(c, " fcntl [ +kill ] ", ruleHead{syscall: "fcntl", positive: "kill"})
-	parseRuleHeadCheck(c, " fcntl[ -kill] ", ruleHead{syscall: "fcntl", negative: "kill"})
-	parseRuleHeadCheck(c, " fcntl[ -kill, +trace] ", ruleHead{syscall: "fcntl", negative: "kill", positive: "trace"})
-	parseRuleHeadCheck(c, " fcntl[+trace,-kill] ", ruleHead{syscall: "fcntl", negative: "kill", positive: "trace"})
-	parseRuleHeadCheck(c, " fcntl[+trace,-42] ", ruleHead{syscall: "fcntl", negative: "42", positive: "trace"})
+	parseRuleHeadCheck(c, "read", tree.Rule{Name: "read"})
+	parseRuleHeadCheck(c, "write", tree.Rule{Name: "write"})
+	parseRuleHeadCheck(c, "\t write  ", tree.Rule{Name: "write"})
+	parseRuleHeadCheck(c, "fcntl[]", tree.Rule{Name: "fcntl"})
+	parseRuleHeadCheck(c, "fcntl [ ] ", tree.Rule{Name: "fcntl"})
+	parseRuleHeadCheck(c, " fcntl [ +kill ] ", tree.Rule{Name: "fcntl", PositiveAction: "kill"})
+	parseRuleHeadCheck(c, " fcntl[ -kill] ", tree.Rule{Name: "fcntl", NegativeAction: "kill"})
+	parseRuleHeadCheck(c, " fcntl[ -kill, +trace] ", tree.Rule{Name: "fcntl", NegativeAction: "kill", PositiveAction: "trace"})
+	parseRuleHeadCheck(c, " fcntl[+trace,-kill] ", tree.Rule{Name: "fcntl", NegativeAction: "kill", PositiveAction: "trace"})
+	parseRuleHeadCheck(c, " fcntl[+trace,-42] ", tree.Rule{Name: "fcntl", NegativeAction: "42", PositiveAction: "trace"})
 
 	_, ok := parseRuleHead("")
 	c.Assert(ok, Equals, false)

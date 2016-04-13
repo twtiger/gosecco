@@ -3,13 +3,9 @@ package parser
 import (
 	"regexp"
 	"strings"
-)
 
-type ruleHead struct {
-	syscall  string
-	positive string
-	negative string
-}
+	"github.com/twtiger/go-seccomp/tree"
+)
 
 var ruleHeadRE = regexp.MustCompile(`^[[:space:]]*([[:word:]]+)[[:space:]]*(?:\[(.*)\])?[[:space:]]*$`)
 
@@ -36,11 +32,11 @@ func findPositiveAndNegative(ss []string) (string, string, bool) {
 	return pos, neg, true
 }
 
-func parseRuleHead(s string) (ruleHead, bool) {
+func parseRuleHead(s string) (tree.Rule, bool) {
 	match := ruleHeadRE.FindStringSubmatch(s)
 	if match != nil {
 		positive, negative, ok := findPositiveAndNegative(strings.Split(match[2], ","))
-		return ruleHead{syscall: match[1], positive: positive, negative: negative}, ok
+		return tree.Rule{Name: match[1], PositiveAction: positive, NegativeAction: negative}, ok
 	}
-	return ruleHead{}, false
+	return tree.Rule{}, false
 }
