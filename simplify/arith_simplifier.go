@@ -2,14 +2,6 @@ package simplify
 
 import "github.com/twtiger/go-seccomp/tree"
 
-func potentialExtractValue(a tree.Numeric) (uint32, bool) {
-	v, ok := a.(tree.NumericLiteral)
-	if ok {
-		return v.Value, ok
-	}
-	return 0, false
-}
-
 // AcceptArithmetic implements Visitor
 func (s *simplifier) AcceptArithmetic(a tree.Arithmetic) {
 	l := Simplify(a.Left)
