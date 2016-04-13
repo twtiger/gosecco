@@ -12,6 +12,8 @@ type simplifier struct {
 	result tree.Expression
 }
 
+// TODO: implement all these with tests
+
 // AcceptAnd implements Visitor
 func (*simplifier) AcceptAnd(tree.And) {}
 

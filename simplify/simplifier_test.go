@@ -63,3 +63,9 @@ func (s *SimplifierSuite) Test_simplifyRsh(c *C) {
 	sx := Simplify(tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{84}, Right: tree.NumericLiteral{2}})
 	c.Assert(tree.ExpressionString(sx), Equals, "21")
 }
+
+func (s *SimplifierSuite) Test_Call(c *C) {
+	c.Skip("TODO: implement")
+	sx := Simplify(tree.Call{"foo", []tree.Any{tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{84}, Right: tree.NumericLiteral{2}}}})
+	c.Assert(tree.ExpressionString(sx), Equals, "(foo 21)")
+}
