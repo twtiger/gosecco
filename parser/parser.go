@@ -93,6 +93,14 @@ func identExpression(f *ast.Ident) tree.Numeric {
 		ix, _ := strconv.Atoi(match[1])
 		return tree.Argument{ix}
 	}
+	switch f.Name {
+	case "true":
+		return tree.BooleanLiteral{true}
+	case "false":
+		return tree.BooleanLiteral{false}
+	default:
+		return tree.Variable{f.Name}
+	}
 	return tree.Variable{f.Name}
 }
 
@@ -157,6 +165,31 @@ func numericArgExpression(f *ast.BinaryExpr) tree.Boolean {
 	return tree.Comparison{Left: left, Right: right, Op: cmp}
 }
 
+func inclusionExpression(f *ast.CallExpr) tree.Inclusion {
+	var pos bool
+	var left tree.Numeric
+	right := make([]tree.Numeric, 0)
+
+	switch f.Fun.(type) {
+	case *ast.Ident:
+		pos = true
+	}
+
+	switch p := f.Args[0].(type) {
+	case *ast.Ident:
+		left = identExpression(p)
+	}
+
+	for _, e := range f.Args {
+		switch y := e.(type) {
+		case *ast.BasicLit:
+			val := unwrapNumericExpression(y)
+			right = append(right, val)
+		}
+	}
+	return tree.Inclusion{pos, left, right}
+}
+
 func unwrapBooleanExpression(x ast.Node) tree.Boolean {
 	switch f := x.(type) {
 	case *ast.BasicLit:
@@ -179,7 +212,11 @@ func unwrapBooleanExpression(x ast.Node) tree.Boolean {
 		if f.Op == token.NOT {
 			return tree.Negation{operand}
 		}
-		// TODO: Fail in a good way here
+	case *ast.CallExpr:
+		return inclusionExpression(f)
+	case *ast.Ident:
+		return identExpression(f)
+		// TODO: Fail in a good way here*/
 	default:
 		panicWithInfo(x)
 	}

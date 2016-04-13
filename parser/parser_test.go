@@ -122,97 +122,85 @@ func (s *RulesSuite) Test_parseAExpressionWithBooleanNegation(c *C) {
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithNotEqual(c *C) {
-	c.Skip("not yet implemented")
-	result, _ := parseExpression("arg0 != arg1")
-	c.Assert(tree.ExpressionString(result), Equals, "(neq arg0 arg1")
+	result, _ := parseExpression("arg0 != 1")
+	c.Assert(tree.ExpressionString(result), Equals, "(neq arg0 1)")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithGreaterThanOrEqualTo(c *C) {
-	c.Skip("not yet implemented")
-	result, _ := parseExpression("arg0 >= arg1")
-	c.Assert(tree.ExpressionString(result), Equals, "(geq arg0 arg1")
+	result, _ := parseExpression("arg0 >= 1")
+	c.Assert(tree.ExpressionString(result), Equals, "(gte arg0 1)")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithLessThan(c *C) {
-	c.Skip("not yet implemented")
 	result, _ := parseExpression("arg0 < arg1")
-	c.Assert(tree.ExpressionString(result), Equals, "(lss arg0 arg1")
+	c.Assert(tree.ExpressionString(result), Equals, "(lt arg0 arg1)")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithLessThanOrEqualTo(c *C) {
-	c.Skip("not yet implemented")
 	result, _ := parseExpression("arg0 <= arg1")
-	c.Assert(tree.ExpressionString(result), Equals, "(leq arg0")
+	c.Assert(tree.ExpressionString(result), Equals, "(lte arg0 arg1)")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithBitSets(c *C) {
-	c.Skip("not yet implemented, check syntax against how we use binary and")
 	result, _ := parseExpression("arg0 & val")
-	c.Assert(tree.ExpressionString(result), Equals, "(set arg0")
+	c.Assert(tree.ExpressionString(result), Equals, "(bitSet arg0 val)")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithInclusion(c *C) {
-	c.Skip("not yet implemented, check syntax about set")
 	result, _ := parseExpression("in(arg0, 1, 2)")
-	c.Assert(tree.ExpressionString(result), Equals, "(in arg0 {1, 2}")
+	c.Assert(tree.ExpressionString(result), Equals, "(in arg0 1 2)")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithExclusion(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("notIn(arg0, 1, 2)")
+	c.Assert(tree.ExpressionString(result), Equals, "(notIn arg0 1, 2)")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithInclusionLargerSet(c *C) {
-	c.Skip("not yet implemented, check syntax about set syntax")
 	result, _ := parseExpression("in(arg0, 1, 2, 3, 4)")
-	c.Assert(tree.ExpressionString(result), Equals, "(in arg0 {1, 2, 3, 4}")
+	c.Assert(tree.ExpressionString(result), Equals, "(in arg0 1 2 3 4)")
+}
+
+func (s *RulesSuite) Test_parseAExpressionWithExclusionLargerSet(c *C) {
+	c.Skip("not yet implemented")
+	result, _ := parseExpression("notin(arg0, 1, 2, 3, 4)")
+	c.Assert(tree.ExpressionString(result), Equals, "(notin arg0 1 2 3 4(")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithInclusionWithWhitespace(c *C) {
-	c.Skip("not yet implemented, check syntax about set syntax")
 	result, _ := parseExpression("in(arg0, 1,   2,   3,   4)")
-	c.Assert(tree.ExpressionString(result), Equals, "(in arg0 {1, 2, 3, 4}")
-}
-
-func (s *RulesSuite) Test_parseAExpressionWithNotInclusion(c *C) {
-	c.Skip("not yet implemented, check syntax about set syntax")
-	result, _ := parseExpression("notIn(arg0, 1, 2)")
-	c.Assert(tree.ExpressionString(result), Equals, "(notIn arg0 {1, 2, 3, 4}")
-}
-
-func (s *RulesSuite) Test_parseAExpressionWithNotInclusionLargerSet(c *C) {
-	c.Skip("not yet implemented, check syntax about set syntax")
-	result, _ := parseExpression("notin(arg0, 1, 2, 3, 4)")
-	c.Assert(tree.ExpressionString(result), Equals, "(notin arg0 {1, 2, 3, 4}")
+	c.Assert(tree.ExpressionString(result), Equals, "(in arg0 1 2 3 4)")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithTrue(c *C) {
-	c.Skip("not yet implemented")
 	result, _ := parseExpression("true")
-	c.Assert(tree.ExpressionString(result), Equals, "1")
+	c.Assert(tree.ExpressionString(result), Equals, "true")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithFalse(c *C) {
-	c.Skip("not yet implemented")
 	result, _ := parseExpression("false")
-	c.Assert(tree.ExpressionString(result), Equals, "0")
+	c.Assert(tree.ExpressionString(result), Equals, "false")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWith0AsFalse(c *C) {
 	c.Skip("not yet implemented")
 	result, _ := parseExpression("0")
-	c.Assert(tree.ExpressionString(result), Equals, "0")
+	c.Assert(tree.ExpressionString(result), Equals, "false")
 }
 
-func (s *RulesSuite) Test_parseAExpressionWithNestedOperatorsWithParens(c *C) {
-	c.Skip("not yet implemented")
+func (s *RulesSuite) Test_parseAExpressionWithParens(c *C) {
 	result, _ := parseExpression("arg0 == (12 + 3) * 2")
-	c.Assert(tree.ExpressionString(result), Equals, "(eq arg0 (* (+ 12 3) 2)))")
+	c.Assert(tree.ExpressionString(result), Equals, "(eq arg0 (mul (plus 12 3) 2))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithNestedOperators(c *C) {
-	c.Skip("not yet implemented")
 	result, _ := parseExpression("arg0 == 12 + 3 * 2")
-	c.Assert(tree.ExpressionString(result), Equals, "(eq arg0 (+ 12 (* 3 2)))")
+	c.Assert(tree.ExpressionString(result), Equals, "(eq arg0 (plus 12 (mul 3 2)))")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithInvalidArithmeticOperator(c *C) {
-	c.Skip("not yet implemented, error handling")
+	c.Skip("not yet implemented")
 	result, _ := parseExpression("arg0 == 12 _ 3")
 	c.Assert(tree.ExpressionString(result), Equals, "(eq arg0 (add 12 3))")
 }
