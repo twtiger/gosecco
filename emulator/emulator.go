@@ -54,6 +54,8 @@ func (e *emulator) next() (uint32, bool) {
 		switch bpfSrc(current.Code) {
 		case syscall.BPF_K:
 			return current.K, true
+		case syscall.BPF_X:
+			return e.X, true
 		}
 	}
 
