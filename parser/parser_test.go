@@ -163,11 +163,11 @@ func (s *RulesSuite) Test_parseAExpressionWithInclusionLargerSet(c *C) {
 
 func (s *RulesSuite) Test_parseAExpressionWithAnotherSet(c *C) {
 	result, _ := parseExpression("in(3, 1, 2, 3, 4)")
-	c.Assert(tree.ExpressionString(result), Equals, "(in 3 3 1 2 3 4)")
+	c.Assert(tree.ExpressionString(result), Equals, "(in 3 1 2 3 4)")
 }
 
 func (s *RulesSuite) Test_parseAExpressionWithExclusionLargerSet(c *C) {
-	result, _ := parseExpression("notin(arg0, 1, 2, 3, 4)")
+	result, _ := parseExpression("notIn(arg0, 1, 2, 3, 4)")
 	c.Assert(tree.ExpressionString(result), Equals, "(notIn arg0 1 2 3 4)")
 }
 

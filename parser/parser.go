@@ -8,63 +8,21 @@ import (
 	"go/token"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/twtiger/go-seccomp/tree"
 )
-
-var tokenTypes = make(map[token.Token]string)
-var arithmeticOps = make(map[token.Token]tree.ArithmeticType)
-var comparisonOps = make(map[token.Token]tree.ComparisonType)
-
-func buildArithmeticOps() {
-	arithmeticOps[token.ADD] = tree.PLUS
-	arithmeticOps[token.SUB] = tree.MINUS
-	arithmeticOps[token.MUL] = tree.MULT
-	arithmeticOps[token.QUO] = tree.DIV
-	arithmeticOps[token.REM] = tree.MOD
-	arithmeticOps[token.AND] = tree.BINAND
-	arithmeticOps[token.OR] = tree.BINOR
-	arithmeticOps[token.XOR] = tree.BINXOR
-	arithmeticOps[token.SHL] = tree.LSH
-	arithmeticOps[token.SHR] = tree.RSH
-}
-
-func buildComparisonOps() {
-	comparisonOps[token.EQL] = tree.EQL
-	comparisonOps[token.LSS] = tree.LT
-	comparisonOps[token.GTR] = tree.GT
-	comparisonOps[token.NEQ] = tree.NEQL
-	comparisonOps[token.LEQ] = tree.LTE
-	comparisonOps[token.GEQ] = tree.GTE
-	comparisonOps[token.AND] = tree.BIT
-}
-
-func init() {
-	buildArithmeticOps()
-	buildComparisonOps()
-
-	tokenTypes[token.LOR] = "booleanArguments"
-	tokenTypes[token.LAND] = "booleanArguments"
-
-	for k := range arithmeticOps {
-		tokenTypes[k] = "integerArguments"
-	}
-
-	for k := range comparisonOps {
-		tokenTypes[k] = "numericArguments"
-	}
-}
 
 func surround(s string) string {
 	return "func() { " + s + "}"
 }
 
 func parseExpression(expr string) (tree.Expression, error) {
-	// fs := token.NewFileSet()
-	tr, _ := parser.ParseExpr(surround(expr))
-	// ast.Print(fs, tr)
-	parsedtree, err := unwrapToplevel(tr)
-	return parsedtree, err
+	tr, err := parser.ParseExpr(surround(expr))
+	if err != nil {
+		return nil, errors.New("Expression is invalid. Unable to parse.")
+	}
+	return unwrapToplevel(tr)
 }
 
 func unwrapToplevel(x ast.Node) (tree.Expression, error) {
@@ -75,8 +33,6 @@ func unwrapToplevel(x ast.Node) (tree.Expression, error) {
 		return unwrapToplevel(f.List[0])
 	case *ast.ExprStmt:
 		return unwrapBooleanExpression(f.X)
-	default:
-		// panicWithInfo(x)
 	}
 	return nil, errors.New("Expression is invalid. Unable to parse.")
 }
@@ -85,17 +41,18 @@ var argRegexpRE = regexp.MustCompile(`^arg([0-5])$`)
 
 func identExpression(f *ast.Ident) (tree.Numeric, error) {
 	if match := argRegexpRE.FindStringSubmatch(f.Name); match != nil {
-		ix, _ := strconv.Atoi(match[1])
+		// This error _really_ shouldn't be possible
+		ix, e := strconv.Atoi(match[1])
+		if e != nil {
+			panic("Impossible error")
+		}
 		return tree.Argument{ix}, nil
 	}
-	switch f.Name {
+	switch strings.ToLower(f.Name) {
 	case "true":
 		return tree.BooleanLiteral{true}, nil
 	case "false":
 		return tree.BooleanLiteral{false}, nil
-	// Handle other cases here
-	default:
-		return tree.Variable{f.Name}, nil
 	}
 	return tree.Variable{f.Name}, nil
 }
@@ -103,7 +60,6 @@ func identExpression(f *ast.Ident) (tree.Numeric, error) {
 func unwrapNumericExpression(x ast.Node) (tree.Numeric, error) {
 	switch f := x.(type) {
 	case *ast.Ident:
-		// Ensure ident doesn't contain stupidness like packages and stuff
 		return identExpression(f)
 	case *ast.BasicLit:
 		// TODO: errors here
@@ -128,9 +84,7 @@ func unwrapNumericExpression(x ast.Node) (tree.Numeric, error) {
 		if f.Op == token.XOR {
 			return tree.BinaryNegation{operand}, nil
 		}
-		// TODO: Fail in a good way here
-	default:
-		// panicWithInfo(x)
+		// TODO: other unary expressions possible here?
 	}
 	return nil, errors.New("Expression is invalid. Unable to parse.")
 }
@@ -170,43 +124,59 @@ func numericArgExpression(f *ast.BinaryExpr) (tree.Boolean, error) {
 	return tree.Comparison{Left: left, Right: right, Op: cmp}, nil
 }
 
-func inclusionExpression(f *ast.CallExpr) (tree.Boolean, error) {
-	var pos bool
-	var left tree.Numeric
+func expressionsToNumerics(inp []ast.Expr) ([]tree.Numeric, error) {
 	var err error
-	var right []tree.Numeric
-	var val tree.Numeric
+	args := make([]tree.Numeric, len(inp))
 
-	switch p := f.Fun.(type) {
-	case *ast.Ident:
-		if p.Name == "in" {
-			pos = true
-		}
-		if p.Name == "notIn" {
-			pos = false
+	for ix, v := range inp {
+		args[ix], err = unwrapNumericExpression(v)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	switch p := f.Args[0].(type) {
-	case *ast.Ident:
-		left, err = identExpression(p)
-	case *ast.BasicLit:
-		left, err = unwrapNumericExpression(p)
-	}
+	return args, nil
+}
 
-	for _, e := range f.Args {
-		switch y := e.(type) {
-		case *ast.BasicLit:
-			val, err = unwrapNumericExpression(y)
-			right = append(right, val)
+func expressionsToAnys(inp []ast.Expr) ([]tree.Any, error) {
+	var err error
+	args := make([]tree.Any, len(inp))
+
+	for ix, v := range inp {
+		args[ix], err = unwrapNumericExpression(v)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	if err != nil {
-		return nil, err
+	return args, nil
+}
+
+func callExpression(f *ast.CallExpr) (tree.Boolean, error) {
+	p, ok := f.Fun.(*ast.Ident)
+	if !ok {
+		return nil, errors.New("Invalid call expression in boolean context")
 	}
 
-	return tree.Inclusion{pos, left, right}, nil
+	name := p.Name
+
+	switch name {
+	case "in", "notIn":
+		args, err := expressionsToNumerics(f.Args)
+		if err != nil {
+			return nil, err
+		}
+		if len(args) == 0 {
+			return nil, errors.New(name + "-expression must have at least a left hand side argument")
+		}
+		return tree.Inclusion{Positive: name == "in", Left: args[0], Rights: args[1:]}, nil
+	default:
+		args, err := expressionsToAnys(f.Args)
+		if err != nil {
+			return nil, err
+		}
+		return tree.Call{Name: name, Args: args}, nil
+	}
 }
 
 func unwrapBooleanExpression(x ast.Node) (tree.Boolean, error) {
@@ -236,12 +206,10 @@ func unwrapBooleanExpression(x ast.Node) (tree.Boolean, error) {
 			}
 		}
 	case *ast.CallExpr:
-		return inclusionExpression(f)
+		return callExpression(f)
 	case *ast.Ident:
 		return identExpression(f)
 		// TODO: Fail in a good way here
-	default:
-		// panicWithInfo(x)
 	}
 	return nil, errors.New("Expression is invalid. Unable to parse.")
 }
