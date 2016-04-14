@@ -52,7 +52,7 @@ func parseRule(s string) (tree.Rule, error) {
 
 	// TODO: positive and negative actions here
 
-	x, err := parseExpression(parts[1])
+	x, _, _, err := parseExpression(parts[1])
 	if err != nil {
 		return tree.Rule{}, err
 	}
