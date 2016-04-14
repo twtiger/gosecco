@@ -265,3 +265,18 @@ func (s *RulesSuite) Test_parseComplexReturn(c *C) {
 	c.Assert(hasReturn, Equals, true)
 	c.Assert(ret, Equals, uint16(42))
 }
+
+func (s *RulesSuite) Test_invalidLiteral(c *C) {
+	_, _, _, err := parseExpression("arg0 == \"foo\"")
+	c.Assert(err, ErrorMatches, "Invalid literal type - this language only supports numbers")
+}
+
+func (s *RulesSuite) Test_unaryExpressionForNumber(c *C) {
+	_, _, _, err := parseExpression("arg0 == !42")
+	c.Assert(err, ErrorMatches, "Invalid unary operator: '!'")
+}
+
+func (s *RulesSuite) Test_invalidBooleanLiteral(c *C) {
+	_, _, _, err := parseExpression("42")
+	c.Assert(err, ErrorMatches, "Invalid boolean literal: '42'")
+}

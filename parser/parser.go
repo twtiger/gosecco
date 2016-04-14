@@ -105,7 +105,7 @@ func unwrapNumericExpression(x ast.Node) (tree.Numeric, error) {
 			i, _ := strconv.ParseUint(f.Value, 0, 32)
 			return tree.NumericLiteral{uint32(i)}, nil
 		}
-		// TODO: errors here
+		return nil, errors.New("Invalid literal type - this language only supports numbers")
 	case *ast.BinaryExpr:
 		op, ok := arithmeticOps[f.Op]
 		if !ok {
@@ -113,11 +113,15 @@ func unwrapNumericExpression(x ast.Node) (tree.Numeric, error) {
 		}
 
 		left, err := unwrapNumericExpression(f.X)
-		right, err := unwrapNumericExpression(f.Y)
-
 		if err != nil {
 			return nil, err
 		}
+
+		right, err := unwrapNumericExpression(f.Y)
+		if err != nil {
+			return nil, err
+		}
+
 		return tree.Arithmetic{Left: left, Right: right, Op: op}, nil
 	case *ast.ParenExpr:
 		return unwrapNumericExpression(f.X)
@@ -131,13 +135,9 @@ func unwrapNumericExpression(x ast.Node) (tree.Numeric, error) {
 		if f.Op == token.XOR {
 			return tree.BinaryNegation{operand}, nil
 		}
-		// TODO: other unary expressions possible here?
+		return nil, fmt.Errorf("Invalid unary operator: '%s'", f.Op)
 	}
 	return nil, errors.New("Expression is invalid. Unable to parse.")
-}
-
-func panicWithInfo(x interface{}) {
-	panic(fmt.Sprintf("sadness: %#v", x))
 }
 
 func takesBooleanArguments(f *ast.BinaryExpr) bool {
@@ -246,13 +246,12 @@ func unwrapBooleanExpression(x ast.Node) (tree.Boolean, error) {
 	switch f := x.(type) {
 	case *ast.BasicLit:
 		switch f.Value {
-		// TODO: Handle other values here
 		case "1":
 			return tree.BooleanLiteral{true}, nil
 		case "0":
 			return tree.BooleanLiteral{false}, nil
 		}
-		// TODO: handle failure here
+		return nil, fmt.Errorf("Invalid boolean literal: '%s'", f.Value)
 	case *ast.BinaryExpr:
 		if takesBooleanArguments(f) {
 			return booleanArgExpression(f)
@@ -274,7 +273,6 @@ func unwrapBooleanExpression(x ast.Node) (tree.Boolean, error) {
 		return callExpression(f)
 	case *ast.Ident:
 		return identExpression(f)
-		// TODO: Fail in a good way here
 	}
 	return nil, errors.New("Expression is invalid. Unable to parse.")
 }
