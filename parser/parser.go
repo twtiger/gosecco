@@ -173,7 +173,7 @@ func inclusionExpression(f *ast.CallExpr) (tree.Boolean, error) {
 	var pos bool
 	var left tree.Numeric
 	var err error
-	var right[] tree.Numeric
+	var right []tree.Numeric
 	var val tree.Numeric
 
 	switch p := f.Fun.(type) {
