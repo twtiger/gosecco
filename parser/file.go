@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -27,7 +26,7 @@ func parseLines(lines []string) (tree.RawPolicy, error) {
 		case assignmentLine, defaultAssignmentLine:
 			// TODO: parse assignment
 		case unknownLine:
-			return tree.RawPolicy{}, errors.New(fmt.Sprintf("Couldn't parse line: '%s' - it doesn't match any kind of valid syntax\n", l))
+			return tree.RawPolicy{}, fmt.Errorf("Couldn't parse line: '%s' - it doesn't match any kind of valid syntax", l)
 		}
 	}
 
