@@ -85,6 +85,8 @@ func (sv *EvaluatorVisitor) AcceptComparison(v Comparison) {
 	switch v.Op {
 	case EQL:
 		sv.pushBoolean(left == right)
+	case NEQL:
+		sv.pushBoolean(left != right)
 	case GT:
 		sv.pushBoolean(left > right)
 	case GTE:
