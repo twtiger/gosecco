@@ -1,33 +1,47 @@
 package unifier
 
 import (
-	"fmt"
+	"errors"
 	"github.com/twtiger/go-seccomp/tree"
 )
 
 type replacer struct {
 	expression tree.Expression
 	macros     map[string]tree.Macro
+	err        error
 }
 
 func (r *replacer) AcceptAnd(b tree.And) {
-	r.expression = tree.And{Left: replace(b.Left, r.macros), Right: replace(b.Right, r.macros)}
+	var left tree.Boolean
+	var right tree.Boolean
+	left, r.err = replace(b.Left, r.macros)
+	if r.err == nil {
+		right, r.err = replace(b.Right, r.macros)
+		r.expression = tree.And{Left: left, Right: right}
+	}
 }
 
 func (r *replacer) AcceptArgument(tree.Argument) {}
 
 func (r *replacer) AcceptArithmetic(b tree.Arithmetic) {
-	r.expression = tree.Arithmetic{Left: replace(b.Left, r.macros), Op: b.Op, Right: replace(b.Right, r.macros)}
+	var left tree.Numeric
+	var right tree.Numeric
+	left, r.err = replace(b.Left, r.macros)
+	if r.err == nil {
+		right, r.err = replace(b.Right, r.macros)
+		r.expression = tree.Arithmetic{Left: left, Op: b.Op, Right: right}
+	}
 }
 
 func (r *replacer) AcceptBinaryNegation(b tree.BinaryNegation) {
-	r.expression = tree.BinaryNegation{replace(b.Operand, r.macros)}
+	var op tree.Numeric
+	op, r.err = replace(b.Operand, r.macros)
+	r.expression = tree.BinaryNegation{op}
 }
 
 func (r *replacer) AcceptBooleanLiteral(tree.BooleanLiteral) {}
 
 func (r *replacer) AcceptCall(b tree.Call) {
-	// should be generic
 	v := r.macros[b.Name]
 
 	nm := make(map[string]tree.Macro)
@@ -36,48 +50,80 @@ func (r *replacer) AcceptCall(b tree.Call) {
 		nm[v.ArgumentNames[i]] = m
 	}
 
-	exp := replace(v.Body, nm)
+	exp, err := replace(v.Body, nm)
+	r.err = err
 
 	for k, v := range r.macros {
 		nm[k] = v
 	}
 
-	r.expression = replace(exp, nm)
+	if r.err == nil {
+		r.expression, r.err = replace(exp, nm)
+	}
 }
 
 func (r *replacer) AcceptComparison(b tree.Comparison) {
-	r.expression = tree.Comparison{
-		Left:  replace(b.Left, r.macros),
-		Op:    b.Op,
-		Right: replace(b.Right, r.macros),
+	var left tree.Numeric
+	var right tree.Numeric
+
+	left, r.err = replace(b.Left, r.macros)
+
+	if r.err == nil {
+		right, r.err = replace(b.Right, r.macros)
+		r.expression = tree.Comparison{
+			Left:  left,
+			Op:    b.Op,
+			Right: right,
+		}
 	}
+
 }
 
 func (r *replacer) AcceptInclusion(b tree.Inclusion) {
 	var rights []tree.Numeric
 	for _, e := range b.Rights {
-		rights = append(rights, replace(e, r.macros))
+		right, err := replace(e, r.macros)
+		if err != nil {
+			r.err = err
+		}
+		rights = append(rights, right)
 	}
-	r.expression = tree.Inclusion{Positive: b.Positive, Left: replace(b.Left, r.macros), Rights: rights}
+	left, err := replace(b.Left, r.macros)
+	if err != nil {
+		r.err = err
+	}
+
+	r.expression = tree.Inclusion{Positive: b.Positive, Left: left, Rights: rights}
 }
 
 func (r *replacer) AcceptNegation(b tree.Negation) {
-	r.expression = tree.Negation{Operand: replace(b.Operand, r.macros)}
+	var op tree.Numeric
+	op, r.err = replace(b.Operand, r.macros)
+
+	r.expression = tree.Negation{Operand: op}
 }
 
 func (r *replacer) AcceptNumericLiteral(tree.NumericLiteral) {}
 
 func (r *replacer) AcceptOr(b tree.Or) {
-	r.expression = tree.Or{Left: replace(b.Left, r.macros), Right: replace(b.Right, r.macros)}
+	var left tree.Boolean
+	var right tree.Boolean
+
+	left, r.err = replace(b.Left, r.macros)
+
+	if r.err == nil {
+		right, r.err = replace(b.Right, r.macros)
+		r.expression = tree.And{Left: left, Right: right}
+		r.expression = tree.Or{Left: left, Right: right}
+	}
 }
 
 func (r *replacer) AcceptVariable(b tree.Variable) {
-	// TODO: handle missing macro definition
-	// TODO: handle case where variable references macro that takes arguments
+	// TODO handle case where a macro is called that should take a variable but is not given one
 	expr, ok := r.macros[b.Name]
 	if ok {
 		r.expression = expr.Body
 	} else {
-		panic(fmt.Sprintf("sadness: %#v")) //TODO handle this case
+		r.err = errors.New("Variable not defined")
 	}
 }

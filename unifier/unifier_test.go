@@ -19,7 +19,7 @@ func (s *UnifierSuite) Test_Unify_withNothingToUnify(c *C) {
 		RuleOrMacros: []interface{}{},
 	}
 
-	output := Unify(input)
+	output, _ := Unify(input)
 
 	c.Assert(output.DefaultPositiveAction, Equals, "")
 	c.Assert(output.DefaultNegativeAction, Equals, "")
@@ -39,7 +39,7 @@ func (s *UnifierSuite) Test_Unify_withRuleToUnify(c *C) {
 		},
 	}
 
-	output := Unify(input)
+	output, _ := Unify(input)
 
 	c.Assert(output.DefaultPositiveAction, Equals, "")
 	c.Assert(output.DefaultNegativeAction, Equals, "")
@@ -66,7 +66,7 @@ func (s *UnifierSuite) Test_Unify_withRuleAndMacroThatDoesntUnify(c *C) {
 		},
 	}
 
-	output := Unify(input)
+	output, _ := Unify(input)
 
 	c.Assert(output.DefaultPositiveAction, Equals, "")
 	c.Assert(output.DefaultNegativeAction, Equals, "")
@@ -94,7 +94,7 @@ func (s *UnifierSuite) Test_Unify_withRuleAndMacroToActuallyUnify(c *C) {
 		},
 	}
 
-	output := Unify(input)
+	output, _ := Unify(input)
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["var1"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -125,7 +125,7 @@ func (s *UnifierSuite) Test_Unify_orExpression(c *C) {
 		},
 	}
 
-	output := Unify(input)
+	output, _ := Unify(input)
 	c.Assert(len(output.Macros), Equals, 2)
 	c.Assert(output.Macros["var1"], DeepEquals, macro1)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -150,7 +150,7 @@ func (s *UnifierSuite) Test_Unify_withAndExpressione(c *C) {
 		},
 	}
 
-	output := Unify(input)
+	output, _ := Unify(input)
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["var1"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -175,7 +175,7 @@ func (s *UnifierSuite) Test_Unify_withArithmeticExpression(c *C) {
 		},
 	}
 
-	output := Unify(input)
+	output, _ := Unify(input)
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["var1"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -203,7 +203,7 @@ func (s *UnifierSuite) Test_Unify_withInclusionExpression(c *C) {
 		},
 	}
 
-	output := Unify(input)
+	output, _ := Unify(input)
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["var2"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -237,7 +237,7 @@ func (s *UnifierSuite) Test_Unify_withInclusionExpressionVariableLeft(c *C) {
 		},
 	}
 
-	output := Unify(input)
+	output, _ := Unify(input)
 	c.Assert(len(output.Macros), Equals, 2)
 	c.Assert(output.Macros["var1"], DeepEquals, macro1)
 	c.Assert(output.Macros["var2"], DeepEquals, macro2)
@@ -263,7 +263,7 @@ func (s *UnifierSuite) Test_Unify_withNegationExpression(c *C) {
 		},
 	}
 
-	output := Unify(input)
+	output, _ := Unify(input)
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["var1"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -289,7 +289,7 @@ func (s *UnifierSuite) Test_Unify_withCallExpression(c *C) {
 		},
 	}
 
-	output := Unify(input)
+	output, _ := Unify(input)
 	//c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["compV1"], DeepEquals, macro)
 	//c.Assert(len(output.Rules), Equals, 1)
@@ -315,7 +315,7 @@ func (s *UnifierSuite) Test_Unify_withCallExpressionWithMultipleVariables(c *C) 
 		},
 	}
 
-	output := Unify(input)
+	output, _ := Unify(input)
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["compV1"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -347,7 +347,7 @@ func (s *UnifierSuite) Test_Unify_withCallExpressionWithPreviouslyDefinedVariabl
 		},
 	}
 
-	output := Unify(input)
+	output, _ := Unify(input)
 	c.Assert(output.Macros["var1"], DeepEquals, macro1)
 	c.Assert(output.Macros["compV1"], DeepEquals, macro2)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -355,7 +355,6 @@ func (s *UnifierSuite) Test_Unify_withCallExpressionWithPreviouslyDefinedVariabl
 }
 
 func (s *UnifierSuite) Test_Unify_withNoVariableDefinedRaisesNoVariableDefinedError(c *C) {
-	c.Skip("handle panic")
 	rule := tree.Rule{
 		Name: "write",
 		Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.Variable{"var1"}},
@@ -367,9 +366,8 @@ func (s *UnifierSuite) Test_Unify_withNoVariableDefinedRaisesNoVariableDefinedEr
 		},
 	}
 
-	output := Unify(input)
-	c.Assert(len(output.Macros), Equals, 0)
-	c.Assert(len(output.Rules), Equals, 0)
-	// TODO fix this up
-	c.Assert(tree.ExpressionString(output.Rules[0].Body), Equals, "(eq arg0 1)")
+	_, error := Unify(input)
+	// TODO handle being able to return nil?
+	//c.Assert(output, IsNil)
+	c.Assert(error, ErrorMatches, "Variable not defined")
 }
