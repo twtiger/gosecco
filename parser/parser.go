@@ -3,12 +3,13 @@ package parser
 import (
 	"errors"
 	"fmt"
-	"github.com/twtiger/go-seccomp/tree"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"regexp"
 	"strconv"
+
+	"github.com/twtiger/go-seccomp/tree"
 )
 
 var tokenTypes = make(map[token.Token]string)
