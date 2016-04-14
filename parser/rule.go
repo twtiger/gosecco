@@ -2,6 +2,7 @@ package parser
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -11,7 +12,6 @@ import (
 var ruleHeadRE = regexp.MustCompile(`^[[:space:]]*([[:word:]]+)[[:space:]]*(?:\[(.*)\])?[[:space:]]*$`)
 
 func findPositiveAndNegative(ss []string) (string, string, bool) {
-	// UGLY - can we do better?
 	neg, pos := "", ""
 	for _, s := range ss {
 		s = strings.TrimSpace(s)
@@ -50,11 +50,12 @@ func parseRule(s string) (tree.Rule, error) {
 		return tree.Rule{}, errors.New("Invalid specification of syscall name")
 	}
 
-	// TODO: positive and negative actions here
-
-	x, _, _, err := parseExpression(parts[1])
+	x, hasReturn, ret, err := parseExpression(parts[1])
 	if err != nil {
 		return tree.Rule{}, err
+	}
+	if hasReturn {
+		rule.PositiveAction = fmt.Sprintf("%d", ret)
 	}
 	rule.Body = x
 	return rule, nil

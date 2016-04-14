@@ -113,6 +113,11 @@ func (s *RulesSuite) Test_parseAExpressionWithModulo(c *C) {
 	c.Assert(tree.ExpressionString(result), Equals, "(eq arg0 (mod 12 3))")
 }
 
+func (s *RulesSuite) Test_parseAWeirdThing(c *C) {
+	result, _, _, _ := parseExpression("arg0 == a | b")
+	c.Assert(tree.ExpressionString(result), Equals, "(eq arg0 (binor a b))")
+}
+
 func (s *RulesSuite) Test_parseAExpressionWithBooleanAnd(c *C) {
 	result, _, _, _ := parseExpression("arg0 == 0 && arg1 == 0")
 	c.Assert(tree.ExpressionString(result), Equals, "(and (eq arg0 0) (eq arg1 0))")
@@ -209,7 +214,7 @@ func (s *RulesSuite) Test_parseAExpressionWithNestedOperators(c *C) {
 
 func (s *RulesSuite) Test_parseAExpressionWithInvalidArithmeticOperator(c *C) {
 	_, _, _, err := parseExpression("arg0 == 12 _ 3")
-	c.Assert(err, ErrorMatches, "Expression is invalid. Unable to parse.")
+	c.Assert(err, ErrorMatches, "Expression is invalid. Unable to parse: 1:21: expected ';', found 'IDENT' _")
 }
 
 func (s *RulesSuite) Test_parseArgumentsCorrectly_andIncorrectly(c *C) {

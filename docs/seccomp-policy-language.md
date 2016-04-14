@@ -8,6 +8,9 @@ Every line can be one of several types - specifically, they can be assignments, 
 
 In general, each line will be parsed and understood in the context of only the previous lines. That means that variables and macros have to be defined before used. This also stops recursive actions from being possible.    
 
+## Valid names
+
+In order to simplify implementation, we reuse the parser from the Go programming language. That means that certain words will not be valid as variable names. These include the typical Golang keywords such as "for", "type", "if", "func" and so on.
 
 ## Comments
 
