@@ -11,6 +11,7 @@ const (
 	commentLine
 	assignmentLine
 	defaultAssignmentLine
+	emptyLine
 )
 
 func isComment(s string) bool {
@@ -19,6 +20,10 @@ func isComment(s string) bool {
 
 func isRule(s string) bool {
 	return len(strings.SplitN(s, ":", 2)) == 2
+}
+
+func isEmpty(s string) bool {
+	return len(strings.TrimSpace(s)) == 0
 }
 
 func isDefaultAssignment(s string) bool {
@@ -49,6 +54,10 @@ func lineType(s string) LineType {
 
 	if isAssignment(s) {
 		return assignmentLine
+	}
+
+	if isEmpty(s) {
+		return emptyLine
 	}
 
 	return unknownLine
