@@ -4,9 +4,11 @@ import (
 	"syscall"
 
 	"github.com/twtiger/go-seccomp/data"
+
+	"golang.org/x/sys/unix"
 )
 
-func Emulate(d data.SeccompData, filters []data.SockFilter) uint32 {
+func Emulate(d data.SeccompWorkingMemory, filters []unix.SockFilter) uint32 {
 	e := &emulator{data: d, filters: filters, pointer: 0}
 	for {
 		val, finished := e.next()
@@ -17,8 +19,8 @@ func Emulate(d data.SeccompData, filters []data.SockFilter) uint32 {
 }
 
 type emulator struct {
-	data    data.SeccompData
-	filters []data.SockFilter
+	data    data.SeccompWorkingMemory
+	filters []unix.SockFilter
 	pointer uint
 
 	X uint32

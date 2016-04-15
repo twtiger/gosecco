@@ -4,6 +4,8 @@ import (
 	"syscall"
 	"testing"
 
+	"golang.org/x/sys/unix"
+
 	"github.com/twtiger/go-seccomp/data"
 
 	. "gopkg.in/check.v1"
@@ -16,8 +18,8 @@ type EmulatorSuite struct{}
 var _ = Suite(&EmulatorSuite{})
 
 func (s *EmulatorSuite) Test_simpleReturnK(c *C) {
-	res := Emulate(data.SeccompData{}, []data.SockFilter{
-		data.SockFilter{
+	res := Emulate(data.SeccompWorkingMemory{}, []unix.SockFilter{
+		unix.SockFilter{
 			Code: syscall.BPF_RET | syscall.BPF_K,
 			K:    uint32(42),
 		},
@@ -27,9 +29,9 @@ func (s *EmulatorSuite) Test_simpleReturnK(c *C) {
 
 func (s *EmulatorSuite) Test_simpleReturnX(c *C) {
 	e := &emulator{
-		data: data.SeccompData{},
-		filters: []data.SockFilter{
-			data.SockFilter{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
 				Code: syscall.BPF_RET | syscall.BPF_X,
 				K:    uint32(42),
 			},
