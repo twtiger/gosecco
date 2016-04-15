@@ -2,6 +2,7 @@ package unifier
 
 import (
 	"errors"
+
 	"github.com/twtiger/go-seccomp/tree"
 )
 
