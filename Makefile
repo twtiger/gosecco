@@ -39,7 +39,8 @@ run-cover: clean-cover
 	go test -coverprofile=.coverprofiles/tree.coverprofile     ./tree
 	go test -coverprofile=.coverprofiles/constants.coverprofile     ./constants
 	go test -coverprofile=.coverprofiles/parser.coverprofile     ./parser
-	go test -coverprofile=.coverprofiles/simplify.coverprofile ./simplify
+	go test -coverprofile=.coverprofiles/simplify.coverprofile ./simplify	
+	go test -coverprofile=.coverprofiles/compiler.coverprofile ./compiler
 	go test -coverprofile=.coverprofiles/main.coverprofile
 	gover .coverprofiles .coverprofiles/gover.coverprofile
 
