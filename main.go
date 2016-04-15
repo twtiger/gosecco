@@ -3,14 +3,19 @@ package main
 import (
 	"fmt"
 
-	"github.com/twtiger/go-seccomp/parser"
+	seccomp "github.com/subgraph/go-seccomp"
 )
 
 func main() {
-	result, err := parser.ParseFile("profiles/shared.seccomp")
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-	} else {
-		fmt.Printf("Result: %#v\n", result)
+	result, _ := seccomp.Compile("bla.seccomp", true)
+	for _, filter := range result {
+		fmt.Println(filter)
 	}
+
+	// result, err := parser.ParseFile("profiles/shared.seccomp")
+	// if err != nil {
+	// 	fmt.Printf("Error: %s\n", err)
+	// } else {
+	// 	fmt.Printf("Result: %#v\n", result)
+	// }
 }
