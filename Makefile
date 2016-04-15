@@ -11,12 +11,14 @@ deps-dev:
 	go get gopkg.in/check.v1
 	go get golang.org/x/tools/cmd/cover
 	go get github.com/modocache/gover
+	go get golang.org/x/sys/unix
 
 deps-dev-u:
 	go get -u github.com/golang/lint/golint
 	go get -u gopkg.in/check.v1
 	go get -u golang.org/x/tools/cmd/cover
 	go get -u github.com/modocache/gover
+	go get -u golang.org/x/sys/unix
 
 ci: lint doctor test coveralls
 
