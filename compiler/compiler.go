@@ -35,20 +35,31 @@ func (c *compiler) compile(rules []tree.Rule) {
 	c.negativeAction("")
 }
 
+func (c *compiler) compileExpression(x tree.Expression) {
+	cv := &compilerVisitor{c}
+	x.Accept(cv)
+}
+
 func (c *compiler) labelHere(label string) {
 	c.fixupJumpPoints(label, uint(len(c.result)))
 }
 
 func (c *compiler) compileRule(r tree.Rule) {
-	c.labelHere("next")
+	c.labelHere("negative")
 	c.checkCorrectSyscall(r.Name)
+	c.compileExpression(r.Body)
 }
 
 const syscallNameIndex = 0
+const arg0IndexLowerWord = 0x10
+const arg0IndexUpperWord = 0x14
 
 const LOAD = BPF_LD | BPF_W | BPF_ABS
+const LOAD_VAL = BPF_LD | BPF_IMM
 const JEQ_K = BPF_JMP | BPF_JEQ | BPF_K
+const JEQ_X = BPF_JMP | BPF_JEQ | BPF_X
 const RET_K = BPF_RET | BPF_K
+const A_TO_X = BPF_MISC | BPF_TAX
 
 func (c *compiler) op(code uint16, k uint32) uint {
 	ix := uint(len(c.result))
@@ -61,11 +72,20 @@ func (c *compiler) op(code uint16, k uint32) uint {
 	return ix
 }
 
+func (c *compiler) moveAtoX() {
+	c.op(A_TO_X, 0)
+}
+
 func (c *compiler) loadAt(pos uint32) {
 	if c.currentlyLoaded != int(pos) {
 		c.op(LOAD, pos)
 		c.currentlyLoaded = int(pos)
 	}
+}
+
+func (c *compiler) loadLiteral(lit uint32) {
+	c.op(LOAD_VAL, lit)
+	c.currentlyLoaded = -1
 }
 
 func (c *compiler) loadCurrentSyscall() {
@@ -90,6 +110,12 @@ func (c *compiler) jumpIfEqualTo(val uint32, jt, jf string) {
 	c.negativeJumpTo(num, jf)
 }
 
+func (c *compiler) jumpIfEqualToX(jt, jf string) {
+	num := c.op(JEQ_X, 0)
+	c.positiveJumpTo(num, jt)
+	c.negativeJumpTo(num, jf)
+}
+
 func (c *compiler) checkCorrectSyscall(name string) {
 	sys, ok := constants.GetSyscall(name)
 	if !ok {
@@ -97,7 +123,7 @@ func (c *compiler) checkCorrectSyscall(name string) {
 	}
 
 	c.loadCurrentSyscall()
-	c.jumpIfEqualTo(sys, "positiveResult", "next")
+	c.jumpIfEqualTo(sys, "positive", "negative")
 }
 
 func (c *compiler) fixupJumpPoints(label string, ix uint) {
@@ -115,11 +141,11 @@ func (c *compiler) fixupJumpPoints(label string, ix uint) {
 }
 
 func (c *compiler) positiveAction(name string) {
-	c.labelHere("positiveResult")
+	c.labelHere("positive")
 	c.op(RET_K, SECCOMP_RET_ALLOW)
 }
 
 func (c *compiler) negativeAction(name string) {
-	c.labelHere("next")
+	c.labelHere("negative")
 	c.op(RET_K, SECCOMP_RET_KILL)
 }
