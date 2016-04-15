@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"go/parser"
+
+	"github.com/twtiger/go-seccomp/parser"
 )
 
 func main() {
