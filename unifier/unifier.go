@@ -1,11 +1,28 @@
 package unifier
 
-import "github.com/twtiger/go-seccomp/tree"
+import (
+	"strconv"
+
+	"github.com/twtiger/go-seccomp/tree"
+)
+
+func getDefaultActions(t tree.Macro) string {
+	var def string
+	switch f := t.Body.(type) {
+	case tree.NumericLiteral:
+		def = strconv.Itoa(int(f.Value))
+	case tree.Variable:
+		def = f.Name
+	}
+	return def
+}
 
 // Unify variables within rules from macros
 func Unify(r tree.RawPolicy) (tree.Policy, error) {
 	var err error
 	var rules []tree.Rule
+	var defpos string
+	var defneg string
 	macros := make(map[string]tree.Macro)
 	for _, e := range r.RuleOrMacros {
 		switch v := e.(type) {
@@ -14,10 +31,16 @@ func Unify(r tree.RawPolicy) (tree.Policy, error) {
 			r, err = replaceFreeNames(v, macros)
 			rules = append(rules, r)
 		case tree.Macro:
-			macros[v.Name] = v
+			if v.Name == "DEFAULT_POSITIVE" {
+				defpos = getDefaultActions(v)
+			} else if v.Name == "DEFAULT_NEGATIVE" {
+				defneg = getDefaultActions(v)
+			} else {
+				macros[v.Name] = v
+			}
 		}
 	}
-	return tree.Policy{Macros: macros, Rules: rules}, err
+	return tree.Policy{DefaultPositiveAction: defpos, DefaultNegativeAction: defneg, Macros: macros, Rules: rules}, err
 }
 
 func replaceFreeNames(r tree.Rule, macros map[string]tree.Macro) (tree.Rule, error) {
