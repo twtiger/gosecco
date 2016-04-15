@@ -479,3 +479,37 @@ func (s *UnifierSuite) Test_Unify_withDefaultNegativeVariableActionSetsNegativeA
 	c.Assert(len(output.Rules), Equals, 1)
 	c.Assert(output.Rules[0], DeepEquals, rule)
 }
+
+func (s *UnifierSuite) Test_Unify_withDefaultNegativeNumericActionSetsNegativeActionAndOtherMacros(c *C) {
+
+	rule := tree.Rule{
+		Name: "write",
+		Body: tree.Or{Left: tree.Argument{0}, Right: tree.Variable{"var1"}},
+	}
+
+	macro1 := tree.Macro{
+		Name: "var1",
+		Body: tree.NumericLiteral{1},
+	}
+
+	macro2 := tree.Macro{
+		Name: "DEFAULT_NEGATIVE",
+		Body: tree.NumericLiteral{0},
+	}
+
+	input := tree.RawPolicy{
+		RuleOrMacros: []interface{}{
+			macro2,
+			macro1,
+			rule,
+		},
+	}
+
+	output, _ := Unify(input)
+
+	c.Assert(output.DefaultPositiveAction, Equals, "")
+	c.Assert(output.DefaultNegativeAction, Equals, "0")
+	c.Assert(len(output.Macros), Equals, 1)
+	c.Assert(len(output.Rules), Equals, 1)
+	c.Assert(tree.ExpressionString(output.Rules[0].Body), Equals, "(or arg0 1)")
+}
