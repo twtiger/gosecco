@@ -1,6 +1,7 @@
 package emulator
 
 import (
+	"fmt"
 	"syscall"
 
 	"github.com/twtiger/gosecco/data"
@@ -53,17 +54,158 @@ func (e *emulator) execRet(current unix.SockFilter) (uint32, bool) {
 		return current.K, true
 	case syscall.BPF_X:
 		return e.X, true
+	default:
+		panic(fmt.Sprintf("Invalid ret source: %d", bpfSrc(current.Code)))
 	}
 	return 0, true
 }
 
+func (e *emulator) getFromWorkingMemory(ix uint32) uint32 {
+	switch ix {
+	case 0:
+		return uint32(e.data.NR)
+	case 4:
+		return e.data.Arch
+	case 8:
+		return uint32(e.data.InstructionPointer >> 32)
+	case 12:
+		return uint32(e.data.InstructionPointer & 0xFFFF)
+	case 16:
+		return uint32(e.data.Args[0] >> 32)
+	case 20:
+		return uint32(e.data.Args[0] & 0xFFFFFFFF)
+	case 24:
+		return uint32(e.data.Args[1] >> 32)
+	case 28:
+		return uint32(e.data.Args[1] & 0xFFFFFFFF)
+	case 32:
+		return uint32(e.data.Args[2] >> 32)
+	case 36:
+		return uint32(e.data.Args[2] & 0xFFFFFFFF)
+	case 40:
+		return uint32(e.data.Args[3] >> 32)
+	case 44:
+		return uint32(e.data.Args[3] & 0xFFFFFFFF)
+	case 48:
+		return uint32(e.data.Args[4] >> 32)
+	case 52:
+		return uint32(e.data.Args[4] & 0xFFFFFFFF)
+	case 56:
+		return uint32(e.data.Args[5] >> 32)
+	case 60:
+		return uint32(e.data.Args[5] & 0xFFFFFFFF)
+	default:
+		return 0
+	}
+}
+
+func (e *emulator) loadFromWorkingMemory(ix uint32) {
+	e.A = e.getFromWorkingMemory(ix)
+}
+
+func (e *emulator) execLd(current unix.SockFilter) (uint32, bool) {
+	cd := current.Code
+
+	if bpfSize(cd) != syscall.BPF_W {
+		panic("Invalid code, we can't load smaller values than wide ones")
+	}
+
+	switch bpfMode(cd) {
+	case syscall.BPF_ABS:
+		e.loadFromWorkingMemory(current.K)
+	case syscall.BPF_IND:
+		e.loadFromWorkingMemory(e.X + current.K)
+	case syscall.BPF_LEN:
+		e.A = uint32(64)
+	case syscall.BPF_IMM:
+		e.A = current.K
+	default:
+		panic(fmt.Sprintf("Invalid mode: %d", bpfMode(cd)))
+	}
+	return 0, false
+}
+
+func (e *emulator) execLdx(current unix.SockFilter) (uint32, bool) {
+	cd := current.Code
+
+	if bpfSize(cd) != syscall.BPF_W {
+		panic("Invalid code, we can't load smaller values than wide ones")
+	}
+
+	switch bpfMode(cd) {
+	case syscall.BPF_LEN:
+		e.X = uint32(64)
+	case syscall.BPF_IMM:
+		e.X = current.K
+	default:
+		panic(fmt.Sprintf("Invalid mode: %d", bpfMode(cd)))
+	}
+	return 0, false
+}
+
+const BPF_MOD = 0x90
+const BPF_XOR = 0xa0
+
+func (e *emulator) execAlu(current unix.SockFilter) (uint32, bool) {
+	cd := current.Code
+
+	right := uint32(0)
+
+	switch bpfSrc(cd) {
+	case syscall.BPF_K:
+		right = current.K
+	case syscall.BPF_X:
+		right = e.X
+	default:
+		panic(fmt.Sprintf("Invalid source for right hand side of operation: %d", bpfSrc(cd)))
+	}
+
+	switch bpfOp(cd) {
+	case syscall.BPF_ADD:
+		e.A += right
+	case syscall.BPF_SUB:
+		e.A -= right
+	case syscall.BPF_MUL:
+		e.A *= right
+	case syscall.BPF_DIV:
+		e.A /= right
+	case syscall.BPF_AND:
+		e.A &= right
+	case syscall.BPF_OR:
+		e.A |= right
+	case BPF_XOR:
+		e.A ^= right
+	case syscall.BPF_LSH:
+		e.A <<= right
+	case syscall.BPF_RSH:
+		e.A >>= right
+	case BPF_MOD:
+		e.A %= right
+	case syscall.BPF_NEG:
+		e.A = -e.A
+	default:
+		panic(fmt.Sprintf("Invalid op: %d", bpfOp(cd)))
+	}
+	return 0, false
+}
+
 func (e *emulator) next() (uint32, bool) {
+	if e.pointer >= uint(len(e.filters)) {
+		return 0, true
+	}
+
 	current := e.filters[e.pointer]
 	e.pointer++
 
 	switch bpfClass(current.Code) {
 	case syscall.BPF_RET:
 		return e.execRet(current)
+	case syscall.BPF_LD:
+		return e.execLd(current)
+	case syscall.BPF_LDX:
+		return e.execLdx(current)
+	case syscall.BPF_ALU:
+		return e.execAlu(current)
 	}
 
 	return 0, true
