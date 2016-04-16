@@ -1,6 +1,6 @@
 package simplify
 
-import "github.com/twtiger/go-seccomp/tree"
+import "github.com/twtiger/gosecco/tree"
 
 // AcceptNegation implements Visitor
 func (s *simplifier) AcceptNegation(v tree.Negation) {

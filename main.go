@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/twtiger/go-seccomp/parser"
+	"github.com/twtiger/gosecco/parser"
 )
 
 func main() {

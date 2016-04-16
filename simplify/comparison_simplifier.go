@@ -1,6 +1,6 @@
 package simplify
 
-import "github.com/twtiger/go-seccomp/tree"
+import "github.com/twtiger/gosecco/tree"
 
 // AcceptComparison implements Visitor
 func (s *simplifier) AcceptComparison(a tree.Comparison) {

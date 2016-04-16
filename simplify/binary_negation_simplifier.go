@@ -1,6 +1,6 @@
 package simplify
 
-import "github.com/twtiger/go-seccomp/tree"
+import "github.com/twtiger/gosecco/tree"
 
 // AcceptBinaryNegation implements Visitor
 func (s *simplifier) AcceptBinaryNegation(v tree.BinaryNegation) {

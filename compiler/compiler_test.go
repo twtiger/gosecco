@@ -6,7 +6,7 @@ import (
 
 	"golang.org/x/sys/unix"
 
-	"github.com/twtiger/go-seccomp/tree"
+	"github.com/twtiger/gosecco/tree"
 
 	. "gopkg.in/check.v1"
 )

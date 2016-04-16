@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/twtiger/go-seccomp/tree"
+	"github.com/twtiger/gosecco/tree"
 )
 
 func surround(s string) string {

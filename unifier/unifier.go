@@ -3,7 +3,7 @@ package unifier
 import (
 	"strconv"
 
-	"github.com/twtiger/go-seccomp/tree"
+	"github.com/twtiger/gosecco/tree"
 )
 
 func getDefaultActions(t tree.Macro) string {

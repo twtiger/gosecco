@@ -3,7 +3,7 @@ package unifier
 import (
 	"errors"
 
-	"github.com/twtiger/go-seccomp/tree"
+	"github.com/twtiger/gosecco/tree"
 )
 
 type replacer struct {

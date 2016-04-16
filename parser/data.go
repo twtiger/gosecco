@@ -3,7 +3,7 @@ package parser
 import (
 	"go/token"
 
-	"github.com/twtiger/go-seccomp/tree"
+	"github.com/twtiger/gosecco/tree"
 )
 
 var tokenTypes = make(map[token.Token]string)

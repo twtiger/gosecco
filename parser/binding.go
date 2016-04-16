@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/twtiger/go-seccomp/tree"
+	"github.com/twtiger/gosecco/tree"
 )
 
 var parseBindingHeadRE = regexp.MustCompile(`^[[:space:]]*([[:word:]]+)[[:space:]]*(?:\((.*)\))?[[:space:]]*$`)

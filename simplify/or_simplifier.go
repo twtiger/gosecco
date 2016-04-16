@@ -1,6 +1,6 @@
 package simplify
 
-import "github.com/twtiger/go-seccomp/tree"
+import "github.com/twtiger/gosecco/tree"
 
 // AcceptOr implements Visitor
 func (s *simplifier) AcceptOr(a tree.Or) {

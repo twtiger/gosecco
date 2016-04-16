@@ -1,6 +1,6 @@
 package compiler
 
-import "github.com/twtiger/go-seccomp/tree"
+import "github.com/twtiger/gosecco/tree"
 
 const DISABLE_UNTESTED_OPTIMIZATIONS = true
 

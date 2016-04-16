@@ -1,6 +1,6 @@
 package simplify
 
-import "github.com/twtiger/go-seccomp/tree"
+import "github.com/twtiger/gosecco/tree"
 
 // Simplify will take an expression and reduce it as much as possible using state operations
 func Simplify(inp tree.Expression) tree.Expression {

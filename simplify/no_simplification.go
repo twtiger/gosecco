@@ -1,6 +1,6 @@
 package simplify
 
-import "github.com/twtiger/go-seccomp/tree"
+import "github.com/twtiger/gosecco/tree"
 
 // AcceptArgument implements Visitor
 func (*simplifier) AcceptArgument(tree.Argument) {}

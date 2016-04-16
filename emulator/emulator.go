@@ -3,7 +3,7 @@ package emulator
 import (
 	"syscall"
 
-	"github.com/twtiger/go-seccomp/data"
+	"github.com/twtiger/gosecco/data"
 
 	"golang.org/x/sys/unix"
 )
@@ -47,18 +47,23 @@ func bpfSrc(code uint16) uint16 {
 	return code & 0x08
 }
 
+func (e *emulator) execRet(current unix.SockFilter) (uint32, bool) {
+	switch bpfSrc(current.Code) {
+	case syscall.BPF_K:
+		return current.K, true
+	case syscall.BPF_X:
+		return e.X, true
+	}
+	return 0, true
+}
+
 func (e *emulator) next() (uint32, bool) {
 	current := e.filters[e.pointer]
 	e.pointer++
 
 	switch bpfClass(current.Code) {
 	case syscall.BPF_RET:
-		switch bpfSrc(current.Code) {
-		case syscall.BPF_K:
-			return current.K, true
-		case syscall.BPF_X:
-			return e.X, true
-		}
+		return e.execRet(current)
 	}
 
 	return 0, true

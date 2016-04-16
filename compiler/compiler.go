@@ -1,8 +1,8 @@
 package compiler
 
 import (
-	"github.com/twtiger/go-seccomp/constants"
-	"github.com/twtiger/go-seccomp/tree"
+	"github.com/twtiger/gosecco/constants"
+	"github.com/twtiger/gosecco/tree"
 	"golang.org/x/sys/unix"
 )
 
