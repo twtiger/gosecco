@@ -1,7 +1,7 @@
-# go-seccomp - a library for parsing and managing seccomp-bpf rules
+# gosecco - a library for parsing and managing seccomp-bpf rules
 
-[![Build Status](https://travis-ci.org/twtiger/go-seccomp.svg?branch=master)](https://travis-ci.org/twtiger/go-seccomp)
-[![Coverage Status](https://coveralls.io/repos/github/twtiger/go-seccomp/badge.svg?branch=master)](https://coveralls.io/github/twtiger/go-seccomp?branch=master)
+[![Build Status](https://travis-ci.org/twtiger/gosecco.svg?branch=master)](https://travis-ci.org/twtiger/gosecco)
+[![Coverage Status](https://coveralls.io/repos/github/twtiger/gosecco/badge.svg?branch=master)](https://coveralls.io/github/twtiger/gosecco?branch=master)
 
 Golang parser and manager for seccomp-bpf rules
 
