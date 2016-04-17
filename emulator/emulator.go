@@ -27,7 +27,7 @@ func Emulate(d data.SeccompWorkingMemory, filters []unix.SockFilter) uint32 {
 type emulator struct {
 	data    data.SeccompWorkingMemory
 	filters []unix.SockFilter
-	pointer uint
+	pointer uint32
 
 	X uint32
 	A uint32
@@ -213,8 +213,54 @@ func (e *emulator) execMisc(current unix.SockFilter) (uint32, bool) {
 	return 0, false
 }
 
+func (e *emulator) execJmp(current unix.SockFilter) (uint32, bool) {
+	cd := current.Code
+
+	right := uint32(0)
+	switch bpfSrc(cd) {
+	case syscall.BPF_K:
+		right = current.K
+	case syscall.BPF_X:
+		right = e.X
+	default:
+		panic(fmt.Sprintf("Invalid source for right hand side of operation: %d", bpfSrc(cd)))
+	}
+
+	switch bpfOp(cd) {
+	case syscall.BPF_JA:
+		e.pointer += current.K
+	case syscall.BPF_JGT:
+		if e.A > right {
+			e.pointer += uint32(current.Jt)
+		} else {
+			e.pointer += uint32(current.Jf)
+		}
+	case syscall.BPF_JGE:
+		if e.A >= right {
+			e.pointer += uint32(current.Jt)
+		} else {
+			e.pointer += uint32(current.Jf)
+		}
+	case syscall.BPF_JEQ:
+		if e.A == right {
+			e.pointer += uint32(current.Jt)
+		} else {
+			e.pointer += uint32(current.Jf)
+		}
+	case syscall.BPF_JSET:
+		if e.A&right != 0 {
+			e.pointer += uint32(current.Jt)
+		} else {
+			e.pointer += uint32(current.Jf)
+		}
+	default:
+		panic(fmt.Sprintf("Invalid op: %d", bpfOp(cd)))
+	}
+	return 0, false
+}
+
 func (e *emulator) next() (uint32, bool) {
-	if e.pointer >= uint(len(e.filters)) {
+	if e.pointer >= uint32(len(e.filters)) {
 		return 0, true
 	}
 
@@ -232,6 +278,8 @@ func (e *emulator) next() (uint32, bool) {
 		return e.execAlu(current)
 	case syscall.BPF_MISC:
 		return e.execMisc(current)
+	case syscall.BPF_JMP:
+		return e.execJmp(current)
 	}
 
 	return 0, true

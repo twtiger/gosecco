@@ -6,3 +6,5 @@
 Golang parser and manager for seccomp-bpf rules
 
 For use with Subgraph and other tools.
+
+Only compatible with Linux 3.7 and above - for now assumes arm64 bit this will change.

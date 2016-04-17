@@ -223,3 +223,220 @@ func (s *EmulatorSuite) Test_misc(c *C) {
 
 	c.Assert(e.A, Equals, uint32(23))
 }
+
+func (s *EmulatorSuite) Test_simpleJump(c *C) {
+	e := &emulator{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
+				Code: syscall.BPF_JMP | syscall.BPF_JA,
+				K:    42,
+			},
+		},
+		pointer: 0,
+	}
+
+	e.next()
+
+	c.Assert(e.pointer, Equals, uint32(43))
+}
+
+func (s *EmulatorSuite) Test_simpleJgtK(c *C) {
+	e := &emulator{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
+				Code: syscall.BPF_JMP | syscall.BPF_JGT | syscall.BPF_K,
+				Jt:   1,
+				Jf:   2,
+				K:    5,
+			},
+		},
+		pointer: 0,
+		A:       0,
+	}
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(3))
+
+	e.pointer = 0
+	e.A = 6
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(2))
+}
+
+func (s *EmulatorSuite) Test_simpleJgeK(c *C) {
+	e := &emulator{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
+				Code: syscall.BPF_JMP | syscall.BPF_JGE | syscall.BPF_K,
+				Jt:   1,
+				Jf:   2,
+				K:    5,
+			},
+		},
+		pointer: 0,
+		A:       0,
+	}
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(3))
+
+	e.pointer = 0
+	e.A = 5
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(2))
+}
+
+func (s *EmulatorSuite) Test_simpleJeqK(c *C) {
+	e := &emulator{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
+				Code: syscall.BPF_JMP | syscall.BPF_JEQ | syscall.BPF_K,
+				Jt:   1,
+				Jf:   2,
+				K:    3,
+			},
+		},
+		pointer: 0,
+		A:       0,
+	}
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(3))
+
+	e.pointer = 0
+	e.A = 3
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(2))
+}
+
+func (s *EmulatorSuite) Test_simpleJsetK(c *C) {
+	e := &emulator{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
+				Code: syscall.BPF_JMP | syscall.BPF_JSET | syscall.BPF_K,
+				Jt:   1,
+				Jf:   2,
+				K:    8,
+			},
+		},
+		pointer: 0,
+		A:       7,
+	}
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(3))
+
+	e.pointer = 0
+	e.A = 15
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(2))
+}
+
+func (s *EmulatorSuite) Test_simpleJgtX(c *C) {
+	e := &emulator{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
+				Code: syscall.BPF_JMP | syscall.BPF_JGT | syscall.BPF_X,
+				Jt:   1,
+				Jf:   2,
+			},
+		},
+		pointer: 0,
+		A:       0,
+		X:       5,
+	}
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(3))
+
+	e.pointer = 0
+	e.A = 6
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(2))
+}
+
+func (s *EmulatorSuite) Test_simpleJgeX(c *C) {
+	e := &emulator{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
+				Code: syscall.BPF_JMP | syscall.BPF_JGE | syscall.BPF_X,
+				Jt:   1,
+				Jf:   2,
+			},
+		},
+		pointer: 0,
+		A:       0,
+		X:       5,
+	}
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(3))
+
+	e.pointer = 0
+	e.A = 5
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(2))
+}
+
+func (s *EmulatorSuite) Test_simpleJeqX(c *C) {
+	e := &emulator{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
+				Code: syscall.BPF_JMP | syscall.BPF_JEQ | syscall.BPF_X,
+				Jt:   1,
+				Jf:   2,
+			},
+		},
+		pointer: 0,
+		A:       0,
+		X:       3,
+	}
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(3))
+
+	e.pointer = 0
+	e.A = 3
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(2))
+}
+
+func (s *EmulatorSuite) Test_simpleJsetX(c *C) {
+	e := &emulator{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
+				Code: syscall.BPF_JMP | syscall.BPF_JSET | syscall.BPF_X,
+				Jt:   1,
+				Jf:   2,
+			},
+		},
+		pointer: 0,
+		A:       7,
+		X:       8,
+	}
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(3))
+
+	e.pointer = 0
+	e.A = 15
+
+	e.next()
+	c.Assert(e.pointer, Equals, uint32(2))
+}
