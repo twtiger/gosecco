@@ -189,3 +189,37 @@ func (s *EmulatorSuite) Test_aluAandX(c *C) {
 	aluAndX(c, syscall.BPF_RSH, 80, 3, 10)
 	aluAndX(c, BPF_MOD, 10, 3, 1)
 }
+
+func (s *EmulatorSuite) Test_misc(c *C) {
+	e := &emulator{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
+				Code: syscall.BPF_MISC | syscall.BPF_TAX,
+			},
+		},
+		pointer: 0,
+		A:       42,
+		X:       23,
+	}
+
+	e.next()
+
+	c.Assert(e.X, Equals, uint32(42))
+
+	e = &emulator{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
+				Code: syscall.BPF_MISC | syscall.BPF_TXA,
+			},
+		},
+		pointer: 0,
+		A:       42,
+		X:       23,
+	}
+
+	e.next()
+
+	c.Assert(e.A, Equals, uint32(23))
+}

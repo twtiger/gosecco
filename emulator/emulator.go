@@ -2,12 +2,17 @@ package emulator
 
 import (
 	"fmt"
+	"log"
 	"syscall"
 
 	"github.com/twtiger/gosecco/data"
 
 	"golang.org/x/sys/unix"
 )
+
+func init() {
+	log.SetFlags(0)
+}
 
 func Emulate(d data.SeccompWorkingMemory, filters []unix.SockFilter) uint32 {
 	e := &emulator{data: d, filters: filters, pointer: 0}
@@ -42,6 +47,9 @@ func bpfMode(code uint16) uint16 {
 
 func bpfOp(code uint16) uint16 {
 	return code & 0xf0
+}
+func bpfMiscOp(code uint16) uint16 {
+	return code & 0xf8
 }
 
 func bpfSrc(code uint16) uint16 {
@@ -143,6 +151,8 @@ func (e *emulator) execLdx(current unix.SockFilter) (uint32, bool) {
 	return 0, false
 }
 
+// These exist from Linux kernel v3.7+
+// Not sure if we should emulate them in the compiler or trying to detect linux version or something
 const BPF_MOD = 0x90
 const BPF_XOR = 0xa0
 
@@ -189,14 +199,28 @@ func (e *emulator) execAlu(current unix.SockFilter) (uint32, bool) {
 	return 0, false
 }
 
+func (e *emulator) execMisc(current unix.SockFilter) (uint32, bool) {
+	cd := current.Code
+
+	switch bpfMiscOp(cd) {
+	case syscall.BPF_TAX:
+		e.X = e.A
+	case syscall.BPF_TXA:
+		e.A = e.X
+	default:
+		panic(fmt.Sprintf("Invalid op: %d", bpfMiscOp(cd)))
+	}
+	return 0, false
+}
+
 func (e *emulator) next() (uint32, bool) {
 	if e.pointer >= uint(len(e.filters)) {
 		return 0, true
 	}
 
 	current := e.filters[e.pointer]
+	log.Printf("%03d:  %s\n", e.pointer, formatInstruction(current))
 	e.pointer++
-
 	switch bpfClass(current.Code) {
 	case syscall.BPF_RET:
 		return e.execRet(current)
@@ -206,7 +230,100 @@ func (e *emulator) next() (uint32, bool) {
 		return e.execLdx(current)
 	case syscall.BPF_ALU:
 		return e.execAlu(current)
+	case syscall.BPF_MISC:
+		return e.execMisc(current)
 	}
 
 	return 0, true
+}
+
+func instructionName(code uint16) string {
+	switch code {
+	case syscall.BPF_RET | syscall.BPF_K:
+		return "ret_k"
+	case syscall.BPF_RET | syscall.BPF_X:
+		return "ret_x"
+	case syscall.BPF_LD | syscall.BPF_W | syscall.BPF_ABS:
+		return "ld_abs"
+	case syscall.BPF_LD | syscall.BPF_W | syscall.BPF_IND:
+		return "ld_ind"
+	case syscall.BPF_LD | syscall.BPF_W | syscall.BPF_LEN:
+		return "ld_len"
+	case syscall.BPF_LD | syscall.BPF_W | syscall.BPF_IMM:
+		return "ld_imm"
+	case syscall.BPF_LDX | syscall.BPF_W | syscall.BPF_LEN:
+		return "ldx_len"
+	case syscall.BPF_LDX | syscall.BPF_W | syscall.BPF_IMM:
+		return "ldx_imm"
+	case syscall.BPF_ALU | syscall.BPF_ADD | syscall.BPF_K:
+		return "add_k"
+	case syscall.BPF_ALU | syscall.BPF_ADD | syscall.BPF_X:
+		return "add_x"
+	case syscall.BPF_ALU | syscall.BPF_SUB | syscall.BPF_K:
+		return "sub_k"
+	case syscall.BPF_ALU | syscall.BPF_SUB | syscall.BPF_X:
+		return "sub_x"
+	case syscall.BPF_ALU | syscall.BPF_MUL | syscall.BPF_K:
+		return "mul_k"
+	case syscall.BPF_ALU | syscall.BPF_MUL | syscall.BPF_X:
+		return "mul_x"
+	case syscall.BPF_ALU | syscall.BPF_DIV | syscall.BPF_K:
+		return "div_k"
+	case syscall.BPF_ALU | syscall.BPF_DIV | syscall.BPF_X:
+		return "div_x"
+	case syscall.BPF_ALU | syscall.BPF_AND | syscall.BPF_K:
+		return "and_k"
+	case syscall.BPF_ALU | syscall.BPF_AND | syscall.BPF_X:
+		return "and_x"
+	case syscall.BPF_ALU | syscall.BPF_OR | syscall.BPF_K:
+		return "or_k"
+	case syscall.BPF_ALU | syscall.BPF_OR | syscall.BPF_X:
+		return "or_x"
+	case syscall.BPF_ALU | BPF_XOR | syscall.BPF_K:
+		return "xor_k"
+	case syscall.BPF_ALU | BPF_XOR | syscall.BPF_X:
+		return "xor_x"
+	case syscall.BPF_ALU | syscall.BPF_LSH | syscall.BPF_K:
+		return "lsh_k"
+	case syscall.BPF_ALU | syscall.BPF_LSH | syscall.BPF_X:
+		return "lsh_x"
+	case syscall.BPF_ALU | syscall.BPF_RSH | syscall.BPF_K:
+		return "rsh_k"
+	case syscall.BPF_ALU | syscall.BPF_RSH | syscall.BPF_X:
+		return "rsh_x"
+	case syscall.BPF_ALU | BPF_MOD | syscall.BPF_K:
+		return "mod_k"
+	case syscall.BPF_ALU | BPF_MOD | syscall.BPF_X:
+		return "mod_x"
+	case syscall.BPF_ALU | syscall.BPF_NEG:
+		return "neg"
+	case syscall.BPF_MISC | syscall.BPF_TAX:
+		return "tax"
+	case syscall.BPF_MISC | syscall.BPF_TXA:
+		return "txa"
+	case syscall.BPF_JMP | syscall.BPF_JA:
+		return "jmp"
+	case syscall.BPF_JMP | syscall.BPF_JGT | syscall.BPF_K:
+		return "jgt_k"
+	case syscall.BPF_JMP | syscall.BPF_JGE | syscall.BPF_K:
+		return "jge_k"
+	case syscall.BPF_JMP | syscall.BPF_JEQ | syscall.BPF_K:
+		return "jeq_k"
+	case syscall.BPF_JMP | syscall.BPF_JSET | syscall.BPF_K:
+		return "jset_k"
+	case syscall.BPF_JMP | syscall.BPF_JGT | syscall.BPF_X:
+		return "jgt_x"
+	case syscall.BPF_JMP | syscall.BPF_JGE | syscall.BPF_X:
+		return "jge_x"
+	case syscall.BPF_JMP | syscall.BPF_JEQ | syscall.BPF_X:
+		return "jeq_x"
+	case syscall.BPF_JMP | syscall.BPF_JSET | syscall.BPF_X:
+		return "jset_x"
+	default:
+		return ""
+	}
+}
+
+func formatInstruction(current unix.SockFilter) string {
+	return fmt.Sprintf("%04x  %-10s   +%02x    -%02x    %08x", current.Code, instructionName(current.Code), current.Jt, current.Jf, current.K)
 }
