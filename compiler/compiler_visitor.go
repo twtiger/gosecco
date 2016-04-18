@@ -2,8 +2,6 @@ package compiler
 
 import "github.com/twtiger/gosecco/tree"
 
-const DISABLE_UNTESTED_OPTIMIZATIONS = true
-
 type compilerVisitor struct {
 	c *compiler
 }
@@ -28,21 +26,11 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 	// version of the JMP instructions, instead of the X versions
 
 	lit, isLit := c.Right.(tree.NumericLiteral)
-	if !DISABLE_UNTESTED_OPTIMIZATIONS && isLit {
+	if isLit {
 		c.Left.Accept(cv)
 		switch c.Op {
 		case tree.EQL:
 			cv.c.jumpIfEqualTo(lit.Value, "positive", "negative")
-			// TODO: deal with others here
-		}
-	} else {
-		c.Right.Accept(cv)
-		cv.c.moveAtoX()
-		c.Left.Accept(cv)
-
-		switch c.Op {
-		case tree.EQL:
-			cv.c.jumpIfEqualToX("positive", "negative")
 			// TODO: deal with others here
 		}
 	}
