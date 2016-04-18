@@ -20,19 +20,11 @@ func (cv *compilerVisitor) AcceptBooleanLiteral(tree.BooleanLiteral) {}
 func (cv *compilerVisitor) AcceptCall(tree.Call)                     {}
 
 func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
-	// TODO: we can recognize whether one of the operands are
-	// a literal value. This will be quite common, and in that case
-	// we can actually load it directly into K and then use the K
-	// version of the JMP instructions, instead of the X versions
-
 	lit, isLit := c.Right.(tree.NumericLiteral)
 	if isLit {
 		c.Left.Accept(cv)
-		switch c.Op {
-		case tree.EQL:
-			cv.c.jumpIfEqualTo(lit.Value, "positive", "negative")
-			// TODO: deal with others here
-		}
+		cmp := tree.ComparisonSymbols[c.Op]
+		cv.c.jumpOnComparison(lit.Value, cmp, "positive", "negative")
 	}
 }
 

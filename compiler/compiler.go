@@ -54,9 +54,15 @@ const syscallNameIndex = 0
 const arg0IndexLowerWord = 0x10
 const arg0IndexUpperWord = 0x14
 
+var ComparisonOps = map[string]uint16{
+	"eq": JEQ_K,
+	"gt": JEG_K,
+}
+
 const LOAD = BPF_LD | BPF_W | BPF_ABS
 const LOAD_VAL = BPF_LD | BPF_IMM
 const JEQ_K = BPF_JMP | BPF_JEQ | BPF_K
+const JEG_K = BPF_JMP + BPF_JGT + BPF_K
 const JEQ_X = BPF_JMP | BPF_JEQ | BPF_X
 const RET_K = BPF_RET | BPF_K
 const A_TO_X = BPF_MISC | BPF_TAX
@@ -104,8 +110,9 @@ func (c *compiler) negativeJumpTo(index uint, label string) {
 	}
 }
 
-func (c *compiler) jumpIfEqualTo(val uint32, jt, jf string) {
-	num := c.op(JEQ_K, val)
+func (c *compiler) jumpOnComparison(val uint32, cmp, jt, jf string) {
+	jc := ComparisonOps[cmp]
+	num := c.op(jc, val)
 	c.positiveJumpTo(num, jt)
 	c.negativeJumpTo(num, jf)
 }
@@ -123,7 +130,7 @@ func (c *compiler) checkCorrectSyscall(name string) {
 	}
 
 	c.loadCurrentSyscall()
-	c.jumpIfEqualTo(sys, "positive", "negative")
+	c.jumpOnComparison(sys, "eq", "positive", "negative")
 }
 
 func (c *compiler) fixupJumpPoints(label string, ix uint) {
