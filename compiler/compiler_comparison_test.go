@@ -140,7 +140,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfSimpleComparisonWithSecondRu
 	})
 }
 
-func (s *CompilerComparisonSuite) Test_compilationOfGTComparison(c *C) {
+func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanComparisonToK(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -159,7 +159,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGTComparison(c *C) {
 
 	c.Assert(res[1], DeepEquals, unix.SockFilter{
 		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   2, // TODO check if this really should be 0
+		Jt:   2,
 		Jf:   3,
 		K:    syscall.SYS_WRITE,
 	})
@@ -187,7 +187,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGTComparison(c *C) {
 	})
 }
 
-func (s *CompilerComparisonSuite) Test_compilationOfComparisonNonNumericRightSide(c *C) {
+func (s *CompilerComparisonSuite) Test_compilationOfComparisonAToX(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -243,7 +243,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonNonNumericRightSid
 	})
 }
 
-func (s *CompilerComparisonSuite) Test_compilationOfLessThanComparison(c *C) {
+func (s *CompilerComparisonSuite) Test_compilationOfLessThanComparisonToK(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -287,5 +287,85 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanComparison(c *C) {
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
 		Code: BPF_RET | BPF_K,
 		K:    SECCOMP_RET_KILL,
+	})
+}
+
+func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanOrEqualsToComparisonToK(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.GTE, Right: tree.NumericLiteral{42}},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+
+	c.Assert(res[3], DeepEquals, unix.SockFilter{
+		Code: BPF_JMP | BPF_JGE | BPF_K,
+		Jt:   0,
+		Jf:   1,
+		K:    42,
+	})
+}
+
+func (s *CompilerComparisonSuite) Test_compilationOfLessThanOrEqualsToComparisonToK(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.LTE, Right: tree.NumericLiteral{42}},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+
+	c.Assert(res[3], DeepEquals, unix.SockFilter{
+		Code: BPF_JMP | BPF_JGE | BPF_K,
+		Jt:   1,
+		Jf:   0,
+		K:    42,
+	})
+}
+
+func (s *CompilerComparisonSuite) Test_compilationOfNotEqualsToK(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.NEQL, Right: tree.NumericLiteral{42}},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+
+	c.Assert(res[3], DeepEquals, unix.SockFilter{
+		Code: BPF_JMP | BPF_JEQ | BPF_K,
+		Jt:   1,
+		Jf:   0,
+		K:    42,
+	})
+}
+
+func (s *CompilerComparisonSuite) Test_compilationOfBitSetToK(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.BIT, Right: tree.NumericLiteral{42}},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+
+	c.Assert(res[3], DeepEquals, unix.SockFilter{
+		Code: BPF_JMP | BPF_JSET | BPF_K,
+		Jt:   0,
+		Jf:   1,
+		K:    42,
 	})
 }

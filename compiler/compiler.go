@@ -61,7 +61,7 @@ var ComparisonOps = map[tree.ComparisonType]uint16{
 	tree.GTE:  JEGE_K,
 	tree.LT:   JEG_K,
 	tree.LTE:  JEGE_K,
-	//BIT:  "bitSet",
+	tree.BIT:  JSET_K,
 }
 
 const LOAD = BPF_LD | BPF_W | BPF_ABS
@@ -72,6 +72,7 @@ const JEGE_K = BPF_JMP | BPF_JGE | BPF_K
 const JEQ_X = BPF_JMP | BPF_JEQ | BPF_X
 const RET_K = BPF_RET | BPF_K
 const A_TO_X = BPF_MISC | BPF_TAX
+const JSET_K = BPF_JMP | BPF_JSET | BPF_K
 
 func (c *compiler) op(code uint16, k uint32) uint {
 	ix := uint(len(c.result))
