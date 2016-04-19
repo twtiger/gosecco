@@ -1,6 +1,8 @@
 package compiler
 
-import "github.com/twtiger/gosecco/tree"
+import (
+	"github.com/twtiger/gosecco/tree"
+)
 
 type compilerVisitor struct {
 	c *compiler
@@ -20,11 +22,20 @@ func (cv *compilerVisitor) AcceptBooleanLiteral(tree.BooleanLiteral) {}
 func (cv *compilerVisitor) AcceptCall(tree.Call)                     {}
 
 func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
+	cmp := tree.ComparisonSymbols[c.Op]
 	lit, isLit := c.Right.(tree.NumericLiteral)
 	if isLit {
 		c.Left.Accept(cv)
-		cmp := tree.ComparisonSymbols[c.Op]
 		cv.c.jumpOnComparison(lit.Value, cmp, "positive", "negative")
+	} else {
+		c.Right.Accept(cv)
+		cv.c.moveAtoX()
+		c.Left.Accept(cv)
+		switch c.Op {
+		case tree.EQL:
+			cv.c.jumpIfEqualToX("positive", "negative")
+			// TODO: deal with others here
+		}
 	}
 }
 
