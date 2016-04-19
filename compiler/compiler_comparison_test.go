@@ -242,3 +242,50 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonNonNumericRightSid
 		K:    SECCOMP_RET_KILL,
 	})
 }
+
+func (s *CompilerComparisonSuite) Test_compilationOfLessThanComparison(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.LT, Right: tree.NumericLiteral{42}},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+
+	c.Assert(res[0], DeepEquals, unix.SockFilter{
+		Code: BPF_LD | BPF_W | BPF_ABS,
+		K:    syscallNameIndex,
+	})
+
+	c.Assert(res[1], DeepEquals, unix.SockFilter{
+		Code: BPF_JMP | BPF_JEQ | BPF_K,
+		Jt:   2,
+		Jf:   3,
+		K:    syscall.SYS_WRITE,
+	})
+
+	c.Assert(res[2], DeepEquals, unix.SockFilter{
+		Code: BPF_LD | BPF_W | BPF_ABS,
+		K:    arg0IndexLowerWord,
+	})
+
+	c.Assert(res[3], DeepEquals, unix.SockFilter{
+		Code: BPF_JMP | BPF_JGT | BPF_K,
+		Jt:   1,
+		Jf:   0,
+		K:    42,
+	})
+
+	c.Assert(res[4], DeepEquals, unix.SockFilter{
+		Code: BPF_RET | BPF_K,
+		K:    SECCOMP_RET_ALLOW,
+	})
+
+	c.Assert(res[5], DeepEquals, unix.SockFilter{
+		Code: BPF_RET | BPF_K,
+		K:    SECCOMP_RET_KILL,
+	})
+}

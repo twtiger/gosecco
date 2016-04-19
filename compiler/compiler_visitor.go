@@ -8,6 +8,16 @@ type compilerVisitor struct {
 	c *compiler
 }
 
+var compVals = map[tree.ComparisonType][]string{
+	tree.EQL:  {"positive", "negative"},
+	tree.GT:   {"positive", "negative"},
+	tree.GTE:  {"positive", "negative"},
+	tree.BIT:  {"positive", "negative"},
+	tree.NEQL: {"negative", "positive"},
+	tree.LT:   {"negative", "positive"},
+	tree.LTE:  {"negative", "positive"},
+}
+
 func (cv *compilerVisitor) AcceptAnd(tree.And) {}
 
 func (cv *compilerVisitor) AcceptArgument(a tree.Argument) {
@@ -22,11 +32,11 @@ func (cv *compilerVisitor) AcceptBooleanLiteral(tree.BooleanLiteral) {}
 func (cv *compilerVisitor) AcceptCall(tree.Call)                     {}
 
 func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
-	cmp := tree.ComparisonSymbols[c.Op]
+	act, _ := compVals[c.Op]
 	lit, isLit := c.Right.(tree.NumericLiteral)
 	if isLit {
 		c.Left.Accept(cv)
-		cv.c.jumpOnComparison(lit.Value, cmp, "positive", "negative")
+		cv.c.jumpOnComparison(lit.Value, c.Op, act[0], act[1])
 	} else {
 		c.Right.Accept(cv)
 		cv.c.moveAtoX()
