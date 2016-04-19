@@ -36,16 +36,12 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 	lit, isLit := c.Right.(tree.NumericLiteral)
 	if isLit {
 		c.Left.Accept(cv)
-		cv.c.jumpOnComparison(lit.Value, c.Op, act[0], act[1])
+		cv.c.jumpOnKComparison(lit.Value, c.Op, act[0], act[1])
 	} else {
 		c.Right.Accept(cv)
 		cv.c.moveAtoX()
 		c.Left.Accept(cv)
-		switch c.Op {
-		case tree.EQL:
-			cv.c.jumpIfEqualToX("positive", "negative")
-			// TODO: deal with others here
-		}
+		cv.c.jumpOnXComparison(c.Op, act[0], act[1])
 	}
 }
 

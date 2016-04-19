@@ -54,25 +54,33 @@ const syscallNameIndex = 0
 const arg0IndexLowerWord = 0x10
 const arg0IndexUpperWord = 0x14
 
-var ComparisonOps = map[tree.ComparisonType]uint16{
-	tree.EQL:  JEQ_K,
-	tree.NEQL: JEQ_K,
-	tree.GT:   JEG_K,
-	tree.GTE:  JEGE_K,
-	tree.LT:   JEG_K,
-	tree.LTE:  JEGE_K,
-	tree.BIT:  JSET_K,
+var ComparisonOps = map[tree.ComparisonType]map[string]uint16{
+	tree.EQL:  {"K": JEQ_K, "X": JEQ_X},
+	tree.NEQL: {"K": JEQ_K, "X": JEQ_X},
+	tree.GT:   {"K": JEG_K, "X": JEG_X},
+	tree.GTE:  {"K": JEGE_K, "X": JEGE_X},
+	tree.LT:   {"K": JEG_K, "X": JEG_X},
+	tree.LTE:  {"K": JEGE_K, "X": JEGE_X},
+	tree.BIT:  {"K": JSET_K, "X": JSET_X},
 }
 
 const LOAD = BPF_LD | BPF_W | BPF_ABS
 const LOAD_VAL = BPF_LD | BPF_IMM
+
 const JEQ_K = BPF_JMP | BPF_JEQ | BPF_K
-const JEG_K = BPF_JMP | BPF_JGT | BPF_K
-const JEGE_K = BPF_JMP | BPF_JGE | BPF_K
 const JEQ_X = BPF_JMP | BPF_JEQ | BPF_X
+
+const JEG_K = BPF_JMP | BPF_JGT | BPF_K
+const JEG_X = BPF_JMP | BPF_JGT | BPF_X
+
+const JEGE_K = BPF_JMP | BPF_JGE | BPF_K
+const JEGE_X = BPF_JMP | BPF_JGE | BPF_X
+
+const JSET_K = BPF_JMP | BPF_JSET | BPF_K
+const JSET_X = BPF_JMP | BPF_JSET | BPF_X
+
 const RET_K = BPF_RET | BPF_K
 const A_TO_X = BPF_MISC | BPF_TAX
-const JSET_K = BPF_JMP | BPF_JSET | BPF_K
 
 func (c *compiler) op(code uint16, k uint32) uint {
 	ix := uint(len(c.result))
@@ -117,15 +125,16 @@ func (c *compiler) negativeJumpTo(index uint, label string) {
 	}
 }
 
-func (c *compiler) jumpOnComparison(val uint32, cmp tree.ComparisonType, jt, jf string) {
-	jc := ComparisonOps[cmp]
+func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, jt, jf string) {
+	jc := ComparisonOps[cmp]["K"]
 	num := c.op(jc, val)
 	c.positiveJumpTo(num, jt)
 	c.negativeJumpTo(num, jf)
 }
 
-func (c *compiler) jumpIfEqualToX(jt, jf string) {
-	num := c.op(JEQ_X, 0)
+func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, jt, jf string) {
+	jc := ComparisonOps[cmp]["X"]
+	num := c.op(jc, 0)
 	c.positiveJumpTo(num, jt)
 	c.negativeJumpTo(num, jf)
 }
@@ -137,7 +146,7 @@ func (c *compiler) checkCorrectSyscall(name string) {
 	}
 
 	c.loadCurrentSyscall()
-	c.jumpOnComparison(sys, tree.EQL, "positive", "negative")
+	c.jumpOnKComparison(sys, tree.EQL, "positive", "negative")
 }
 
 func (c *compiler) fixupJumpPoints(label string, ix uint) {
