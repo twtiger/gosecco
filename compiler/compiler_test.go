@@ -151,7 +151,7 @@ func (s *CompilerSuite) Test_compliationOfArithmeticOperation(c *C) {
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexUpperWord,
+		K:    ArgumentIndex[0]["upper"],
 	})
 
 	c.Assert(res[6], DeepEquals, unix.SockFilter{
@@ -163,7 +163,7 @@ func (s *CompilerSuite) Test_compliationOfArithmeticOperation(c *C) {
 
 	c.Assert(res[7], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexLowerWord,
+		K:    ArgumentIndex[0]["lower"],
 	})
 
 	c.Assert(res[8], DeepEquals, unix.SockFilter{

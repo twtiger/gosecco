@@ -43,7 +43,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfEqualsComparison(c *C) {
 
 	c.Assert(res[2], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexUpperWord,
+		K:    ArgumentIndex[0]["upper"],
 	})
 
 	c.Assert(res[3], DeepEquals, unix.SockFilter{
@@ -55,7 +55,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfEqualsComparison(c *C) {
 
 	c.Assert(res[4], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexLowerWord,
+		K:    ArgumentIndex[0]["lower"],
 	})
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
@@ -110,7 +110,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfSimpleComparisonWithSecondRu
 
 	c.Assert(res[2], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexUpperWord,
+		K:    ArgumentIndex[0]["upper"],
 	})
 
 	c.Assert(res[3], DeepEquals, unix.SockFilter{
@@ -123,7 +123,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfSimpleComparisonWithSecondRu
 	// Load left hand side of the comparison into A (arg0)
 	c.Assert(res[4], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexLowerWord,
+		K:    ArgumentIndex[0]["lower"],
 	})
 
 	// Compare A against constant K
@@ -190,7 +190,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanComparisonToK(c *
 
 	c.Assert(res[2], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexUpperWord,
+		K:    ArgumentIndex[0]["upper"],
 	})
 
 	c.Assert(res[3], DeepEquals, unix.SockFilter{
@@ -202,7 +202,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanComparisonToK(c *
 
 	c.Assert(res[4], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexLowerWord,
+		K:    ArgumentIndex[0]["lower"],
 	})
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
@@ -249,7 +249,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonAToX(c *C) {
 
 	c.Assert(res[2], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexUpperWord,
+		K:    ArgumentIndex[0]["upper"],
 	})
 
 	c.Assert(res[3], DeepEquals, unix.SockFilter{
@@ -261,7 +261,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonAToX(c *C) {
 
 	c.Assert(res[4], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexLowerWord,
+		K:    ArgumentIndex[0]["lower"],
 	})
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
@@ -317,7 +317,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanComparisonToK(c *C) 
 
 	c.Assert(res[2], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexUpperWord,
+		K:    ArgumentIndex[0]["upper"],
 	})
 
 	c.Assert(res[3], DeepEquals, unix.SockFilter{
@@ -329,7 +329,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanComparisonToK(c *C) 
 
 	c.Assert(res[4], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexLowerWord,
+		K:    ArgumentIndex[0]["lower"],
 	})
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
@@ -456,7 +456,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanAToX(c *C) {
 
 	c.Assert(res[2], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexUpperWord,
+		K:    ArgumentIndex[0]["upper"],
 	})
 
 	c.Assert(res[3], DeepEquals, unix.SockFilter{
@@ -468,7 +468,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanAToX(c *C) {
 
 	c.Assert(res[4], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexLowerWord,
+		K:    ArgumentIndex[0]["lower"],
 	})
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
@@ -595,5 +595,73 @@ func (s *CompilerComparisonSuite) Test_compilationOfNotEqualsAToX(c *C) {
 		Jt:   1,
 		Jf:   0,
 		K:    0,
+	})
+}
+
+func (s *CompilerComparisonSuite) Test_compilationOfComparisonForFirstArgument(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.NEQL, Right: tree.Argument{1}},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+
+	c.Assert(res[0], DeepEquals, unix.SockFilter{
+		Code: BPF_LD | BPF_W | BPF_ABS,
+		K:    syscallNameIndex,
+	})
+
+	c.Assert(res[1], DeepEquals, unix.SockFilter{
+		Code: BPF_JMP | BPF_JEQ | BPF_K,
+		Jt:   0,
+		Jf:   7,
+		K:    syscall.SYS_WRITE,
+	})
+
+	c.Assert(res[2], DeepEquals, unix.SockFilter{
+		Code: BPF_LD | BPF_W | BPF_ABS,
+		K:    ArgumentIndex[1]["upper"],
+	})
+
+	c.Assert(res[3], DeepEquals, unix.SockFilter{
+		Code: BPF_JMP | BPF_JEQ | BPF_K,
+		Jt:   0,
+		Jf:   5,
+		K:    0,
+	})
+
+	c.Assert(res[4], DeepEquals, unix.SockFilter{
+		Code: BPF_LD | BPF_W | BPF_ABS,
+		K:    ArgumentIndex[1]["lower"],
+	})
+
+	c.Assert(res[5], DeepEquals, unix.SockFilter{
+		Code: BPF_MISC | BPF_TAX,
+	})
+
+	c.Assert(res[6], DeepEquals, unix.SockFilter{
+		Code: BPF_LD | BPF_IMM,
+		K:    1,
+	})
+
+	c.Assert(res[7], DeepEquals, unix.SockFilter{
+		Code: BPF_JMP | BPF_JEQ | BPF_X,
+		Jt:   1,
+		Jf:   0,
+		K:    0,
+	})
+
+	c.Assert(res[8], DeepEquals, unix.SockFilter{
+		Code: BPF_RET | BPF_K,
+		K:    SECCOMP_RET_ALLOW,
+	})
+
+	c.Assert(res[9], DeepEquals, unix.SockFilter{
+		Code: BPF_RET | BPF_K,
+		K:    SECCOMP_RET_KILL,
 	})
 }

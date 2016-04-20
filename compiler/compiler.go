@@ -52,8 +52,15 @@ func (c *compiler) compileRule(r tree.Rule) {
 }
 
 const syscallNameIndex = 0
-const arg0IndexLowerWord = 0x10
-const arg0IndexUpperWord = 0x14
+
+var ArgumentIndex = map[int]map[string]uint32{
+	0: {"lower": 0x10, "upper": 0x14},
+	1: {"lower": 0x18, "upper": 0x1c},
+	2: {"lower": 0x20, "upper": 0x24},
+	3: {"lower": 0x28, "upper": 0x2c},
+	4: {"lower": 0x30, "upper": 0x34},
+	5: {"lower": 0x38, "upper": 0x3c},
+}
 
 var ComparisonOps = map[tree.ComparisonType]map[string]uint16{
 	tree.EQL:  {"K": JEQ_K, "X": JEQ_X},
