@@ -36,7 +36,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfEqualsComparison(c *C) {
 
 	c.Assert(res[1], DeepEquals, unix.SockFilter{
 		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   2, // TODO check if this really should be 0
+		Jt:   0,
 		Jf:   3,
 		K:    syscall.SYS_WRITE,
 	})
@@ -91,7 +91,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfSimpleComparisonWithSecondRu
 	// Compare against the syscall for the current rule
 	c.Assert(res[1], DeepEquals, unix.SockFilter{
 		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   4,
+		Jt:   0,
 		Jf:   2,
 		K:    syscall.SYS_WRITE,
 	})
@@ -159,7 +159,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanComparisonToK(c *
 
 	c.Assert(res[1], DeepEquals, unix.SockFilter{
 		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   2,
+		Jt:   0,
 		Jf:   3,
 		K:    syscall.SYS_WRITE,
 	})
@@ -206,7 +206,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonAToX(c *C) {
 
 	c.Assert(res[1], DeepEquals, unix.SockFilter{
 		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   4,
+		Jt:   0,
 		Jf:   5,
 		K:    syscall.SYS_WRITE,
 	})
@@ -262,7 +262,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanComparisonToK(c *C) 
 
 	c.Assert(res[1], DeepEquals, unix.SockFilter{
 		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   2,
+		Jt:   0,
 		Jf:   3,
 		K:    syscall.SYS_WRITE,
 	})
@@ -389,7 +389,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanAToX(c *C) {
 
 	c.Assert(res[1], DeepEquals, unix.SockFilter{
 		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   4,
+		Jt:   0,
 		Jf:   5,
 		K:    syscall.SYS_WRITE,
 	})

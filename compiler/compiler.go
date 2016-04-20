@@ -46,7 +46,8 @@ func (c *compiler) labelHere(label string) {
 
 func (c *compiler) compileRule(r tree.Rule) {
 	c.labelHere("negative")
-	c.checkCorrectSyscall(r.Name)
+	_, isBoolLit := r.Body.(tree.BooleanLiteral)
+	c.checkCorrectSyscall(r.Name, isBoolLit) // set JT flag to final ret_allow only if the rule is only a boolean literal
 	c.compileExpression(r.Body)
 }
 
@@ -125,10 +126,12 @@ func (c *compiler) negativeJumpTo(index uint, label string) {
 	}
 }
 
-func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, jt, jf string) {
+func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, setPosFlags bool, jt, jf string) {
 	jc := ComparisonOps[cmp]["K"]
 	num := c.op(jc, val)
-	c.positiveJumpTo(num, jt)
+	if setPosFlags {
+		c.positiveJumpTo(num, jt)
+	}
 	c.negativeJumpTo(num, jf)
 }
 
@@ -139,14 +142,14 @@ func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, jt, jf string) {
 	c.negativeJumpTo(num, jf)
 }
 
-func (c *compiler) checkCorrectSyscall(name string) {
+func (c *compiler) checkCorrectSyscall(name string, setPosFlags bool) {
 	sys, ok := constants.GetSyscall(name)
 	if !ok {
 		panic("This shouldn't happen - analyzer should have caught it before compiler tries to compile it")
 	}
 
 	c.loadCurrentSyscall()
-	c.jumpOnKComparison(sys, tree.EQL, "positive", "negative")
+	c.jumpOnKComparison(sys, tree.EQL, setPosFlags, "positive", "negative")
 }
 
 func (c *compiler) fixupJumpPoints(label string, ix uint) {
