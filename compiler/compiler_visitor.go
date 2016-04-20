@@ -26,7 +26,12 @@ func (cv *compilerVisitor) AcceptArgument(a tree.Argument) {
 	cv.c.loadAt(arg0IndexLowerWord)
 }
 
-func (cv *compilerVisitor) AcceptArithmetic(tree.Arithmetic)         {}
+func (cv *compilerVisitor) AcceptArithmetic(a tree.Arithmetic) {
+	a.Left.Accept(cv)
+	rightOperand := a.Right.(tree.NumericLiteral)
+	cv.c.performArithmetic(a.Op, rightOperand.Value)
+}
+
 func (cv *compilerVisitor) AcceptBinaryNegation(tree.BinaryNegation) {}
 func (cv *compilerVisitor) AcceptBooleanLiteral(tree.BooleanLiteral) {}
 func (cv *compilerVisitor) AcceptCall(tree.Call)                     {}

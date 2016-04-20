@@ -75,10 +75,13 @@ const JEG_K = BPF_JMP | BPF_JGT | BPF_K
 const JEG_X = BPF_JMP | BPF_JGT | BPF_X
 
 const JEGE_K = BPF_JMP | BPF_JGE | BPF_K
+
 const JEGE_X = BPF_JMP | BPF_JGE | BPF_X
 
 const JSET_K = BPF_JMP | BPF_JSET | BPF_K
 const JSET_X = BPF_JMP | BPF_JSET | BPF_X
+
+const ADD_K = BPF_ALU | BPF_ADD | BPF_K
 
 const RET_K = BPF_RET | BPF_K
 const A_TO_X = BPF_MISC | BPF_TAX
@@ -140,6 +143,10 @@ func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, jt, jf string) {
 	num := c.op(jc, 0)
 	c.positiveJumpTo(num, jt)
 	c.negativeJumpTo(num, jf)
+}
+
+func (c *compiler) performArithmetic(op tree.ArithmeticType, operand uint32) {
+	c.op(ADD_K, operand)
 }
 
 func (c *compiler) checkCorrectSyscall(name string, setPosFlags bool) {

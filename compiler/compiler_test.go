@@ -112,7 +112,6 @@ func (s *CompilerSuite) Test_nextSimplestCompilation(c *C) {
 }
 
 func (s *CompilerSuite) Test_compliationOfArtimeticOperation(c *C) {
-	c.Skip("finish implementation to make this pass")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -131,8 +130,8 @@ func (s *CompilerSuite) Test_compliationOfArtimeticOperation(c *C) {
 
 	c.Assert(res[1], DeepEquals, unix.SockFilter{
 		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   6,
-		Jf:   7,
+		Jt:   0,
+		Jf:   6,
 		K:    syscall.SYS_WRITE,
 	})
 
