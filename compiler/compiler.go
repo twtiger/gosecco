@@ -47,7 +47,7 @@ func (c *compiler) labelHere(label string) {
 func (c *compiler) compileRule(r tree.Rule) {
 	c.labelHere("negative")
 	_, isBoolLit := r.Body.(tree.BooleanLiteral)
-	c.checkCorrectSyscall(r.Name, isBoolLit) // set JT flag to final ret_allow only if the rule is only a boolean literal
+	c.checkCorrectSyscall(r.Name, isBoolLit) // set JT flag to final ret_allow only if the rule is a boolean literal
 	c.compileExpression(r.Body)
 }
 

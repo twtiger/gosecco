@@ -111,7 +111,7 @@ func (s *CompilerSuite) Test_nextSimplestCompilation(c *C) {
 	})
 }
 
-func (s *CompilerSuite) Test_compliationOfArtimeticOperation(c *C) {
+func (s *CompilerSuite) Test_compliationOfArithmeticOperation(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -131,7 +131,7 @@ func (s *CompilerSuite) Test_compliationOfArtimeticOperation(c *C) {
 	c.Assert(res[1], DeepEquals, unix.SockFilter{
 		Code: BPF_JMP | BPF_JEQ | BPF_K,
 		Jt:   0,
-		Jf:   6,
+		Jf:   8,
 		K:    syscall.SYS_WRITE,
 	})
 
@@ -151,22 +151,34 @@ func (s *CompilerSuite) Test_compliationOfArtimeticOperation(c *C) {
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    arg0IndexLowerWord,
+		K:    arg0IndexUpperWord,
 	})
 
 	c.Assert(res[6], DeepEquals, unix.SockFilter{
+		Code: BPF_JMP | BPF_JEQ | BPF_K,
+		Jt:   0,
+		Jf:   3,
+		K:    0,
+	})
+
+	c.Assert(res[7], DeepEquals, unix.SockFilter{
+		Code: BPF_LD | BPF_W | BPF_ABS,
+		K:    arg0IndexLowerWord,
+	})
+
+	c.Assert(res[8], DeepEquals, unix.SockFilter{
 		Code: BPF_JMP | BPF_JEQ | BPF_X,
 		Jt:   0,
 		Jf:   1,
 		K:    0,
 	})
 
-	c.Assert(res[7], DeepEquals, unix.SockFilter{
+	c.Assert(res[9], DeepEquals, unix.SockFilter{
 		Code: BPF_RET | BPF_K,
 		K:    SECCOMP_RET_ALLOW,
 	})
 
-	c.Assert(res[8], DeepEquals, unix.SockFilter{
+	c.Assert(res[10], DeepEquals, unix.SockFilter{
 		Code: BPF_RET | BPF_K,
 		K:    SECCOMP_RET_KILL,
 	})

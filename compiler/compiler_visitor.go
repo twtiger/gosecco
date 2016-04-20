@@ -22,7 +22,8 @@ func (cv *compilerVisitor) AcceptAnd(tree.And) {}
 
 func (cv *compilerVisitor) AcceptArgument(a tree.Argument) {
 	// TODO actually load based on the index.
-	// TODO sort out the messiness of the higher word etc
+	cv.c.loadAt(arg0IndexUpperWord)
+	cv.c.jumpOnKComparison(0, tree.EQL, false, "positive", "negative")
 	cv.c.loadAt(arg0IndexLowerWord)
 }
 
