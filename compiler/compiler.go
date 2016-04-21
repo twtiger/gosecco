@@ -36,7 +36,7 @@ func (c *compiler) compile(rules []tree.Rule) {
 }
 
 func (c *compiler) compileExpression(x tree.Expression) {
-	cv := &compilerVisitor{c}
+	cv := &compilerVisitor{c, true}
 	x.Accept(cv)
 }
 
@@ -137,20 +137,24 @@ func (c *compiler) negativeJumpTo(index uint, label string) {
 	}
 }
 
-func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, setPosFlags bool, jt, jf string) {
+func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, setPosFlags, isTerminal bool, jt, jf string) {
 	jc := ComparisonOps[cmp]["K"]
 	num := c.op(jc, val)
 	if setPosFlags {
 		c.positiveJumpTo(num, jt)
 	}
-	c.negativeJumpTo(num, jf)
+	if isTerminal {
+		c.negativeJumpTo(num, jf)
+	}
 }
 
-func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, jt, jf string) {
+func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, isTerminal bool, jt, jf string) {
 	jc := ComparisonOps[cmp]["X"]
 	num := c.op(jc, 0)
 	c.positiveJumpTo(num, jt)
-	c.negativeJumpTo(num, jf)
+	if isTerminal {
+		c.negativeJumpTo(num, jf)
+	}
 }
 
 func (c *compiler) performArithmetic(op tree.ArithmeticType, operand uint32) {
@@ -169,7 +173,7 @@ func (c *compiler) checkCorrectSyscall(name string, setPosFlags bool) {
 	}
 
 	c.loadCurrentSyscall()
-	c.jumpOnKComparison(sys, tree.EQL, setPosFlags, "positive", "negative")
+	c.jumpOnKComparison(sys, tree.EQL, setPosFlags, true, "positive", "negative")
 }
 
 func (c *compiler) fixupJumpPoints(label string, ix uint) {

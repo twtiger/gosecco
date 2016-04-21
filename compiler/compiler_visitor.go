@@ -5,7 +5,8 @@ import (
 )
 
 type compilerVisitor struct {
-	c *compiler
+	c          *compiler
+	isTerminal bool
 }
 
 var compVals = map[tree.ComparisonType][]string{
@@ -23,7 +24,8 @@ func (cv *compilerVisitor) AcceptAnd(tree.And) {}
 func (cv *compilerVisitor) AcceptArgument(a tree.Argument) {
 	ix := ArgumentIndex[a.Index]
 	cv.c.loadAt(ix["upper"])
-	cv.c.jumpOnKComparison(0, tree.EQL, false, "positive", "negative")
+	// maybe make this its own function
+	cv.c.jumpOnKComparison(0, tree.EQL, false, true, "positive", "negative")
 	cv.c.loadAt(ix["lower"])
 }
 
@@ -42,12 +44,12 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 	lit, isLit := c.Right.(tree.NumericLiteral)
 	if isLit {
 		c.Left.Accept(cv)
-		cv.c.jumpOnKComparison(lit.Value, c.Op, true, act[0], act[1])
+		cv.c.jumpOnKComparison(lit.Value, c.Op, true, cv.isTerminal, act[0], act[1])
 	} else {
 		c.Right.Accept(cv)
 		cv.c.moveAtoX()
 		c.Left.Accept(cv)
-		cv.c.jumpOnXComparison(c.Op, act[0], act[1])
+		cv.c.jumpOnXComparison(c.Op, cv.isTerminal, act[0], act[1])
 	}
 }
 
@@ -58,7 +60,12 @@ func (cv *compilerVisitor) AcceptNumericLiteral(l tree.NumericLiteral) {
 	cv.c.loadLiteral(l.Value)
 }
 
-func (cv *compilerVisitor) AcceptOr(tree.Or)             {}
+func (cv *compilerVisitor) AcceptOr(c tree.Or) {
+	cv.isTerminal = false
+	c.Left.Accept(cv)
+	cv.isTerminal = true
+	c.Right.Accept(cv)
+}
 func (cv *compilerVisitor) AcceptVariable(tree.Variable) {}
 
 // func peepHole(filters []unix.SockFilter) []unix.SockFilter {
