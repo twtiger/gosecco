@@ -151,9 +151,10 @@ func (e *emulator) execLdx(current unix.SockFilter) (uint32, bool) {
 	return 0, false
 }
 
-// These exist from Linux kernel v3.7+
-// Not sure if we should emulate them in the compiler or trying to detect linux version or something
+// BPF_MOD is BPF_MOD - it is supported in Linux from v3.7+, but not in go's syscall...
 const BPF_MOD = 0x90
+
+// BPF_XOR is BPF_XOR - it is supported in Linux from v3.7+, but not in go's syscall...
 const BPF_XOR = 0xa0
 
 func (e *emulator) execAlu(current unix.SockFilter) (uint32, bool) {
