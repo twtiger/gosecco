@@ -6,6 +6,7 @@ import (
 
 	"golang.org/x/sys/unix"
 
+	"github.com/twtiger/gosecco/asm"
 	"github.com/twtiger/gosecco/tree"
 
 	. "gopkg.in/check.v1"
@@ -28,52 +29,16 @@ func (s *CompilerComparisonSuite) Test_compilationOfEqualsComparison(c *C) {
 	}
 
 	res, _ := Compile(p)
-
-	c.Assert(res[0], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    syscallNameIndex,
-	})
-
-	c.Assert(res[1], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   5,
-		K:    syscall.SYS_WRITE,
-	})
-
-	c.Assert(res[2], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["upper"],
-	})
-
-	c.Assert(res[3], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   3,
-		K:    0,
-	})
-
-	c.Assert(res[4], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["lower"],
-	})
-
-	c.Assert(res[5], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   1,
-		K:    42,
-	})
-
-	c.Assert(res[6], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_ALLOW,
-	})
-
-	c.Assert(res[7], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_KILL,
-	})
+	a := asm.Dump(res)
+	c.Assert(a, Equals, ""+
+		"ld_abs	0\n"+ // syscallNameIndex
+		"jeq_k	00	05	1\n"+ // syscall.SYS_WRITE
+		"ld_abs	14\n"+ //argumentindex[0][upper]
+		"jeq_k	00	03	0\n"+
+		"ld_abs	10\n"+ //argumentindex[0][upper]
+		"jeq_k	00	01	2A\n"+
+		"ret_k	7FFF0000\n"+ //SECCOMP_RET_ALLOW
+		"ret_k	0\n") //SECCOMP_RET_KILL
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfSimpleComparisonWithSecondRule(c *C) {
