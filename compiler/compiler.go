@@ -44,7 +44,7 @@ func (c *compiler) compile(rules []tree.Rule) {
 }
 
 func (c *compiler) compileExpression(x tree.Expression) {
-	cv := &compilerVisitor{c, true}
+	cv := &compilerVisitor{c, true, true}
 	x.Accept(cv)
 }
 
@@ -88,6 +88,13 @@ var comparisonOps = map[tree.ComparisonType]kexInstruction{
 	tree.LT:   kexInstruction{k: JEG_K, x: JEG_X},
 	tree.LTE:  kexInstruction{k: JEGE_K, x: JEGE_X},
 	tree.BIT:  kexInstruction{k: JSET_K, x: JSET_X},
+}
+
+var posVals = map[tree.ComparisonType]bool{
+	tree.EQL: true,
+	tree.GT:  true,
+	tree.GTE: true,
+	tree.BIT: true,
 }
 
 const LOAD = BPF_LD | BPF_W | BPF_ABS
@@ -155,23 +162,40 @@ func (c *compiler) negativeJumpTo(index uint, l label) {
 	}
 }
 
-func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, setPosFlags, isTerminal bool, jt, jf label) {
-	jc := comparisonOps[cmp].k
-	num := c.op(jc, val)
-	if setPosFlags {
-		c.positiveJumpTo(num, jt)
-	}
-	if isTerminal {
+func (c *compiler) jumpTo(num uint, terminalJF, terminalJT bool, jt, jf label) {
+	if terminalJF {
 		c.negativeJumpTo(num, jf)
+	}
+	if terminalJT {
+		c.positiveJumpTo(num, jt)
 	}
 }
 
-func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, isTerminal bool, jt, jf label) {
+func (c *compiler) jumpOnComparison(val uint32, cmp tree.ComparisonType) {
+	jc := comparisonOps[cmp].k
+	num := c.op(jc, val)
+	c.jumpTo(num, true, false, positive, negative)
+}
+
+func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, terminalJF, terminalJT bool) {
+	_, isPos := posVals[cmp]
+	jc := comparisonOps[cmp].k
+	num := c.op(jc, val)
+	if isPos {
+		c.jumpTo(num, terminalJF, terminalJT, positive, negative)
+	} else {
+		c.jumpTo(num, terminalJF, terminalJT, negative, positive)
+	}
+}
+
+func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, terminalJF, terminalJT bool) {
+	_, isPos := posVals[cmp]
 	jc := comparisonOps[cmp].x
 	num := c.op(jc, 0)
-	c.positiveJumpTo(num, jt)
-	if isTerminal {
-		c.negativeJumpTo(num, jf)
+	if isPos {
+		c.jumpTo(num, terminalJF, terminalJT, positive, negative)
+	} else {
+		c.jumpTo(num, terminalJF, terminalJT, negative, positive)
 	}
 }
 
@@ -191,7 +215,7 @@ func (c *compiler) checkCorrectSyscall(name string, setPosFlags bool) {
 	}
 
 	c.loadCurrentSyscall()
-	c.jumpOnKComparison(sys, tree.EQL, setPosFlags, true, positive, negative)
+	c.jumpOnKComparison(sys, tree.EQL, true, setPosFlags)
 }
 
 func (c *compiler) fixupJumpPoints(l label, ix uint) {

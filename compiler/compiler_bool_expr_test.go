@@ -4,6 +4,7 @@ import (
 	"syscall"
 	"testing"
 
+	"github.com/twtiger/gosecco/asm"
 	"golang.org/x/sys/unix"
 
 	"github.com/twtiger/gosecco/tree"
@@ -129,4 +130,69 @@ func (s *BoolCompilerSuite) Test_compliationOfOrOperation(c *C) {
 		Code: BPF_RET | BPF_K,
 		K:    SECCOMP_RET_KILL,
 	})
+}
+
+func (s *CompilerComparisonSuite) Test_compilationOfOrExpression(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Or{
+					Left:  tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+					Right: tree.Comparison{Left: tree.Argument{1}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	a := asm.Dump(res)
+	c.Assert(a, Equals, ""+
+		"ld_abs	0\n"+ // syscallNameIndex
+		"jeq_k	00	09	1\n"+ // syscall.SYS_WRITE
+		"ld_abs	14\n"+ //argumentindex[0][upper]
+		"jeq_k	00	07	0\n"+
+		"ld_abs	10\n"+ //argumentindex[0][upper]
+		"jeq_k	04	00	2A\n"+
+		"ld_abs	1C\n"+ //argumentindex[1][upper]
+		"jeq_k	00	03	0\n"+
+		"ld_abs	18\n"+ //argumentindex[1][upper]
+		"jeq_k	00	01	2A\n"+
+		"ret_k	7FFF0000\n"+ //SECCOMP_RET_ALLOW
+		"ret_k	0\n") //SECCOMP_RET_KILL
+}
+
+func (s *CompilerComparisonSuite) Test_compilationOfAndExpression(c *C) {
+	//c.Skip("pending")
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.And{
+					Left:  tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+					Right: tree.Comparison{Left: tree.Argument{1}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	a := asm.Dump(res)
+
+	c.Assert(a, Equals, ""+
+		"ld_abs	0\n"+ // syscallNameIndex
+		"jeq_k	00	09	1\n"+ // syscall.SYS_WRITE
+		"ld_abs	14\n"+ //argumentindex[0][upper]
+		"jeq_k	00	07	0\n"+
+		"ld_abs	10\n"+ //argumentindex[0][upper]
+		"jeq_k	00	05	2A\n"+
+		"ld_abs	1C\n"+ //argumentindex[1][upper]
+		"jeq_k	00	03	0\n"+
+		"ld_abs	18\n"+ //argumentindex[1][upper]
+		"jeq_k	00	01	2A\n"+
+		"ret_k	7FFF0000\n"+ //SECCOMP_RET_ALLOW
+		"ret_k	0\n") //SECCOMP_RET_KILL
+
+	//     "jeq_k\t04\t05\t2A\n"
+
 }
