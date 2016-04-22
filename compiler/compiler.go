@@ -120,11 +120,11 @@ const DIV_K = BPF_ALU | BPF_DIV | BPF_K
 const AND_K = BPF_ALU | BPF_AND | BPF_K
 const OR_K = BPF_ALU | BPF_OR | BPF_K
 
-// const XOR_K = BPF_ALU | BPF_XOR | BPF_K
 const LSH_K = BPF_ALU | BPF_LSH | BPF_K
 const RSH_K = BPF_ALU | BPF_RSH | BPF_K
 
 // const MOD_K = BPF_ALU | BPF_MOD | BPF_K
+// const XOR_K = BPF_ALU | BPF_XOR | BPF_K
 
 const RET_K = BPF_RET | BPF_K
 const A_TO_X = BPF_MISC | BPF_TAX
@@ -219,6 +219,14 @@ func (c *compiler) performArithmetic(op tree.ArithmeticType, operand uint32) {
 		c.op(MUL_K, operand)
 	case tree.DIV:
 		c.op(DIV_K, operand)
+	case tree.BINAND:
+		c.op(AND_K, operand)
+	case tree.BINOR:
+		c.op(OR_K, operand)
+	case tree.LSH:
+		c.op(LSH_K, operand)
+	case tree.RSH:
+		c.op(RSH_K, operand)
 	}
 }
 

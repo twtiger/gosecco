@@ -91,7 +91,7 @@ func (s *CompilerArithmeticSuite) Test_compilationOfAdditionWithK(c *C) {
 	})
 }
 
-func (s *CompilerSuite) Test_compilationOfMultiplicationWithK(c *C) {
+func (s *CompilerArithmeticSuite) Test_compilationOfMultiplicationWithK(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -172,7 +172,7 @@ func (s *CompilerSuite) Test_compilationOfMultiplicationWithK(c *C) {
 	})
 }
 
-func (s *CompilerSuite) Test_compilationOfSubtractionWithK(c *C) {
+func (s *CompilerArithmeticSuite) Test_compilationOfSubtractionWithK(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -207,7 +207,7 @@ func (s *CompilerSuite) Test_compilationOfSubtractionWithK(c *C) {
 		"ret_k\t0\n")
 }
 
-func (s *CompilerSuite) Test_compilationOfDivisionWithK(c *C) {
+func (s *CompilerArithmeticSuite) Test_compilationOfDivisionWithK(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -233,6 +233,146 @@ func (s *CompilerSuite) Test_compilationOfDivisionWithK(c *C) {
 		"jeq_k\t00\t08\t1\n"+
 		"ld_imm\tA\n"+
 		"div_k\t5\n"+
+		"tax\n"+
+		"ld_abs\t14\n"+
+		"jeq_k\t00\t03\t0\n"+
+		"ld_abs\t10\n"+
+		"jeq_x\t00\t01\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
+}
+
+func (s *CompilerArithmeticSuite) Test_compilationOfBinaryAndWithK(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{
+					Left: tree.Argument{0},
+					Op:   tree.EQL,
+					Right: tree.Arithmetic{
+						Op:    tree.BINAND,
+						Left:  tree.NumericLiteral{4},
+						Right: tree.NumericLiteral{2},
+					},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	a := asm.Dump(res)
+
+	c.Assert(a, Equals, ""+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t08\t1\n"+
+		"ld_imm\t4\n"+
+		"and_k\t2\n"+
+		"tax\n"+
+		"ld_abs\t14\n"+
+		"jeq_k\t00\t03\t0\n"+
+		"ld_abs\t10\n"+
+		"jeq_x\t00\t01\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
+}
+
+func (s *CompilerArithmeticSuite) Test_compilationOfBinaryOrWithK(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{
+					Left: tree.Argument{0},
+					Op:   tree.EQL,
+					Right: tree.Arithmetic{
+						Op:    tree.BINOR,
+						Left:  tree.NumericLiteral{4},
+						Right: tree.NumericLiteral{2},
+					},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	a := asm.Dump(res)
+
+	c.Assert(a, Equals, ""+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t08\t1\n"+
+		"ld_imm\t4\n"+
+		"or_k\t2\n"+
+		"tax\n"+
+		"ld_abs\t14\n"+
+		"jeq_k\t00\t03\t0\n"+
+		"ld_abs\t10\n"+
+		"jeq_x\t00\t01\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
+}
+
+func (s *CompilerArithmeticSuite) Test_compilationOfBitwiseLeftShiftWithK(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{
+					Left: tree.Argument{0},
+					Op:   tree.EQL,
+					Right: tree.Arithmetic{
+						Op:    tree.LSH,
+						Left:  tree.NumericLiteral{4},
+						Right: tree.NumericLiteral{2},
+					},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	a := asm.Dump(res)
+
+	c.Assert(a, Equals, ""+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t08\t1\n"+
+		"ld_imm\t4\n"+
+		"lsh_k\t2\n"+
+		"tax\n"+
+		"ld_abs\t14\n"+
+		"jeq_k\t00\t03\t0\n"+
+		"ld_abs\t10\n"+
+		"jeq_x\t00\t01\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
+}
+
+func (s *CompilerArithmeticSuite) Test_compilationOfBitwiseRightShiftWithK(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{
+					Left: tree.Argument{0},
+					Op:   tree.EQL,
+					Right: tree.Arithmetic{
+						Op:    tree.RSH,
+						Left:  tree.NumericLiteral{4},
+						Right: tree.NumericLiteral{2},
+					},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	a := asm.Dump(res)
+
+	c.Assert(a, Equals, ""+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t08\t1\n"+
+		"ld_imm\t4\n"+
+		"rsh_k\t2\n"+
 		"tax\n"+
 		"ld_abs\t14\n"+
 		"jeq_k\t00\t03\t0\n"+
