@@ -1,47 +1,12 @@
 package parser2
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/twtiger/gosecco/tree"
 )
-
-type parseContext struct {
-	index  int
-	tokens []tokenData
-	atEnd  bool
-}
-
-// ARITH things to support:
-// - Parenthesis
-// - Binary and (&)
-// - Binary or (|)
-// - Binary xor (^)
-// - Binary negation (~)
-// - Left shift (<<)
-// - Right shift (>>)
-// - Modulo (%)
-
-// BOOLEAN things to support:
-// - Parenthesis
-// - Boolean OR (||)
-// - Boolean AND(&&)
-// - Boolean negation (!)
-// - Comparison operators
-//   - Equal (==)
-//   - Not equal (!=)
-//   - Greater than (>)
-//   - Greater or equal to (>=)
-//   - Less than (<)
-//   - Less than or equal to (<=)
-//   - Bits set (this operator will mask the left hand side with the right hand, and return true if the result has any bits set) (&)
-// - Inclusion:
-//   in(arg0, 1,2,3,4)
-//   notIn(arg0, 1, 2, 3, 4)
-
-// OTHER things to support:
-// - Variables
-// - Calls
 
 // TODO: none of these check errors or whatever
 
@@ -52,33 +17,10 @@ func parseExpression(expr string) tree.Expression {
 		return nil
 	}
 	ctx := parseContext{0, tokens, false}
-	expression := ctx.expression()
+	expression := ctx.logicalORExpression()
 	ctx.end()
 
 	return expression
-}
-
-func (ctx *parseContext) next() token {
-	if ctx.atEnd {
-		return ILLEGAL
-	}
-	return ctx.tokens[ctx.index].t
-}
-
-func (ctx *parseContext) advance() {
-	ctx.index++
-	if ctx.index >= len(ctx.tokens) {
-		ctx.atEnd = true
-	}
-}
-
-func (ctx *parseContext) consume() (token, []byte) {
-	if ctx.atEnd {
-		return ILLEGAL, nil
-	}
-	res := ctx.tokens[ctx.index]
-	ctx.advance()
-	return res.t, res.td
 }
 
 func (ctx *parseContext) end() {
@@ -87,39 +29,200 @@ func (ctx *parseContext) end() {
 	}
 }
 
-func (ctx *parseContext) expression() tree.Expression {
-	term := ctx.term()
-	if ctx.next() == ADD || ctx.next() == SUB {
-		op, _ := ctx.consume()
-		term2 := ctx.term()
-		opx := tree.PLUS
-		if op == SUB {
-			opx = tree.MINUS
-		}
-		return tree.Arithmetic{Op: opx, Left: term, Right: term2}
+func (ctx *parseContext) logicalORExpression() tree.Expression {
+	left := ctx.logicalANDExpression()
+	if ctx.next() == LOR {
+		ctx.consume()
+		right := ctx.logicalORExpression()
+		return tree.Or{Left: left, Right: right}
 	}
-	return term
+	return left
 }
 
-func (ctx *parseContext) term() tree.Expression {
-	factor := ctx.factor()
+func (ctx *parseContext) logicalANDExpression() tree.Expression {
+	left := ctx.inclusiveORExpression()
+	if ctx.next() == LAND {
+		ctx.consume()
+		right := ctx.logicalANDExpression()
+		return tree.And{Left: left, Right: right}
+	}
+	return left
+}
+
+func (ctx *parseContext) inclusiveORExpression() tree.Expression {
+	left := ctx.exclusiveORExpression()
+	if ctx.next() == OR {
+		ctx.consume()
+		right := ctx.inclusiveORExpression()
+		return tree.Arithmetic{Op: tree.BINOR, Left: left, Right: right}
+	}
+	return left
+}
+
+func (ctx *parseContext) exclusiveORExpression() tree.Expression {
+	left := ctx.andExpression()
+	if ctx.next() == XOR {
+		ctx.consume()
+		right := ctx.exclusiveORExpression()
+		return tree.Arithmetic{Op: tree.BINXOR, Left: left, Right: right}
+	}
+	return left
+}
+
+func (ctx *parseContext) andExpression() tree.Expression {
+	left := ctx.equalityExpression()
+	if ctx.next() == AND {
+		ctx.consume()
+		right := ctx.andExpression()
+		return tree.Arithmetic{Op: tree.BINAND, Left: left, Right: right}
+	}
+	return left
+}
+
+func (ctx *parseContext) equalityExpression() tree.Expression {
+	left := ctx.relationalExpression()
 	switch ctx.next() {
-	case MUL, DIV:
+	case EQL, NEQ:
 		op, _ := ctx.consume()
-		factor2 := ctx.factor()
-		opx := tree.MULT
-		if op == DIV {
-			opx = tree.DIV
-		}
-		return tree.Arithmetic{Op: opx, Left: factor, Right: factor2}
+		right := ctx.equalityExpression()
+		return tree.Comparison{Op: comparisonOperator[op], Left: left, Right: right}
 	}
-	return factor
+	return left
 }
 
-func (ctx *parseContext) factor() tree.Expression {
-	// TODO: here we can also have parenthesis and recursive stuff, arguments and other things
-	_, data := ctx.consume()
-	// TODO: check token type is actually integer here of course
-	val, _ := strconv.ParseUint(string(data), 0, 32)
-	return tree.NumericLiteral{uint32(val)}
+func (ctx *parseContext) relationalExpression() tree.Expression {
+	left := ctx.shiftExpression()
+	switch ctx.next() {
+	case LT, GT, LTE, GTE:
+		op, _ := ctx.consume()
+		right := ctx.relationalExpression()
+		return tree.Comparison{Op: comparisonOperator[op], Left: left, Right: right}
+	}
+	return left
+}
+
+func (ctx *parseContext) shiftExpression() tree.Expression {
+	left := ctx.additiveExpression()
+	switch ctx.next() {
+	case LSH, RSH:
+		op, _ := ctx.consume()
+		right := ctx.shiftExpression()
+		return tree.Arithmetic{Op: shiftOperator[op], Left: left, Right: right}
+	}
+
+	return left
+}
+
+func (ctx *parseContext) additiveExpression() tree.Expression {
+	left := ctx.multiplicativeExpression()
+	switch ctx.next() {
+	case ADD, SUB:
+		op, _ := ctx.consume()
+		right := ctx.additiveExpression()
+		return tree.Arithmetic{Op: addOperator[op], Left: left, Right: right}
+	}
+	return left
+}
+
+func (ctx *parseContext) multiplicativeExpression() tree.Expression {
+	left := ctx.unaryExpression()
+	switch ctx.next() {
+	case MUL, DIV, MOD:
+		op, _ := ctx.consume()
+		right := ctx.multiplicativeExpression()
+		return tree.Arithmetic{Op: multOperator[op], Left: left, Right: right}
+	}
+	return left
+}
+
+func (ctx *parseContext) unaryExpression() tree.Expression {
+	switch ctx.next() {
+	case INV:
+		ctx.consume()
+		left := ctx.primary()
+		return tree.BinaryNegation{left}
+	case NOT:
+		ctx.consume()
+		left := ctx.primary()
+		return tree.Negation{left}
+	}
+	return ctx.primary()
+}
+
+func (ctx *parseContext) collectArgs() []tree.Any {
+	args := []tree.Any{}
+	ctx.consume()
+	for ctx.next() != RPAREN {
+		args = append(args, ctx.logicalORExpression())
+		switch ctx.next() {
+		case RPAREN:
+		case COMMA:
+			ctx.consume()
+		default:
+			//TODO: error here
+		}
+	}
+	ctx.consume()
+	return args
+}
+
+func (ctx *parseContext) collectNumerics() []tree.Numeric {
+	args := []tree.Numeric{}
+	ctx.consume()
+	for ctx.next() != RPAREN {
+		args = append(args, ctx.logicalORExpression())
+		switch ctx.next() {
+		case RPAREN:
+		case COMMA:
+			ctx.consume()
+		default:
+			//TODO: error here
+		}
+	}
+	ctx.consume()
+	return args
+}
+
+func (ctx *parseContext) primary() tree.Expression {
+	switch ctx.next() {
+	case LPAREN:
+		ctx.consume()
+		val := ctx.logicalORExpression()
+		op, _ := ctx.consume()
+		if op != RPAREN {
+			// TODO: raise error here
+		}
+		return val
+	case ARG:
+		_, data := ctx.consume()
+		val, _ := strconv.Atoi(strings.TrimPrefix(string(data), "arg"))
+		// This should never error out
+		return tree.Argument{val}
+	case IDENT:
+		_, data := ctx.consume()
+		if ctx.next() == LPAREN {
+			return tree.Call{Name: string(data), Args: ctx.collectArgs()}
+		}
+		return tree.Variable{string(data)}
+	case IN, NOTIN:
+		op, _ := ctx.consume()
+		if ctx.next() == LPAREN {
+			all := ctx.collectNumerics()
+			return tree.Inclusion{Positive: op == IN, Left: all[0], Rights: all[1:]}
+		}
+		// ERROR here
+	case INT:
+		_, data := ctx.consume()
+		val, _ := strconv.ParseUint(string(data), 0, 32)
+		return tree.NumericLiteral{uint32(val)}
+	case TRUE:
+		ctx.consume()
+		return tree.BooleanLiteral{true}
+	case FALSE:
+		ctx.consume()
+		return tree.BooleanLiteral{false}
+	}
+
+	// ERRROR here
+	panic(fmt.Sprintf("Unexpected token: %s", tokens[ctx.next()]))
 }
