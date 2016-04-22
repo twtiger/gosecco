@@ -12,6 +12,37 @@ type parseContext struct {
 	atEnd  bool
 }
 
+// ARITH things to support:
+// - Parenthesis
+// - Binary and (&)
+// - Binary or (|)
+// - Binary xor (^)
+// - Binary negation (~)
+// - Left shift (<<)
+// - Right shift (>>)
+// - Modulo (%)
+
+// BOOLEAN things to support:
+// - Parenthesis
+// - Boolean OR (||)
+// - Boolean AND(&&)
+// - Boolean negation (!)
+// - Comparison operators
+//   - Equal (==)
+//   - Not equal (!=)
+//   - Greater than (>)
+//   - Greater or equal to (>=)
+//   - Less than (<)
+//   - Less than or equal to (<=)
+//   - Bits set (this operator will mask the left hand side with the right hand, and return true if the result has any bits set) (&)
+// - Inclusion:
+//   in(arg0, 1,2,3,4)
+//   notIn(arg0, 1, 2, 3, 4)
+
+// OTHER things to support:
+// - Variables
+// - Calls
+
 // TODO: none of these check errors or whatever
 
 func parseExpression(expr string) tree.Expression {

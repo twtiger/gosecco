@@ -6,7 +6,7 @@ Each line is its own unit of parsing - there exists no way of extending expressi
 
 Every line can be one of several types - specifically, they can be assignments, rules or comments.
 
-In general, each line will be parsed and understood in the context of only the previous lines. That means that variables and macros have to be defined before used. This also stops recursive actions from being possible.    
+In general, each line will be parsed and understood in the context of only the previous lines. That means that variables and macros have to be defined before used. This also stops recursive actions from being possible.
 
 ## Valid names
 
