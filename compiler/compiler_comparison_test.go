@@ -75,7 +75,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfSimpleComparisonWithSecondRu
 
 	c.Assert(res[2], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["upper"],
+		K:    argument[0].upper,
 	})
 
 	c.Assert(res[3], DeepEquals, unix.SockFilter{
@@ -88,7 +88,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfSimpleComparisonWithSecondRu
 	// Load left hand side of the comparison into A (arg0)
 	c.Assert(res[4], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["lower"],
+		K:    argument[0].lower,
 	})
 
 	// Compare A against constant K
@@ -155,7 +155,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanComparisonToK(c *
 
 	c.Assert(res[2], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["upper"],
+		K:    argument[0].upper,
 	})
 
 	c.Assert(res[3], DeepEquals, unix.SockFilter{
@@ -167,7 +167,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanComparisonToK(c *
 
 	c.Assert(res[4], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["lower"],
+		K:    argument[0].lower,
 	})
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
@@ -214,7 +214,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonAToX(c *C) {
 
 	c.Assert(res[2], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["upper"],
+		K:    argument[0].upper,
 	})
 
 	c.Assert(res[3], DeepEquals, unix.SockFilter{
@@ -226,7 +226,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonAToX(c *C) {
 
 	c.Assert(res[4], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["lower"],
+		K:    argument[0].lower,
 	})
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
@@ -282,7 +282,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanComparisonToK(c *C) 
 
 	c.Assert(res[2], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["upper"],
+		K:    argument[0].upper,
 	})
 
 	c.Assert(res[3], DeepEquals, unix.SockFilter{
@@ -294,7 +294,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanComparisonToK(c *C) 
 
 	c.Assert(res[4], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["lower"],
+		K:    argument[0].lower,
 	})
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
@@ -421,7 +421,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanAToX(c *C) {
 
 	c.Assert(res[2], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["upper"],
+		K:    argument[0].upper,
 	})
 
 	c.Assert(res[3], DeepEquals, unix.SockFilter{
@@ -433,7 +433,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanAToX(c *C) {
 
 	c.Assert(res[4], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["lower"],
+		K:    argument[0].lower,
 	})
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
@@ -589,7 +589,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonForFirstArgument(c
 
 	c.Assert(res[2], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[1]["upper"],
+		K:    argument[1].upper,
 	})
 
 	c.Assert(res[3], DeepEquals, unix.SockFilter{
@@ -601,7 +601,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonForFirstArgument(c
 
 	c.Assert(res[4], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[1]["lower"],
+		K:    argument[1].lower,
 	})
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{

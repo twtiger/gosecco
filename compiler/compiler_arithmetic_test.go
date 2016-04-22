@@ -57,7 +57,7 @@ func (s *CompilerArithmeticSuite) Test_compliationOfAdditionWithK(c *C) {
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["upper"],
+		K:    argument[0].upper,
 	})
 
 	c.Assert(res[6], DeepEquals, unix.SockFilter{
@@ -69,7 +69,7 @@ func (s *CompilerArithmeticSuite) Test_compliationOfAdditionWithK(c *C) {
 
 	c.Assert(res[7], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["lower"],
+		K:    argument[0].lower,
 	})
 
 	c.Assert(res[8], DeepEquals, unix.SockFilter{
@@ -138,7 +138,7 @@ func (s *CompilerSuite) Test_compliationOfMultiplicationWithK(c *C) {
 
 	c.Assert(res[5], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["upper"],
+		K:    argument[0].upper,
 	})
 
 	c.Assert(res[6], DeepEquals, unix.SockFilter{
@@ -150,7 +150,7 @@ func (s *CompilerSuite) Test_compliationOfMultiplicationWithK(c *C) {
 
 	c.Assert(res[7], DeepEquals, unix.SockFilter{
 		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    ArgumentIndex[0]["lower"],
+		K:    argument[0].lower,
 	})
 
 	c.Assert(res[8], DeepEquals, unix.SockFilter{

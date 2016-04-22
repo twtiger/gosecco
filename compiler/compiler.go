@@ -53,13 +53,23 @@ func (c *compiler) compileRule(r tree.Rule) {
 
 const syscallNameIndex = 0
 
-var ArgumentIndex = map[int]map[string]uint32{
-	0: {"lower": 0x10, "upper": 0x14},
-	1: {"lower": 0x18, "upper": 0x1c},
-	2: {"lower": 0x20, "upper": 0x24},
-	3: {"lower": 0x28, "upper": 0x2c},
-	4: {"lower": 0x30, "upper": 0x34},
-	5: {"lower": 0x38, "upper": 0x3c},
+type argumentPosition struct {
+	lower uint32
+	upper uint32
+}
+
+var argument = []argumentPosition{
+	argumentPosition{lower: 0x10, upper: 0x14},
+	argumentPosition{lower: 0x18, upper: 0x1c},
+	argumentPosition{lower: 0x20, upper: 0x24},
+	argumentPosition{lower: 0x28, upper: 0x2c},
+	argumentPosition{lower: 0x30, upper: 0x34},
+	argumentPosition{lower: 0x38, upper: 0x3c},
+}
+
+type kexInstruction struct {
+	k uint16
+	x uint16
 }
 
 var ComparisonOps = map[tree.ComparisonType]map[string]uint16{

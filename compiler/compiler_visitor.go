@@ -22,11 +22,11 @@ var compVals = map[tree.ComparisonType][]string{
 func (cv *compilerVisitor) AcceptAnd(tree.And) {}
 
 func (cv *compilerVisitor) AcceptArgument(a tree.Argument) {
-	ix := ArgumentIndex[a.Index]
-	cv.c.loadAt(ix["upper"])
+	ix := argument[a.Index]
+	cv.c.loadAt(ix.upper)
 	// maybe make this its own function
 	cv.c.jumpOnKComparison(0, tree.EQL, false, true, "positive", "negative")
-	cv.c.loadAt(ix["lower"])
+	cv.c.loadAt(ix.lower)
 }
 
 func (cv *compilerVisitor) AcceptArithmetic(a tree.Arithmetic) {
