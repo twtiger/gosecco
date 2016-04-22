@@ -5,8 +5,8 @@ package parser2
 
     BIN_DIGIT = [0-1] ;
     OCT_DIGIT = [0-7] ;
-    
-    INTBIN = "0b"i BIN_DIGIT+ ; 
+
+    INTBIN = "0b"i BIN_DIGIT+ ;
     INTHEX = "0x"i xdigit+ ;
     INTOCT = "0" OCT_DIGIT+ ;
     INTDEC = ( "0" | ( [1-9] digit* ) ) ;
@@ -18,7 +18,7 @@ package parser2
     ARG = "arg" [0-5] ;
 
     IDENT = [_a-zA-Z] IDENT_CHAR* ;
-    
+
     main := |*
       ARG     => {f(ARG,   data[ts:te])};
 
@@ -27,7 +27,7 @@ package parser2
 
       "true"i  => {f(TRUE, nil)};
       "false"i => {f(FALSE, nil)};
-      
+
       IDENT   => {f(IDENT, data[ts:te])};
 
       INTHEX  => {f(INT,   data[ts:te])};
@@ -67,12 +67,14 @@ package parser2
       "," => {f(COMMA, nil)};
 
       SPACES+;
+
+      any => {return false};
     *|;
 }%%
 
 %% write data;
 
-func parse(data []byte, f func(token, []byte)) {
+func tokenizeRaw(data []byte, f func(token, []byte)) bool {
      var cs, act int
      p, pe := 0, len(data)
      ts, te := 0, 0
@@ -80,4 +82,6 @@ func parse(data []byte, f func(token, []byte)) {
 
      %% write init;
      %% write exec;
+
+     return true
 }

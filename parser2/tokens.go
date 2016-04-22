@@ -2,6 +2,7 @@ package parser2
 
 type token int
 
+// These define all legal token types
 const (
 	ILLEGAL token = iota
 
