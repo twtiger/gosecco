@@ -6,6 +6,7 @@ import (
 
 	"golang.org/x/sys/unix"
 
+	"github.com/twtiger/gosecco/asm"
 	"github.com/twtiger/gosecco/tree"
 
 	. "gopkg.in/check.v1"
@@ -169,4 +170,74 @@ func (s *CompilerSuite) Test_compliationOfMultiplicationWithK(c *C) {
 		Code: BPF_RET | BPF_K,
 		K:    SECCOMP_RET_KILL,
 	})
+}
+
+func (s *CompilerSuite) Test_compliationOfSubtractionWithK(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{
+					Left: tree.Argument{0},
+					Op:   tree.EQL,
+					Right: tree.Arithmetic{
+						Op:    tree.MINUS,
+						Left:  tree.NumericLiteral{3},
+						Right: tree.NumericLiteral{8},
+					},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	a := asm.Dump(res)
+
+	c.Assert(a, Equals, ""+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t08\t1\n"+
+		"ld_imm\t3\n"+
+		"sub_k\t8\n"+
+		"tax\n"+
+		"ld_abs\t14\n"+
+		"jeq_k\t00\t03\t0\n"+
+		"ld_abs\t10\n"+
+		"jeq_x\t00\t01\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
+}
+
+func (s *CompilerSuite) Test_compliationOfDivisionWithK(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{
+					Left: tree.Argument{0},
+					Op:   tree.EQL,
+					Right: tree.Arithmetic{
+						Op:    tree.DIV,
+						Left:  tree.NumericLiteral{10},
+						Right: tree.NumericLiteral{5},
+					},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	a := asm.Dump(res)
+
+	c.Assert(a, Equals, ""+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t08\t1\n"+
+		"ld_imm\tA\n"+
+		"div_k\t5\n"+
+		"tax\n"+
+		"ld_abs\t14\n"+
+		"jeq_k\t00\t03\t0\n"+
+		"ld_abs\t10\n"+
+		"jeq_x\t00\t01\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
 }
