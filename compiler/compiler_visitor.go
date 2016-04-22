@@ -9,14 +9,14 @@ type compilerVisitor struct {
 	isTerminal bool
 }
 
-var compVals = map[tree.ComparisonType][]string{
-	tree.EQL:  {"positive", "negative"},
-	tree.GT:   {"positive", "negative"},
-	tree.GTE:  {"positive", "negative"},
-	tree.BIT:  {"positive", "negative"},
-	tree.NEQL: {"negative", "positive"},
-	tree.LT:   {"negative", "positive"},
-	tree.LTE:  {"negative", "positive"},
+var compVals = map[tree.ComparisonType][]label{
+	tree.EQL:  {positive, negative},
+	tree.GT:   {positive, negative},
+	tree.GTE:  {positive, negative},
+	tree.BIT:  {positive, negative},
+	tree.NEQL: {negative, positive},
+	tree.LT:   {negative, positive},
+	tree.LTE:  {negative, positive},
 }
 
 func (cv *compilerVisitor) AcceptAnd(tree.And) {}
@@ -25,7 +25,7 @@ func (cv *compilerVisitor) AcceptArgument(a tree.Argument) {
 	ix := argument[a.Index]
 	cv.c.loadAt(ix.upper)
 	// maybe make this its own function
-	cv.c.jumpOnKComparison(0, tree.EQL, false, true, "positive", "negative")
+	cv.c.jumpOnKComparison(0, tree.EQL, false, true, positive, negative)
 	cv.c.loadAt(ix.lower)
 }
 

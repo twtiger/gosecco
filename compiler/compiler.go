@@ -6,11 +6,19 @@ import (
 	"golang.org/x/sys/unix"
 )
 
+type label string
+
+const (
+	negative label = "negative"
+	positive       = "positive"
+	noLabel        = ""
+)
+
 func newCompiler() *compiler {
 	return &compiler{
 		currentlyLoaded: -1,
-		positiveLabels:  make(map[string][]uint),
-		negativeLabels:  make(map[string][]uint),
+		positiveLabels:  make(map[label][]uint),
+		negativeLabels:  make(map[label][]uint),
 	}
 }
 
@@ -23,16 +31,16 @@ func Compile(policy tree.Policy) ([]unix.SockFilter, error) {
 type compiler struct {
 	result          []unix.SockFilter
 	currentlyLoaded int
-	positiveLabels  map[string][]uint
-	negativeLabels  map[string][]uint
+	positiveLabels  map[label][]uint
+	negativeLabels  map[label][]uint
 }
 
 func (c *compiler) compile(rules []tree.Rule) {
 	for _, r := range rules {
 		c.compileRule(r)
 	}
-	c.positiveAction("")
-	c.negativeAction("")
+	c.positiveAction(noLabel)
+	c.negativeAction(noLabel)
 }
 
 func (c *compiler) compileExpression(x tree.Expression) {
@@ -40,12 +48,12 @@ func (c *compiler) compileExpression(x tree.Expression) {
 	x.Accept(cv)
 }
 
-func (c *compiler) labelHere(label string) {
-	c.fixupJumpPoints(label, uint(len(c.result)))
+func (c *compiler) labelHere(l label) {
+	c.fixupJumpPoints(l, uint(len(c.result)))
 }
 
 func (c *compiler) compileRule(r tree.Rule) {
-	c.labelHere("negative")
+	c.labelHere(negative)
 	_, isBoolLit := r.Body.(tree.BooleanLiteral)
 	c.checkCorrectSyscall(r.Name, isBoolLit) // set JT flag to final ret_allow only if the rule is a boolean literal
 	c.compileExpression(r.Body)
@@ -135,19 +143,19 @@ func (c *compiler) loadCurrentSyscall() {
 	c.loadAt(syscallNameIndex)
 }
 
-func (c *compiler) positiveJumpTo(index uint, label string) {
-	if label != "" {
-		c.positiveLabels[label] = append(c.positiveLabels[label], index)
+func (c *compiler) positiveJumpTo(index uint, l label) {
+	if l != noLabel {
+		c.positiveLabels[l] = append(c.positiveLabels[l], index)
 	}
 }
 
-func (c *compiler) negativeJumpTo(index uint, label string) {
-	if label != "" {
-		c.negativeLabels[label] = append(c.negativeLabels[label], index)
+func (c *compiler) negativeJumpTo(index uint, l label) {
+	if l != noLabel {
+		c.negativeLabels[l] = append(c.negativeLabels[l], index)
 	}
 }
 
-func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, setPosFlags, isTerminal bool, jt, jf string) {
+func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, setPosFlags, isTerminal bool, jt, jf label) {
 	jc := comparisonOps[cmp].k
 	num := c.op(jc, val)
 	if setPosFlags {
@@ -158,7 +166,7 @@ func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, setPos
 	}
 }
 
-func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, isTerminal bool, jt, jf string) {
+func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, isTerminal bool, jt, jf label) {
 	jc := comparisonOps[cmp].x
 	num := c.op(jc, 0)
 	c.positiveJumpTo(num, jt)
@@ -183,29 +191,29 @@ func (c *compiler) checkCorrectSyscall(name string, setPosFlags bool) {
 	}
 
 	c.loadCurrentSyscall()
-	c.jumpOnKComparison(sys, tree.EQL, setPosFlags, true, "positive", "negative")
+	c.jumpOnKComparison(sys, tree.EQL, setPosFlags, true, positive, negative)
 }
 
-func (c *compiler) fixupJumpPoints(label string, ix uint) {
-	for _, origin := range c.positiveLabels[label] {
+func (c *compiler) fixupJumpPoints(l label, ix uint) {
+	for _, origin := range c.positiveLabels[l] {
 		// TODO: check that these jumps aren't to large - in that case we need to insert a JUMP_K instruction
 		c.result[origin].Jt = uint8(ix-origin) - 1
 	}
-	delete(c.positiveLabels, label)
+	delete(c.positiveLabels, l)
 
-	for _, origin := range c.negativeLabels[label] {
+	for _, origin := range c.negativeLabels[l] {
 		// TODO: check that these jumps aren't to large - in that case we need to insert a JUMP_K instruction
 		c.result[origin].Jf = uint8(ix-origin) - 1
 	}
-	delete(c.negativeLabels, label)
+	delete(c.negativeLabels, l)
 }
 
 func (c *compiler) positiveAction(name string) {
-	c.labelHere("positive")
+	c.labelHere(positive)
 	c.op(RET_K, SECCOMP_RET_ALLOW)
 }
 
 func (c *compiler) negativeAction(name string) {
-	c.labelHere("negative")
+	c.labelHere(negative)
 	c.op(RET_K, SECCOMP_RET_KILL)
 }
