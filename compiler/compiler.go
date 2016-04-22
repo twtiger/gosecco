@@ -72,14 +72,14 @@ type kexInstruction struct {
 	x uint16
 }
 
-var ComparisonOps = map[tree.ComparisonType]map[string]uint16{
-	tree.EQL:  {"K": JEQ_K, "X": JEQ_X},
-	tree.NEQL: {"K": JEQ_K, "X": JEQ_X},
-	tree.GT:   {"K": JEG_K, "X": JEG_X},
-	tree.GTE:  {"K": JEGE_K, "X": JEGE_X},
-	tree.LT:   {"K": JEG_K, "X": JEG_X},
-	tree.LTE:  {"K": JEGE_K, "X": JEGE_X},
-	tree.BIT:  {"K": JSET_K, "X": JSET_X},
+var comparisonOps = map[tree.ComparisonType]kexInstruction{
+	tree.EQL:  kexInstruction{k: JEQ_K, x: JEQ_X},
+	tree.NEQL: kexInstruction{k: JEQ_K, x: JEQ_X},
+	tree.GT:   kexInstruction{k: JEG_K, x: JEG_X},
+	tree.GTE:  kexInstruction{k: JEGE_K, x: JEGE_X},
+	tree.LT:   kexInstruction{k: JEG_K, x: JEG_X},
+	tree.LTE:  kexInstruction{k: JEGE_K, x: JEGE_X},
+	tree.BIT:  kexInstruction{k: JSET_K, x: JSET_X},
 }
 
 const LOAD = BPF_LD | BPF_W | BPF_ABS
@@ -148,7 +148,7 @@ func (c *compiler) negativeJumpTo(index uint, label string) {
 }
 
 func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, setPosFlags, isTerminal bool, jt, jf string) {
-	jc := ComparisonOps[cmp]["K"]
+	jc := comparisonOps[cmp].k
 	num := c.op(jc, val)
 	if setPosFlags {
 		c.positiveJumpTo(num, jt)
@@ -159,7 +159,7 @@ func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, setPos
 }
 
 func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, isTerminal bool, jt, jf string) {
-	jc := ComparisonOps[cmp]["X"]
+	jc := comparisonOps[cmp].x
 	num := c.op(jc, 0)
 	c.positiveJumpTo(num, jt)
 	if isTerminal {
