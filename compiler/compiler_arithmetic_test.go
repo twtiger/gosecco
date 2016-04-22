@@ -18,7 +18,7 @@ type CompilerArithmeticSuite struct{}
 
 var _ = Suite(&CompilerArithmeticSuite{})
 
-func (s *CompilerArithmeticSuite) Test_compliationOfAdditionWithK(c *C) {
+func (s *CompilerArithmeticSuite) Test_compilationOfAdditionWithK(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -91,7 +91,7 @@ func (s *CompilerArithmeticSuite) Test_compliationOfAdditionWithK(c *C) {
 	})
 }
 
-func (s *CompilerSuite) Test_compliationOfMultiplicationWithK(c *C) {
+func (s *CompilerSuite) Test_compilationOfMultiplicationWithK(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -172,7 +172,7 @@ func (s *CompilerSuite) Test_compliationOfMultiplicationWithK(c *C) {
 	})
 }
 
-func (s *CompilerSuite) Test_compliationOfSubtractionWithK(c *C) {
+func (s *CompilerSuite) Test_compilationOfSubtractionWithK(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -207,7 +207,7 @@ func (s *CompilerSuite) Test_compliationOfSubtractionWithK(c *C) {
 		"ret_k\t0\n")
 }
 
-func (s *CompilerSuite) Test_compliationOfDivisionWithK(c *C) {
+func (s *CompilerSuite) Test_compilationOfDivisionWithK(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
