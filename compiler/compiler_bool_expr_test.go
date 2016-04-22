@@ -163,7 +163,6 @@ func (s *CompilerComparisonSuite) Test_compilationOfOrExpression(c *C) {
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfAndExpression(c *C) {
-	//c.Skip("pending")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
