@@ -43,11 +43,22 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 
 func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 	// should also work for arguments in the inclusion list, and a numeric on the left side
+	if c.Positive == false {
+		cv.negated = true
+	}
 	c.Left.Accept(cv)
-	cv.terminalJF = !cv.terminalJF
+	if c.Positive {
+		cv.terminalJF = !cv.terminalJF
+	} else {
+		cv.terminalJT = !cv.terminalJT
+	}
 	for i, e := range c.Rights {
 		if i == len(c.Rights)-1 {
-			cv.terminalJF = !cv.terminalJF
+			if c.Positive {
+				cv.terminalJF = !cv.terminalJF
+			} else {
+				cv.terminalJT = !cv.terminalJT
+			}
 		}
 		lit, _ := e.(tree.NumericLiteral)
 		cv.c.jumpOnKComparison(lit.Value, tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
