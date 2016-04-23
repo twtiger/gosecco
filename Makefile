@@ -37,6 +37,7 @@ coveralls: run-cover
 run-cover: clean-cover
 	mkdir -p .coverprofiles
 	go test -coverprofile=.coverprofiles/tree.coverprofile     ./tree
+	go test -coverprofile=.coverprofiles/checker.coverprofile     ./checker
 	go test -coverprofile=.coverprofiles/constants.coverprofile     ./constants
 	go test -coverprofile=.coverprofiles/parser.coverprofile     ./parser
 	go test -coverprofile=.coverprofiles/simplify.coverprofile ./simplify	

@@ -267,7 +267,7 @@ func (e *emulator) next() (uint32, bool) {
 	}
 
 	current := e.filters[e.pointer]
-	log.Printf("%03d:  %s\n", e.pointer, formatInstruction(current))
+	//	log.Printf("%03d:  %s\n", e.pointer, formatInstruction(current))
 	e.pointer++
 	switch bpfClass(current.Code) {
 	case syscall.BPF_RET:
