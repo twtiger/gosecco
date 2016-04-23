@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -77,8 +78,6 @@ func (p *parser) parseExpression(expr string) (tree.Expression, bool, uint16, er
 		return expression, hasRet, ret, err
 	}
 
-	// TODO: change documentation to make this clear
-
 	tokens, err := tokenize(expr, func(ts, te int, data []byte) error {
 		trace := "<input>:-1"
 		if p.traceData != nil {
@@ -90,7 +89,12 @@ func (p *parser) parseExpression(expr string) (tree.Expression, bool, uint16, er
 	if err != nil {
 		return nil, false, 0, err
 	}
-	ctx := parseContext{0, tokens, false, p}
+	ctx := parseContext{0, tokens, len(tokens) == 0, p}
+
+	if ctx.atEnd {
+		return nil, hasRet, ret, nil
+	}
+
 	expression, err = ctx.logicalORExpression()
 	if err != nil {
 		return nil, false, 0, err
@@ -103,13 +107,21 @@ func (p *parser) parseExpression(expr string) (tree.Expression, bool, uint16, er
 	return expression, hasRet, ret, nil
 }
 
-func (ctx *parseContext) end() error {
+func (ctx *parseContext) genErr(exp string) error {
+	found := "EOF"
 	if !ctx.atEnd {
 		td := ""
 		if ctx.tokens[ctx.index].td != nil {
 			td = " " + string(ctx.tokens[ctx.index].td)
 		}
-		return fmt.Errorf("expression is invalid. unable to parse: expected EOF, found '%s'%s", tokens[ctx.tokens[ctx.index].t], td)
+		found = fmt.Sprintf("'%s'%s", tokens[ctx.tokens[ctx.index].t], td)
+	}
+	return fmt.Errorf("expression is invalid. unable to parse: expected %s, found %s", exp, found)
+}
+
+func (ctx *parseContext) end() error {
+	if !ctx.atEnd {
+		return ctx.genErr("EOF")
 	}
 	return nil
 }
@@ -302,19 +314,18 @@ func (ctx *parseContext) unaryExpression() (tree.Expression, error) {
 
 func (ctx *parseContext) collectArgs() ([]tree.Any, error) {
 	args := []tree.Any{}
-	ctx.consume()
 	for ctx.next() != RPAREN {
+		ctx.consume() //consume the opening paren, or last comma
 		res, e := ctx.logicalORExpression()
 		if e != nil {
 			return nil, e
 		}
 		args = append(args, res)
 		switch ctx.next() {
-		case RPAREN:
-		case COMMA:
-			ctx.consume()
+		case RPAREN, COMMA:
+			// Do nothing here
 		default:
-			//TODO: error here
+			return nil, ctx.genErr("')' or ','")
 		}
 	}
 	ctx.consume()
@@ -323,19 +334,18 @@ func (ctx *parseContext) collectArgs() ([]tree.Any, error) {
 
 func (ctx *parseContext) collectNumerics() ([]tree.Numeric, error) {
 	args := []tree.Numeric{}
-	ctx.consume()
 	for ctx.next() != RPAREN {
+		ctx.consume() //consume the opening paren, or last comma
 		res, e := ctx.logicalORExpression()
 		if e != nil {
 			return nil, e
 		}
 		args = append(args, res)
 		switch ctx.next() {
-		case RPAREN:
-		case COMMA:
-			ctx.consume()
+		case RPAREN, COMMA:
+			// Do nothing here
 		default:
-			//TODO: error here
+			return nil, ctx.genErr("')' or ','")
 		}
 	}
 	ctx.consume()
@@ -352,7 +362,7 @@ func (ctx *parseContext) primary() (tree.Expression, error) {
 		}
 		op, _ := ctx.consume()
 		if op != RPAREN {
-			// TODO: raise error here
+			return nil, ctx.genErr("')'")
 		}
 		return val, nil
 	case ARG:
@@ -389,7 +399,7 @@ func (ctx *parseContext) primary() (tree.Expression, error) {
 			}
 			return tree.Inclusion{Positive: op == IN, Left: all[0], Rights: all[1:]}, nil
 		}
-		// TODO: ERROR here
+		return nil, ctx.genErr("'('")
 	case INT:
 		_, data := ctx.consume()
 		val, _ := strconv.ParseUint(string(data), 0, 32)
@@ -400,8 +410,9 @@ func (ctx *parseContext) primary() (tree.Expression, error) {
 	case FALSE:
 		ctx.consume()
 		return tree.BooleanLiteral{false}, nil
+	case EOF:
+		return nil, errors.New("unexpected end of line")
 	}
 
-	// TODO: ERRROR here
-	panic(fmt.Sprintf("Unexpected token: %s", tokens[ctx.next()]))
+	return nil, ctx.genErr("primary expression")
 }

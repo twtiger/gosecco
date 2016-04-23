@@ -207,3 +207,21 @@ func (s *SimplifierSuite) Test_Variable(c *C) {
 	sx := Simplify(tree.Variable{"foo"})
 	c.Assert(tree.ExpressionString(sx), Equals, "foo")
 }
+
+func (s *SimplifierSuite) Test_Arguments(c *C) {
+	t := tree.Argument{Index: 1}
+	sx := Simplify(t)
+	c.Assert(sx, Equals, t)
+}
+
+func (s *SimplifierSuite) Test_BooleanLiteral(c *C) {
+	t := tree.BooleanLiteral{true}
+	sx := Simplify(t)
+	c.Assert(sx, Equals, t)
+}
+
+func (s *SimplifierSuite) Test_NumericLiteral(c *C) {
+	t := tree.NumericLiteral{42}
+	sx := Simplify(t)
+	c.Assert(sx, Equals, t)
+}

@@ -47,6 +47,8 @@ const (
 
 	IN    // in
 	NOTIN //notin
+
+	EOF
 )
 
 var tokens = [...]string{

@@ -421,3 +421,39 @@ func (s *ParserSuite) Test_parsesArgumentPieces(c *C) {
 	x, _, _, _ = parseExpression("argL1")
 	c.Assert(x, Equals, tree.Argument{Index: 1, Type: tree.Low})
 }
+
+func (s *ParserSuite) Test_invalidCall(c *C) {
+	_, _, _, err := parseExpression("foo(1,2,)")
+	c.Assert(err, ErrorMatches, "expression is invalid\\. unable to parse: expected primary expression, found '\\)'")
+}
+
+func (s *ParserSuite) Test_invalidCall2(c *C) {
+	_, _, _, err := parseExpression("foo(1,2,3")
+	c.Assert(err, ErrorMatches, "expression is invalid\\. unable to parse: expected '\\)' or ',', found EOF")
+}
+
+func (s *ParserSuite) Test_invalidIn(c *C) {
+	_, _, _, err := parseExpression("in(1,2,)")
+	c.Assert(err, ErrorMatches, "expression is invalid\\. unable to parse: expected primary expression, found '\\)'")
+}
+
+func (s *ParserSuite) Test_invalidIn2(c *C) {
+	_, _, _, err := parseExpression("in(1,2,3")
+	c.Assert(err, ErrorMatches, "expression is invalid\\. unable to parse: expected '\\)' or ',', found EOF")
+}
+
+func (s *ParserSuite) Test_invalidIn3(c *C) {
+	_, _, _, err := parseExpression("in 2")
+	c.Assert(err, ErrorMatches, "expression is invalid\\. unable to parse: expected '\\(', found 'INT' 2")
+}
+
+func (s *ParserSuite) Test_invalidParen(c *C) {
+	_, _, _, err := parseExpression("(1")
+	c.Assert(err, ErrorMatches, "expression is invalid\\. unable to parse: expected '\\)', found EOF")
+}
+
+func (s *ParserSuite) Test_emptyString(c *C) {
+	x, _, _, err := parseExpression("")
+	c.Assert(x, IsNil)
+	c.Assert(err, IsNil)
+}

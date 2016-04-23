@@ -9,7 +9,7 @@ type parseContext struct {
 
 func (ctx *parseContext) next() token {
 	if ctx.atEnd {
-		return ILLEGAL
+		return EOF
 	}
 	return ctx.tokens[ctx.index].t
 }
@@ -23,7 +23,7 @@ func (ctx *parseContext) advance() {
 
 func (ctx *parseContext) consume() (token, []byte) {
 	if ctx.atEnd {
-		return ILLEGAL, nil
+		return EOF, nil
 	}
 	res := ctx.tokens[ctx.index]
 	ctx.advance()
