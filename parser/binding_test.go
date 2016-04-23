@@ -15,7 +15,7 @@ func parseBindingHeadCheck(c *C, s string, r tree.Macro) {
 	c.Check(res, DeepEquals, r)
 }
 
-func (s *RuleSuite) Test_parseBindingHead_parsesValidBindingHeads(c *C) {
+func (s *BindingSuite) Test_parseBindingHead_parsesValidBindingHeads(c *C) {
 	parseBindingHeadCheck(c, "test1", tree.Macro{Name: "test1"})
 	parseBindingHeadCheck(c, " _IOC ", tree.Macro{Name: "_IOC"})
 	parseBindingHeadCheck(c, "\t write  ", tree.Macro{Name: "write"})
@@ -31,26 +31,26 @@ func (s *RuleSuite) Test_parseBindingHead_parsesValidBindingHeads(c *C) {
 	c.Assert(ok, Equals, false)
 }
 
-func (s *RuleSuite) Test_parseBinding_parseABinding(c *C) {
+func (s *BindingSuite) Test_parseBinding_parseABinding(c *C) {
 	res, error := parseBinding("test1=42")
 	c.Assert(error, IsNil)
 	c.Assert(res.Name, Equals, "test1")
 	c.Assert(tree.ExpressionString(res.Body), Equals, "42")
 }
 
-func (s *RuleSuite) Test_parseBinding_parseAComplicatedBinding(c *C) {
+func (s *BindingSuite) Test_parseBinding_parseAComplicatedBinding(c *C) {
 	res, error := parseBinding("test2(a, b, c)=a + b*c")
 	c.Assert(error, IsNil)
 	c.Assert(res.Name, Equals, "test2")
 	c.Assert(tree.ExpressionString(res.Body), Equals, "(plus a (mul b c))")
 }
 
-func (s *RuleSuite) Test_parseBinding_parseFailingBinding(c *C) {
+func (s *BindingSuite) Test_parseBinding_parseFailingBinding(c *C) {
 	_, error := parseBinding("test2(a, b, c)=a b")
-	c.Assert(error.Error(), Equals, "Expression is invalid. Unable to parse: 1:12: expected ';', found 'IDENT' b")
+	c.Assert(error.Error(), Equals, "expression is invalid. unable to parse: expected EOF, found 'IDENT' b")
 }
 
-func (s *RuleSuite) Test_parseBinding_parseFailingBindingHead(c *C) {
+func (s *BindingSuite) Test_parseBinding_parseFailingBindingHead(c *C) {
 	_, error := parseBinding("test2[]=a")
 	c.Assert(error.Error(), Equals, "Invalid macro name")
 }

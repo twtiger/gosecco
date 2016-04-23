@@ -80,10 +80,18 @@ Hexadecimal: 0xFEFE or 0XfeFE
 
 All numbers represent 32 bit unsigned numbers. Negative numbers can only be represented implicitly, through arithmetic operations.
 
-Comparisons with 64bit arguments will be handled automatically when comparing against literal numbers.
-If it's necessary to compare the upper 32 bits of an argument, explicit bit masking and shifting needs to be done.
-For example:
-  (arg0 >> 32) == 0xfe
+## Arguments
+
+System calls can take up to 6 arguments. These will be specified as arg0, arg1, arg2, arg3, arg4 and arg5. Internally, these will always be 64bit numbers. However, this causes a certain amount of awkwardness when it comes to working with them in a language that only supports 32 bit numbers. So the rules are like this:
+
+When an argument is directly on the left or right hand side of a comparison, the compiler will automatically extend the comparison to the upper half of the argument, such as:
+`arg0 == 32`
+will actually generate code to check that the lower half of arg0 is equal to 32 and the upper half is equal to 0. For comparisons, similar things happen:
+`arg0 < 32`
+will generate code to ensure that the upper half is 0, and the lower half is less than 32.
+Comparing two arguments directly will also generate comparisons of both the upper and lower half of the arguments.
+
+However, these methods only work if no arithmetic operations have been applied to the argument. Once arithmetic happens, the argument turns into a 32bit number for all intents and purposes, and will stay that way. Sometimes, this can be a bit awkward. For these situations, the bpf language provides support for loading of the upper or lower half of the arguments. The loaded values will always be 32bits and will never do the extra comparisons specified above. The syntax for loading the upper half is argH0, argH1, argH2, argH3, argH4 and argH5, and the lower part argL0, argL1, argL2, argL3, argL4 and argL5. Hopefully, these won't be necessary very often.
 
 ## Syntax of expressions
 
@@ -121,7 +129,6 @@ The outcome of every rule will be defined by boolean operations. These primarily
   - Greater or equal to (>=)
   - Less than (<)
   - Less than or equal to (<=)
-  - Bits set (this operator will mask the left hand side with the right hand, and return true if the result has any bits set) (&)
 - Inclusion:
   in(arg0, 1,2,3,4)
   notIn(arg0, 1, 2, 3, 4)
@@ -145,3 +152,15 @@ These can all be arbitrarily nested. The precedence between boolean operators an
 
 As a special case, the string "1" can be used as a short form of specifying the allow case for a rule. No other symmetric values are valid in the same setting.
   read: 1
+
+### Compatibility note
+
+The current language as defined is almost completely backwards compatible with the previous seccomp definition language, with one big difference. The bitset comparison operator & does not exist anymore, so if you have a rule like:
+
+  ioctl: arg0 & 0x07
+
+that will need to be changed to
+
+  ioctl: arg0 & 0x07 != 0
+
+The reason for this is that we have introduced the bitwise AND operator and parsing it as different in different contexts introduces a lot of fragility and problems in the parser. For robustness we decided to go this path. The type checker will warn about these kinds of instances, so it won't generate incorrect code.

@@ -30,9 +30,6 @@ func (s *simplifier) AcceptComparison(a tree.Comparison) {
 		case tree.LTE:
 			s.result = tree.BooleanLiteral{pl <= pr}
 			return
-		case tree.BIT:
-			s.result = tree.BooleanLiteral{(pl & pr) != 0}
-			return
 		}
 	}
 	s.result = tree.Comparison{Op: a.Op, Left: l, Right: r}

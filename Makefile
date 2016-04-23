@@ -1,7 +1,7 @@
 default: lint test
 
 lint:
-	golint ./... | grep -v -f lint.ignores
+	golint ./... | egrep -v -f lint.ignores || true
 
 test:
 	go test -cover -v ./...

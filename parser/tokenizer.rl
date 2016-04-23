@@ -1,4 +1,4 @@
-package parser2
+package parser
 
 import "fmt"
 
@@ -17,7 +17,7 @@ import "fmt"
 
     IDENT_CHAR = "_" | alnum ;
 
-    ARG = "arg" [0-5] ;
+    ARG = "arg" [HL]? [0-5] ;
 
     IDENT = [_a-zA-Z] IDENT_CHAR* ;
 

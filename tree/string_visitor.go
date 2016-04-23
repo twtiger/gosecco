@@ -30,7 +30,15 @@ func (sv *StringVisitor) AcceptAnd(v And) {
 
 // AcceptArgument implements Visitor
 func (sv *StringVisitor) AcceptArgument(v Argument) {
-	sv.result += fmt.Sprintf("arg%d", v.Index)
+	addition := ""
+	if v.Type != Full {
+		if v.Type == Hi {
+			addition = "H"
+		} else {
+			addition = "L"
+		}
+	}
+	sv.result += fmt.Sprintf("arg%s%d", addition, v.Index)
 }
 
 // AcceptArithmetic implements Visitor

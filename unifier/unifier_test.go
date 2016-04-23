@@ -30,7 +30,7 @@ func (s *UnifierSuite) Test_Unify_withNothingToUnify(c *C) {
 func (s *UnifierSuite) Test_Unify_withRuleToUnify(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+		Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
 	}
 
 	input := tree.RawPolicy{
@@ -51,7 +51,7 @@ func (s *UnifierSuite) Test_Unify_withRuleToUnify(c *C) {
 func (s *UnifierSuite) Test_Unify_withRuleAndMacroThatDoesntUnify(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+		Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
 	}
 
 	macro := tree.Macro{
@@ -79,7 +79,7 @@ func (s *UnifierSuite) Test_Unify_withRuleAndMacroThatDoesntUnify(c *C) {
 func (s *UnifierSuite) Test_Unify_withRuleAndMacroToActuallyUnify(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.Variable{"var1"}},
+		Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.Variable{"var1"}},
 	}
 
 	macro := tree.Macro{
@@ -104,7 +104,7 @@ func (s *UnifierSuite) Test_Unify_withRuleAndMacroToActuallyUnify(c *C) {
 func (s *UnifierSuite) Test_Unify_orExpression(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Or{Left: tree.Argument{0}, Right: tree.Variable{"var1"}},
+		Body: tree.Or{Left: tree.Argument{Index: 0}, Right: tree.Variable{"var1"}},
 	}
 
 	macro1 := tree.Macro{
@@ -135,7 +135,7 @@ func (s *UnifierSuite) Test_Unify_orExpression(c *C) {
 func (s *UnifierSuite) Test_Unify_withAndExpressione(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.And{Left: tree.Argument{0}, Right: tree.Variable{"var1"}},
+		Body: tree.And{Left: tree.Argument{Index: 0}, Right: tree.Variable{"var1"}},
 	}
 
 	macro := tree.Macro{
@@ -160,7 +160,7 @@ func (s *UnifierSuite) Test_Unify_withAndExpressione(c *C) {
 func (s *UnifierSuite) Test_Unify_withArithmeticExpression(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Arithmetic{Left: tree.Argument{0}, Op: tree.PLUS, Right: tree.Variable{"var1"}},
+		Body: tree.Arithmetic{Left: tree.Argument{Index: 0}, Op: tree.PLUS, Right: tree.Variable{"var1"}},
 	}
 
 	macro := tree.Macro{
@@ -186,7 +186,7 @@ func (s *UnifierSuite) Test_Unify_withInclusionExpression(c *C) {
 	rule := tree.Rule{
 		Name: "write",
 		Body: tree.Inclusion{Positive: true,
-			Left:   tree.Argument{0},
+			Left:   tree.Argument{Index: 0},
 			Rights: []tree.Numeric{tree.NumericLiteral{1}, tree.Variable{"var2"}},
 		},
 	}
@@ -221,7 +221,7 @@ func (s *UnifierSuite) Test_Unify_withInclusionExpressionVariableLeft(c *C) {
 
 	macro1 := tree.Macro{
 		Name: "var1",
-		Body: tree.Argument{0},
+		Body: tree.Argument{Index: 0},
 	}
 
 	macro2 := tree.Macro{
@@ -273,7 +273,7 @@ func (s *UnifierSuite) Test_Unify_withNegationExpression(c *C) {
 func (s *UnifierSuite) Test_Unify_withCallExpression(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Call{Name: "compV1", Args: []tree.Any{tree.Argument{0}}},
+		Body: tree.Call{Name: "compV1", Args: []tree.Any{tree.Argument{Index: 0}}},
 	}
 
 	macro := tree.Macro{
@@ -299,7 +299,7 @@ func (s *UnifierSuite) Test_Unify_withCallExpression(c *C) {
 func (s *UnifierSuite) Test_Unify_withCallExpressionWithMultipleVariables(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Call{Name: "compV1", Args: []tree.Any{tree.Argument{0}, tree.Argument{1}}},
+		Body: tree.Call{Name: "compV1", Args: []tree.Any{tree.Argument{Index: 0}, tree.Argument{Index: 1}}},
 	}
 
 	macro := tree.Macro{
@@ -325,12 +325,12 @@ func (s *UnifierSuite) Test_Unify_withCallExpressionWithMultipleVariables(c *C) 
 func (s *UnifierSuite) Test_Unify_withCallExpressionWithPreviouslyDefinedVariables(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Call{Name: "compV1", Args: []tree.Any{tree.Argument{0}, tree.Variable{"var1"}}},
+		Body: tree.Call{Name: "compV1", Args: []tree.Any{tree.Argument{Index: 0}, tree.Variable{"var1"}}},
 	}
 
 	macro1 := tree.Macro{
 		Name: "var1",
-		Body: tree.Argument{5},
+		Body: tree.Argument{Index: 5},
 	}
 
 	macro2 := tree.Macro{
@@ -357,7 +357,7 @@ func (s *UnifierSuite) Test_Unify_withCallExpressionWithPreviouslyDefinedVariabl
 func (s *UnifierSuite) Test_Unify_withNoVariableDefinedRaisesNoVariableDefinedError(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.Variable{"var1"}},
+		Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.Variable{"var1"}},
 	}
 
 	input := tree.RawPolicy{
@@ -375,7 +375,7 @@ func (s *UnifierSuite) Test_Unify_withNoVariableDefinedRaisesNoVariableDefinedEr
 func (s *UnifierSuite) Test_Unify_withDefaultPositiveNumericActionSetsPositiveAction(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.NumericLiteral{872}},
+		Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{872}},
 	}
 
 	macro := tree.Macro{
@@ -402,7 +402,7 @@ func (s *UnifierSuite) Test_Unify_withDefaultPositiveNumericActionSetsPositiveAc
 func (s *UnifierSuite) Test_Unify_withDefaultPositiveVariableActionSetsPositiveAction(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+		Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
 	}
 
 	macro := tree.Macro{
@@ -429,7 +429,7 @@ func (s *UnifierSuite) Test_Unify_withDefaultPositiveVariableActionSetsPositiveA
 func (s *UnifierSuite) Test_Unify_withDefaultNegativeNumericActionSetsNegativeAction(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+		Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
 	}
 
 	macro := tree.Macro{
@@ -456,7 +456,7 @@ func (s *UnifierSuite) Test_Unify_withDefaultNegativeNumericActionSetsNegativeAc
 func (s *UnifierSuite) Test_Unify_withDefaultNegativeVariableActionSetsNegativeAction(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+		Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
 	}
 
 	macro := tree.Macro{
@@ -484,7 +484,7 @@ func (s *UnifierSuite) Test_Unify_withDefaultNegativeNumericActionSetsNegativeAc
 
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Or{Left: tree.Argument{0}, Right: tree.Variable{"var1"}},
+		Body: tree.Or{Left: tree.Argument{Index: 0}, Right: tree.Variable{"var1"}},
 	}
 
 	macro1 := tree.Macro{

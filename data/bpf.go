@@ -1,5 +1,6 @@
 package data
 
+// SeccompWorkingMemory represents the piece of memory BPF is operating on when a program is running
 type SeccompWorkingMemory struct {
 	NR                 int32     // The system call number.
 	Arch               uint32    // System call convention as an AUDIT_ARCH_* value.

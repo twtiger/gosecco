@@ -95,8 +95,6 @@ func (sv *EvaluatorVisitor) AcceptComparison(v Comparison) {
 		sv.pushBoolean(left < right)
 	case LTE:
 		sv.pushBoolean(left <= right)
-	case BIT:
-		sv.pushBoolean((left & right) != 0)
 	}
 }
 

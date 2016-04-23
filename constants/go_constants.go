@@ -1672,6 +1672,7 @@ func init() {
 	syscalls["prlimit64"] = syscall.SYS_PRLIMIT64
 }
 
+// GetSyscall returns the syscall number for the given name if it exists
 func GetSyscall(name string) (uint32, bool) {
 	res, ok := syscalls[name]
 	return uint32(res), ok

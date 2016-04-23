@@ -23,7 +23,7 @@ func (s *CompilerArithmeticSuite) Test_compilationOfAdditionWithK(c *C) {
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{12}, Right: tree.NumericLiteral{4}}},
+				Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{12}, Right: tree.NumericLiteral{4}}},
 			},
 		},
 	}
@@ -97,7 +97,7 @@ func (s *CompilerArithmeticSuite) Test_compilationOfMultiplicationWithK(c *C) {
 			tree.Rule{
 				Name: "write",
 				Body: tree.Comparison{
-					Left: tree.Argument{0},
+					Left: tree.Argument{Index: 0},
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.MULT,
@@ -178,7 +178,7 @@ func (s *CompilerArithmeticSuite) Test_compilationOfSubtractionWithK(c *C) {
 			tree.Rule{
 				Name: "write",
 				Body: tree.Comparison{
-					Left: tree.Argument{0},
+					Left: tree.Argument{Index: 0},
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.MINUS,
@@ -213,7 +213,7 @@ func (s *CompilerArithmeticSuite) Test_compilationOfDivisionWithK(c *C) {
 			tree.Rule{
 				Name: "write",
 				Body: tree.Comparison{
-					Left: tree.Argument{0},
+					Left: tree.Argument{Index: 0},
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.DIV,
@@ -248,7 +248,7 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBinaryAndWithK(c *C) {
 			tree.Rule{
 				Name: "write",
 				Body: tree.Comparison{
-					Left: tree.Argument{0},
+					Left: tree.Argument{Index: 0},
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.BINAND,
@@ -283,7 +283,7 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBinaryOrWithK(c *C) {
 			tree.Rule{
 				Name: "write",
 				Body: tree.Comparison{
-					Left: tree.Argument{0},
+					Left: tree.Argument{Index: 0},
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.BINOR,
@@ -318,7 +318,7 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBitwiseLeftShiftWithK(c *C) 
 			tree.Rule{
 				Name: "write",
 				Body: tree.Comparison{
-					Left: tree.Argument{0},
+					Left: tree.Argument{Index: 0},
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.LSH,
@@ -353,7 +353,7 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBitwiseRightShiftWithK(c *C)
 			tree.Rule{
 				Name: "write",
 				Body: tree.Comparison{
-					Left: tree.Argument{0},
+					Left: tree.Argument{Index: 0},
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.RSH,

@@ -22,7 +22,7 @@ func (s *IncludeCompilerSuite) Test_compliationOfIncludeOperation(c *C) {
 			tree.Rule{
 				Name: "write",
 				Body: tree.Inclusion{
-					Left:   tree.Argument{0},
+					Left:   tree.Argument{Index: 0},
 					Rights: []tree.Numeric{tree.NumericLiteral{1}, tree.NumericLiteral{2}},
 				},
 			},

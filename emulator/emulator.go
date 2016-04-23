@@ -14,6 +14,7 @@ func init() {
 	log.SetFlags(0)
 }
 
+// Emulate will execute a seccomp filter program against the given working memory.
 func Emulate(d data.SeccompWorkingMemory, filters []unix.SockFilter) uint32 {
 	e := &emulator{data: d, filters: filters, pointer: 0}
 	for {

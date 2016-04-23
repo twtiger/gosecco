@@ -23,7 +23,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfEqualsComparison(c *C) {
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+				Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
 			},
 		},
 	}
@@ -46,7 +46,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfSimpleComparisonWithSecondRu
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+				Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
 			},
 			tree.Rule{
 				Name: "vhangup",
@@ -134,7 +134,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanComparisonToK(c *
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.GT, Right: tree.NumericLiteral{42}},
+				Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.GT, Right: tree.NumericLiteral{42}},
 			},
 		},
 	}
@@ -193,7 +193,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonAToX(c *C) {
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.EQL, Right: tree.Argument{0}},
+				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.EQL, Right: tree.Argument{Index: 0}},
 			},
 		},
 	}
@@ -261,7 +261,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanComparisonToK(c *C) 
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.LT, Right: tree.NumericLiteral{42}},
+				Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.LT, Right: tree.NumericLiteral{42}},
 			},
 		},
 	}
@@ -320,7 +320,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanOrEqualsToCompari
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.GTE, Right: tree.NumericLiteral{42}},
+				Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.GTE, Right: tree.NumericLiteral{42}},
 			},
 		},
 	}
@@ -340,7 +340,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanOrEqualsToComparison
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.LTE, Right: tree.NumericLiteral{42}},
+				Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.LTE, Right: tree.NumericLiteral{42}},
 			},
 		},
 	}
@@ -360,7 +360,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfNotEqualsToK(c *C) {
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.NEQL, Right: tree.NumericLiteral{42}},
+				Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.NEQL, Right: tree.NumericLiteral{42}},
 			},
 		},
 	}
@@ -375,32 +375,12 @@ func (s *CompilerComparisonSuite) Test_compilationOfNotEqualsToK(c *C) {
 	})
 }
 
-func (s *CompilerComparisonSuite) Test_compilationOfBitSetToK(c *C) {
-	p := tree.Policy{
-		Rules: []tree.Rule{
-			tree.Rule{
-				Name: "write",
-				Body: tree.Comparison{Left: tree.Argument{0}, Op: tree.BIT, Right: tree.NumericLiteral{42}},
-			},
-		},
-	}
-
-	res, _ := Compile(p)
-
-	c.Assert(res[5], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JSET | BPF_K,
-		Jt:   0,
-		Jf:   1,
-		K:    42,
-	})
-}
-
 func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanAToX(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.GT, Right: tree.Argument{0}},
+				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.GT, Right: tree.Argument{Index: 0}},
 			},
 		},
 	}
@@ -468,7 +448,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanOrEqualsToAToX(c 
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.GTE, Right: tree.Argument{0}},
+				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.GTE, Right: tree.Argument{Index: 0}},
 			},
 		},
 	}
@@ -488,7 +468,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanAToX(c *C) {
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.LT, Right: tree.Argument{0}},
+				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.LT, Right: tree.Argument{Index: 0}},
 			},
 		},
 	}
@@ -508,7 +488,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessOrEqualsToAToX(c *C) {
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.LTE, Right: tree.Argument{0}},
+				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.LTE, Right: tree.Argument{Index: 0}},
 			},
 		},
 	}
@@ -523,32 +503,12 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessOrEqualsToAToX(c *C) {
 	})
 }
 
-func (s *CompilerComparisonSuite) Test_compilationOfBitSetAToX(c *C) {
-	p := tree.Policy{
-		Rules: []tree.Rule{
-			tree.Rule{
-				Name: "write",
-				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.BIT, Right: tree.Argument{0}},
-			},
-		},
-	}
-
-	res, _ := Compile(p)
-
-	c.Assert(res[7], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP + BPF_JSET + BPF_X,
-		Jt:   0,
-		Jf:   1,
-		K:    0,
-	})
-}
-
 func (s *CompilerComparisonSuite) Test_compilationOfNotEqualsAToX(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.NEQL, Right: tree.Argument{0}},
+				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.NEQL, Right: tree.Argument{Index: 0}},
 			},
 		},
 	}
@@ -568,7 +528,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonForFirstArgument(c
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.NEQL, Right: tree.Argument{1}},
+				Body: tree.Comparison{Left: tree.NumericLiteral{1}, Op: tree.NEQL, Right: tree.Argument{Index: 1}},
 			},
 		},
 	}

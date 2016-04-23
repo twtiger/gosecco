@@ -77,7 +77,7 @@ func (s *SimplifierSuite) Test_simplifyAnd(c *C) {
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
 		},
 		tree.Comparison{
-			Left:  tree.Argument{2},
+			Left:  tree.Argument{Index: 2},
 			Op:    tree.EQL,
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
 		},
@@ -91,7 +91,7 @@ func (s *SimplifierSuite) Test_simplifyAnd(c *C) {
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.Variable{"foo"}},
 		},
 		tree.Comparison{
-			Left:  tree.Argument{2},
+			Left:  tree.Argument{Index: 2},
 			Op:    tree.EQL,
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
 		},
@@ -117,9 +117,6 @@ func (s *SimplifierSuite) Test_simplifyComparison(c *C) {
 
 	sx = Simplify(tree.Comparison{Left: tree.NumericLiteral{42}, Op: tree.LTE, Right: tree.NumericLiteral{41}})
 	c.Assert(tree.ExpressionString(sx), Equals, "false")
-
-	sx = Simplify(tree.Comparison{Left: tree.NumericLiteral{3}, Op: tree.BIT, Right: tree.NumericLiteral{2}})
-	c.Assert(tree.ExpressionString(sx), Equals, "true")
 }
 
 func (s *SimplifierSuite) Test_simplifyOr(c *C) {
@@ -130,7 +127,7 @@ func (s *SimplifierSuite) Test_simplifyOr(c *C) {
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
 		},
 		tree.Comparison{
-			Left:  tree.Argument{2},
+			Left:  tree.Argument{Index: 2},
 			Op:    tree.EQL,
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
 		},
@@ -144,7 +141,7 @@ func (s *SimplifierSuite) Test_simplifyOr(c *C) {
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.Variable{"foo"}},
 		},
 		tree.Comparison{
-			Left:  tree.Argument{2},
+			Left:  tree.Argument{Index: 2},
 			Op:    tree.EQL,
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
 		},
@@ -153,7 +150,7 @@ func (s *SimplifierSuite) Test_simplifyOr(c *C) {
 }
 
 func (s *SimplifierSuite) Test_Argument(c *C) {
-	sx := Simplify(tree.Argument{3})
+	sx := Simplify(tree.Argument{Index: 3})
 	c.Assert(tree.ExpressionString(sx), Equals, "arg3")
 }
 
@@ -181,14 +178,14 @@ func (s *SimplifierSuite) Test_simplifyInclusion(c *C) {
 		Positive: true,
 		Left:     tree.BinaryNegation{tree.NumericLiteral{42}},
 		Rights: []tree.Numeric{
-			tree.Argument{0},
+			tree.Argument{Index: 0},
 			tree.Arithmetic{Op: tree.LSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
 		}})
 	c.Assert(tree.ExpressionString(sx), Equals, "(in 4294967253 arg0)")
 
 	sx = Simplify(tree.Inclusion{
 		Positive: true,
-		Left:     tree.Argument{0},
+		Left:     tree.Argument{Index: 0},
 		Rights: []tree.Numeric{
 			tree.NumericLiteral{42},
 			tree.Arithmetic{Op: tree.LSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},

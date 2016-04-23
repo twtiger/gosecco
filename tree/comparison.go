@@ -11,7 +11,6 @@ const (
 	GTE
 	LT
 	LTE
-	BIT
 )
 
 // ComparisonNames maps types to names for presentation
@@ -22,7 +21,6 @@ var ComparisonNames = map[ComparisonType]string{
 	GTE:  ">=",
 	LT:   "<",
 	LTE:  "<=",
-	BIT:  "&",
 }
 
 // ComparisonSymbols maps types to names for symbolic processing
@@ -33,7 +31,6 @@ var ComparisonSymbols = map[ComparisonType]string{
 	GTE:  "gte",
 	LT:   "lt",
 	LTE:  "lte",
-	BIT:  "bitSet",
 }
 
 // Comparison represents a comparison

@@ -22,6 +22,9 @@ func newCompiler() *compiler {
 	}
 }
 
+// Compile will take a parsed policy and generate an optimized sock filter for that policy
+// The policy is assumed to have been unified and simplified before compilation starts -
+// no unresolved variables or calls should exist in the policy.
 func Compile(policy tree.Policy) ([]unix.SockFilter, error) {
 	c := newCompiler()
 	c.compile(policy.Rules)
@@ -87,14 +90,12 @@ var comparisonOps = map[tree.ComparisonType]kexInstruction{
 	tree.GTE:  kexInstruction{k: JEGE_K, x: JEGE_X},
 	tree.LT:   kexInstruction{k: JEG_K, x: JEG_X},
 	tree.LTE:  kexInstruction{k: JEGE_K, x: JEGE_X},
-	tree.BIT:  kexInstruction{k: JSET_K, x: JSET_X},
 }
 
 var posVals = map[tree.ComparisonType]bool{
 	tree.EQL: true,
 	tree.GT:  true,
 	tree.GTE: true,
-	tree.BIT: true,
 }
 
 const LOAD = BPF_LD | BPF_W | BPF_ABS

@@ -1,4 +1,4 @@
-package parser2
+package parser
 
 type tokenData struct {
 	t  token
