@@ -1,6 +1,9 @@
 package constants
 
-import "syscall"
+import (
+	"strings"
+	"syscall"
+)
 
 var allConstants = make(map[string]int)
 var syscalls = make(map[string]int)
@@ -1674,6 +1677,6 @@ func init() {
 
 // GetSyscall returns the syscall number for the given name if it exists
 func GetSyscall(name string) (uint32, bool) {
-	res, ok := syscalls[name]
+	res, ok := syscalls[strings.ToLower(name)]
 	return uint32(res), ok
 }

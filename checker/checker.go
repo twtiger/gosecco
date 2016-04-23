@@ -1,8 +1,10 @@
 package checker
 
 import (
+	"errors"
 	"fmt"
 
+	"github.com/twtiger/gosecco/constants"
 	"github.com/twtiger/gosecco/tree"
 )
 
@@ -37,11 +39,29 @@ func (e *ruleError) Error() string {
 	return fmt.Sprintf("[%s] %s", e.syscallName, e.err)
 }
 
+func checkValidSyscall(r tree.Rule) error {
+
+	if _, ok := constants.GetSyscall(r.Name); !ok {
+		return errors.New("invalid syscall")
+	}
+	return nil
+}
+
 func (v *validityChecker) check() []error {
 	result := []error{}
 
 	for _, r := range v.rules {
-		res := v.checkRule(r)
+		var res error
+		if v.seen[r.Name] {
+			res = errors.New("duplicate definition of syscall rule")
+		}
+		v.seen[r.Name] = true
+		if res == nil {
+			res = checkValidSyscall(r)
+		}
+		if res == nil {
+			res = v.checkRule(r)
+		}
 		if res != nil {
 			result = append(result, &ruleError{syscallName: r.Name, err: res})
 		}

@@ -325,3 +325,30 @@ func (s *CheckerSuite) Test_inclusion_badRight(c *C) {
 	c.Assert(len(val), Equals, 1)
 	c.Assert(val[0], ErrorMatches, "\\[read\\] expected numeric expression but found: false")
 }
+
+func (s *CheckerSuite) Test_duplicateRules(c *C) {
+	toCheck := tree.Policy{Rules: []tree.Rule{
+		tree.Rule{Name: "read", Body: tree.BooleanLiteral{true}},
+		tree.Rule{Name: "write", Body: tree.BooleanLiteral{true}},
+		tree.Rule{Name: "read", Body: tree.BooleanLiteral{true}},
+		tree.Rule{Name: "write", Body: tree.BooleanLiteral{true}},
+		tree.Rule{Name: "fcntl", Body: tree.BooleanLiteral{true}},
+	}}
+
+	val := EnsureValid(toCheck)
+
+	c.Assert(len(val), Equals, 2)
+	c.Assert(val[0], ErrorMatches, "\\[read\\] duplicate definition of syscall rule")
+	c.Assert(val[1], ErrorMatches, "\\[write\\] duplicate definition of syscall rule")
+}
+
+func (s *CheckerSuite) Test_invalidSyscall(c *C) {
+	toCheck := tree.Policy{Rules: []tree.Rule{
+		tree.Rule{Name: "fluffipuff", Body: tree.BooleanLiteral{true}},
+	}}
+
+	val := EnsureValid(toCheck)
+
+	c.Assert(len(val), Equals, 1)
+	c.Assert(val[0], ErrorMatches, "\\[fluffipuff\\] invalid syscall")
+}
