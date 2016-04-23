@@ -8,6 +8,11 @@ import (
 
 type label string
 
+type labelInfo struct {
+	origin  uint
+	negated bool
+}
+
 const (
 	negative label = "negative"
 	positive       = "positive"
@@ -17,8 +22,8 @@ const (
 func newCompiler() *compiler {
 	return &compiler{
 		currentlyLoaded: -1,
-		positiveLabels:  make(map[label][]uint),
-		negativeLabels:  make(map[label][]uint),
+		positiveLabels:  make(map[label][]labelInfo),
+		negativeLabels:  make(map[label][]labelInfo),
 	}
 }
 
@@ -34,8 +39,8 @@ func Compile(policy tree.Policy) ([]unix.SockFilter, error) {
 type compiler struct {
 	result          []unix.SockFilter
 	currentlyLoaded int
-	positiveLabels  map[label][]uint
-	negativeLabels  map[label][]uint
+	positiveLabels  map[label][]labelInfo
+	negativeLabels  map[label][]labelInfo
 }
 
 func (c *compiler) compile(rules []tree.Rule) {
@@ -47,7 +52,7 @@ func (c *compiler) compile(rules []tree.Rule) {
 }
 
 func (c *compiler) compileExpression(x tree.Expression) {
-	cv := &compilerVisitor{c, true, true}
+	cv := &compilerVisitor{c, true, true, false}
 	x.Accept(cv)
 }
 
@@ -161,52 +166,54 @@ func (c *compiler) loadCurrentSyscall() {
 	c.loadAt(syscallNameIndex)
 }
 
-func (c *compiler) positiveJumpTo(index uint, l label) {
+func (c *compiler) positiveJumpTo(index uint, l label, neg bool) {
+	li := labelInfo{index, neg}
 	if l != noLabel {
-		c.positiveLabels[l] = append(c.positiveLabels[l], index)
+		c.positiveLabels[l] = append(c.positiveLabels[l], li)
 	}
 }
 
-func (c *compiler) negativeJumpTo(index uint, l label) {
+func (c *compiler) negativeJumpTo(index uint, l label, neg bool) {
+	li := labelInfo{index, neg}
 	if l != noLabel {
-		c.negativeLabels[l] = append(c.negativeLabels[l], index)
+		c.negativeLabels[l] = append(c.negativeLabels[l], li)
 	}
 }
 
-func (c *compiler) jumpTo(num uint, terminalJF, terminalJT bool, jt, jf label) {
+func (c *compiler) jumpTo(num uint, terminalJF, terminalJT, neg bool, jt, jf label) {
 	if terminalJF {
-		c.negativeJumpTo(num, jf)
+		c.negativeJumpTo(num, jf, neg)
 	}
 	if terminalJT {
-		c.positiveJumpTo(num, jt)
+		c.positiveJumpTo(num, jt, neg)
 	}
 }
 
 func (c *compiler) jumpOnComparison(val uint32, cmp tree.ComparisonType) {
 	jc := comparisonOps[cmp].k
 	num := c.op(jc, val)
-	c.jumpTo(num, true, false, positive, negative)
+	c.jumpTo(num, true, false, false, positive, negative)
 }
 
-func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, terminalJF, terminalJT bool) {
+func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, terminalJF, terminalJT, negated bool) {
 	_, isPos := posVals[cmp]
 	jc := comparisonOps[cmp].k
 	num := c.op(jc, val)
 	if isPos {
-		c.jumpTo(num, terminalJF, terminalJT, positive, negative)
+		c.jumpTo(num, terminalJF, terminalJT, negated, positive, negative)
 	} else {
-		c.jumpTo(num, terminalJF, terminalJT, negative, positive)
+		c.jumpTo(num, terminalJF, terminalJT, negated, negative, positive)
 	}
 }
 
-func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, terminalJF, terminalJT bool) {
+func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, terminalJF, terminalJT, negated bool) {
 	_, isPos := posVals[cmp]
 	jc := comparisonOps[cmp].x
 	num := c.op(jc, 0)
 	if isPos {
-		c.jumpTo(num, terminalJF, terminalJT, positive, negative)
+		c.jumpTo(num, terminalJF, terminalJT, negated, positive, negative)
 	} else {
-		c.jumpTo(num, terminalJF, terminalJT, negative, positive)
+		c.jumpTo(num, terminalJF, terminalJT, negated, negative, positive)
 	}
 }
 
@@ -238,19 +245,27 @@ func (c *compiler) checkCorrectSyscall(name string, setPosFlags bool) {
 	}
 
 	c.loadCurrentSyscall()
-	c.jumpOnKComparison(sys, tree.EQL, true, setPosFlags)
+	c.jumpOnKComparison(sys, tree.EQL, true, setPosFlags, false)
 }
 
 func (c *compiler) fixupJumpPoints(l label, ix uint) {
-	for _, origin := range c.positiveLabels[l] {
+	for _, e := range c.positiveLabels[l] {
 		// TODO: check that these jumps aren't to large - in that case we need to insert a JUMP_K instruction
-		c.result[origin].Jt = uint8(ix-origin) - 1
+		if e.negated {
+			c.result[e.origin].Jf = uint8(ix-e.origin) - 1
+		} else {
+			c.result[e.origin].Jt = uint8(ix-e.origin) - 1
+		}
 	}
 	delete(c.positiveLabels, l)
 
-	for _, origin := range c.negativeLabels[l] {
+	for _, e := range c.negativeLabels[l] {
 		// TODO: check that these jumps aren't to large - in that case we need to insert a JUMP_K instruction
-		c.result[origin].Jf = uint8(ix-origin) - 1
+		if e.negated {
+			c.result[e.origin].Jt = uint8(ix-e.origin) - 1
+		} else {
+			c.result[e.origin].Jf = uint8(ix-e.origin) - 1
+		}
 	}
 	delete(c.negativeLabels, l)
 }

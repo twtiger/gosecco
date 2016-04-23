@@ -8,6 +8,7 @@ type compilerVisitor struct {
 	c          *compiler
 	terminalJF bool
 	terminalJT bool
+	negated    bool
 }
 
 func (cv *compilerVisitor) AcceptArgument(a tree.Argument) {
@@ -31,12 +32,12 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 	lit, isLit := c.Right.(tree.NumericLiteral)
 	if isLit {
 		c.Left.Accept(cv)
-		cv.c.jumpOnKComparison(lit.Value, c.Op, cv.terminalJF, cv.terminalJT)
+		cv.c.jumpOnKComparison(lit.Value, c.Op, cv.terminalJF, cv.terminalJT, cv.negated)
 	} else {
 		c.Right.Accept(cv)
 		cv.c.moveAtoX()
 		c.Left.Accept(cv)
-		cv.c.jumpOnXComparison(c.Op, cv.terminalJF, cv.terminalJT)
+		cv.c.jumpOnXComparison(c.Op, cv.terminalJF, cv.terminalJT, cv.negated)
 	}
 }
 
@@ -49,20 +50,23 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 			cv.terminalJF = !cv.terminalJF
 		}
 		lit, _ := e.(tree.NumericLiteral)
-		cv.c.jumpOnKComparison(lit.Value, tree.EQL, cv.terminalJF, cv.terminalJT)
+		cv.c.jumpOnKComparison(lit.Value, tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
 	}
 }
 
-func (cv *compilerVisitor) AcceptNegation(tree.Negation) {}
+func (cv *compilerVisitor) AcceptNegation(c tree.Negation) {
+	cv.negated = true
+	c.Operand.Accept(cv)
+}
 
 func (cv *compilerVisitor) AcceptNumericLiteral(l tree.NumericLiteral) {
 	cv.c.loadLiteral(l.Value)
 }
 
 func (cv *compilerVisitor) AcceptAnd(c tree.And) {
-	cv.terminalJT = false
+	cv.terminalJT = !cv.terminalJT
 	c.Left.Accept(cv)
-	cv.terminalJT = true
+	cv.terminalJT = !cv.terminalJT
 	c.Right.Accept(cv)
 }
 
