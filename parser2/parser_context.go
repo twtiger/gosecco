@@ -4,6 +4,7 @@ type parseContext struct {
 	index  int
 	tokens []tokenData
 	atEnd  bool
+	parser *parser
 }
 
 func (ctx *parseContext) next() token {

@@ -102,7 +102,7 @@ All standard arithmetic operators from C are available and follow the same prece
 - Binary and (&)
 - Binary or (|)
 - Binary xor (^)
-- Binary negation (^)
+- Binary negation (~)
 - Left shift (<<)
 - Right shift (>>)
 - Modulo (%)
@@ -128,8 +128,20 @@ The outcome of every rule will be defined by boolean operations. These primarily
   the in/not in operators are not case sensitive. Any valid value or name can be used inside the brackets. Values have to be separated
   by commas, and arbitrary amount of whitespace (tabs or spaces). The in/notIn operator is the function like application that is not actually a function
 
-These can all be arbitrarily nested.
+These can all be arbitrarily nested. The precedence between boolean operators and arithmetic operators differ from those in most languages. Specifically, the precedence prefers all boolean operations before all arithmetic operations. In real terms, that means the precedence schedule looks about like this:
 
-In a boolean context, the strings "1" and "true" can be used as literal true values, while "0" and "false" can be used as literal false values. This is mostly useful to create short rules like:
+01. Boolean OR: ||
+02. Boolean AND: &&
+03. Equality expressions: ==, !=
+04. Relativity expressions: <, <=, >, >=
+05. Binary or: |
+06. Binary xor: ^
+07. Binary and: &
+08. Shift expressions: <<, >>
+09. Additive expression: +, -
+10. Multiplicative expression: *, /, %
+11. Unary expression: !, ~
+12. Primary expression: argument, variable, call, parenthesised expression, in, notIn
+
+As a special case, the string "1" can be used as a short form of specifying the allow case for a rule. No other symmetric values are valid in the same setting.
   read: 1
-  fcntl: false

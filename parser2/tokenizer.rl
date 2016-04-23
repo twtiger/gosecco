@@ -1,5 +1,7 @@
 package parser2
 
+import "fmt"
+
 %%{
     machine gosecco_tokenizer;
 
@@ -68,13 +70,13 @@ package parser2
 
       SPACES+;
 
-      any => {return false};
+      any => {return tokenError(ts, te, data)};
     *|;
 }%%
 
 %% write data;
 
-func tokenizeRaw(data []byte, f func(token, []byte)) bool {
+func tokenizeRaw(data []byte, f func(token, []byte), tokenError func(int, int, []byte) error) error {
      var cs, act int
      p, pe := 0, len(data)
      ts, te := 0, 0
@@ -83,5 +85,5 @@ func tokenizeRaw(data []byte, f func(token, []byte)) bool {
      %% write init;
      %% write exec;
 
-     return true
+     return nil
 }

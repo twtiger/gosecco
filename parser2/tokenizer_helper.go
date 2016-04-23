@@ -5,16 +5,16 @@ type tokenData struct {
 	td []byte
 }
 
-func tokenize(data string) ([]tokenData, bool) {
+func tokenize(data string, tokenError func(int, int, []byte) error) ([]tokenData, error) {
 	result := []tokenData{}
 
-	res := tokenizeRaw([]byte(data), func(t token, td []byte) {
+	err := tokenizeRaw([]byte(data), func(t token, td []byte) {
 		result = append(result, tokenData{t, td})
-	})
+	}, tokenError)
 
-	if !res {
-		return nil, false
+	if err != nil {
+		return nil, err
 	}
 
-	return result, true
+	return result, nil
 }

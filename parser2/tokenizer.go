@@ -25,7 +25,7 @@ var gosecco_tokenizer_first_final int = 2
 var gosecco_tokenizer_error int = -1
 var gosecco_tokenizer_en_main int = 2
 
-func tokenizeRaw(data []byte, f func(token, []byte)) bool {
+func tokenizeRaw(data []byte, f func(token, []byte), tokenError func(int, int, []byte) error) error {
 	var cs, act int
 	p, pe := 0, len(data)
 	ts, te := 0, 0
@@ -481,7 +481,7 @@ func tokenizeRaw(data []byte, f func(token, []byte)) bool {
 						{
 							te = p + 1
 							{
-								return false
+								return tokenError(ts, te, data)
 							}
 						}
 					}
@@ -622,7 +622,7 @@ func tokenizeRaw(data []byte, f func(token, []byte)) bool {
 							te = p
 							p = p - 1
 							{
-								return false
+								return tokenError(ts, te, data)
 							}
 						}
 					}
@@ -745,5 +745,5 @@ func tokenizeRaw(data []byte, f func(token, []byte)) bool {
 		}
 
 	}
-	return true
+	return nil
 }
