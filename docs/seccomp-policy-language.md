@@ -8,10 +8,6 @@ Every line can be one of several types - specifically, they can be assignments, 
 
 In general, each line will be parsed and understood in the context of only the previous lines. That means that variables and macros have to be defined before used. This also stops recursive actions from being possible.
 
-## Valid names
-
-In order to simplify implementation, we reuse the parser from the Go programming language. That means that certain words will not be valid as variable names. These include the typical Golang keywords such as "for", "type", "if", "func" and so on.
-
 ## Comments
 
 A comment will start with a literal octothorpe (#) in column 0, and continues until the end of the line
@@ -95,7 +91,7 @@ However, these methods only work if no arithmetic operations have been applied t
 
 ## Syntax of expressions
 
-In all expressions, there will be variables named arg0 to arg5 available. These are 64 bit unsigned numbers. All comparisons with these numbers will only operate on the lower 32 bits, such that the upper 32bits have to be 0 for the comparison to succeed.
+In all expressions, there will be variables named arg0 to arg5 available. These are 64 bit unsigned numbers. If the argument is compared with a constant, this comparison will only operate on the lower 32 bits of the argument, such that the upper 32bits have to be 0 for the comparison to succeed. However, when two arguments are compared, both upper and lower halves of the arguments will be used (for a 64 bit comparison).
 
 The arguments to unary or binary operators can be any VALUE, where VALUE is defined to either be one of the argument names, an explicit number, or another expression.
 
