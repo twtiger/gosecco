@@ -6,19 +6,6 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-type label string
-
-type labelInfo struct {
-	origin  uint
-	negated bool
-}
-
-const (
-	negative label = "negative"
-	positive       = "positive"
-	noLabel        = ""
-)
-
 func newCompiler() *compiler {
 	return &compiler{
 		currentlyLoaded: -1,
@@ -56,10 +43,6 @@ func (c *compiler) compileExpression(x tree.Expression) {
 	x.Accept(cv)
 }
 
-func (c *compiler) labelHere(l label) {
-	c.fixupJumpPoints(l, uint(len(c.result)))
-}
-
 func (c *compiler) compileRule(r tree.Rule) {
 	c.labelHere(negative)
 	_, isBoolLit := r.Body.(tree.BooleanLiteral)
@@ -68,20 +51,6 @@ func (c *compiler) compileRule(r tree.Rule) {
 }
 
 const syscallNameIndex = 0
-
-type argumentPosition struct {
-	lower uint32
-	upper uint32
-}
-
-var argument = []argumentPosition{
-	argumentPosition{lower: 0x10, upper: 0x14},
-	argumentPosition{lower: 0x18, upper: 0x1c},
-	argumentPosition{lower: 0x20, upper: 0x24},
-	argumentPosition{lower: 0x28, upper: 0x2c},
-	argumentPosition{lower: 0x30, upper: 0x34},
-	argumentPosition{lower: 0x38, upper: 0x3c},
-}
 
 type kexInstruction struct {
 	k uint16
@@ -102,38 +71,6 @@ var posVals = map[tree.ComparisonType]bool{
 	tree.GT:  true,
 	tree.GTE: true,
 }
-
-const LOAD = BPF_LD | BPF_W | BPF_ABS
-const LOAD_VAL = BPF_LD | BPF_IMM
-
-const JEQ_K = BPF_JMP | BPF_JEQ | BPF_K
-const JEQ_X = BPF_JMP | BPF_JEQ | BPF_X
-
-const JEG_K = BPF_JMP | BPF_JGT | BPF_K
-const JEG_X = BPF_JMP | BPF_JGT | BPF_X
-
-const JEGE_K = BPF_JMP | BPF_JGE | BPF_K
-
-const JEGE_X = BPF_JMP | BPF_JGE | BPF_X
-
-const JSET_K = BPF_JMP | BPF_JSET | BPF_K
-const JSET_X = BPF_JMP | BPF_JSET | BPF_X
-
-const ADD_K = BPF_ALU | BPF_ADD | BPF_K
-const SUB_K = BPF_ALU | BPF_SUB | BPF_K
-const MUL_K = BPF_ALU | BPF_MUL | BPF_K
-const DIV_K = BPF_ALU | BPF_DIV | BPF_K
-const AND_K = BPF_ALU | BPF_AND | BPF_K
-const OR_K = BPF_ALU | BPF_OR | BPF_K
-
-const LSH_K = BPF_ALU | BPF_LSH | BPF_K
-const RSH_K = BPF_ALU | BPF_RSH | BPF_K
-
-// const MOD_K = BPF_ALU | BPF_MOD | BPF_K
-// const XOR_K = BPF_ALU | BPF_XOR | BPF_K
-
-const RET_K = BPF_RET | BPF_K
-const A_TO_X = BPF_MISC | BPF_TAX
 
 func (c *compiler) op(code uint16, k uint32) uint {
 	ix := uint(len(c.result))
@@ -166,57 +103,6 @@ func (c *compiler) loadCurrentSyscall() {
 	c.loadAt(syscallNameIndex)
 }
 
-func (c *compiler) positiveJumpTo(index uint, l label, neg bool) {
-	li := labelInfo{index, neg}
-	if l != noLabel {
-		c.positiveLabels[l] = append(c.positiveLabels[l], li)
-	}
-}
-
-func (c *compiler) negativeJumpTo(index uint, l label, neg bool) {
-	li := labelInfo{index, neg}
-	if l != noLabel {
-		c.negativeLabels[l] = append(c.negativeLabels[l], li)
-	}
-}
-
-func (c *compiler) jumpTo(num uint, terminalJF, terminalJT, neg bool, jt, jf label) {
-	if terminalJF {
-		c.negativeJumpTo(num, jf, neg)
-	}
-	if terminalJT {
-		c.positiveJumpTo(num, jt, neg)
-	}
-}
-
-func (c *compiler) jumpOnComparison(val uint32, cmp tree.ComparisonType) {
-	jc := comparisonOps[cmp].k
-	num := c.op(jc, val)
-	c.jumpTo(num, true, false, false, positive, negative)
-}
-
-func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, terminalJF, terminalJT, negated bool) {
-	_, isPos := posVals[cmp]
-	jc := comparisonOps[cmp].k
-	num := c.op(jc, val)
-	if isPos {
-		c.jumpTo(num, terminalJF, terminalJT, negated, positive, negative)
-	} else {
-		c.jumpTo(num, terminalJF, terminalJT, negated, negative, positive)
-	}
-}
-
-func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, terminalJF, terminalJT, negated bool) {
-	_, isPos := posVals[cmp]
-	jc := comparisonOps[cmp].x
-	num := c.op(jc, 0)
-	if isPos {
-		c.jumpTo(num, terminalJF, terminalJT, negated, positive, negative)
-	} else {
-		c.jumpTo(num, terminalJF, terminalJT, negated, negative, positive)
-	}
-}
-
 func (c *compiler) performArithmetic(op tree.ArithmeticType, operand uint32) {
 	switch op {
 	case tree.PLUS:
@@ -246,28 +132,6 @@ func (c *compiler) checkCorrectSyscall(name string, setPosFlags bool) {
 
 	c.loadCurrentSyscall()
 	c.jumpOnKComparison(sys, tree.EQL, true, setPosFlags, false)
-}
-
-func (c *compiler) fixupJumpPoints(l label, ix uint) {
-	for _, e := range c.positiveLabels[l] {
-		// TODO: check that these jumps aren't to large - in that case we need to insert a JUMP_K instruction
-		if e.negated {
-			c.result[e.origin].Jf = uint8(ix-e.origin) - 1
-		} else {
-			c.result[e.origin].Jt = uint8(ix-e.origin) - 1
-		}
-	}
-	delete(c.positiveLabels, l)
-
-	for _, e := range c.negativeLabels[l] {
-		// TODO: check that these jumps aren't to large - in that case we need to insert a JUMP_K instruction
-		if e.negated {
-			c.result[e.origin].Jt = uint8(ix-e.origin) - 1
-		} else {
-			c.result[e.origin].Jf = uint8(ix-e.origin) - 1
-		}
-	}
-	delete(c.negativeLabels, l)
 }
 
 func (c *compiler) positiveAction(name string) {
