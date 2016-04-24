@@ -72,5 +72,35 @@ func (s *IncludeCompilerSuite) Test_compliationOfNotIncludeOperation(c *C) {
 		"ret_k	0\n") //SECCOMP_RET_KILL
 }
 
-//...     "jeq_k\t00\t01\t1\n" +
-//...     "jeq_k\t01\t00\t2\n" +
+func (s *IncludeCompilerSuite) Test_compliationOfArgumentsInIncludeList(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Inclusion{
+					Positive: true,
+					Left:     tree.NumericLiteral{1},
+					Rights:   []tree.Numeric{tree.Argument{Index: 1}, tree.Argument{Index: 0}},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	a := asm.Dump(res)
+	c.Assert(a, Equals, ""+
+		"ld_abs\t0\n"+ // syscallNameIndex
+		"jeq_k\t00\t0B\t1\n"+ // syscall.SYS_WRITE
+		"ld_imm\t1\n"+ // load K into A
+		"tax\n"+ // move A to X
+		"ld_abs\t1C\n"+ // load first half of argument 1
+		"jeq_k\t00\t07\t0\n"+ // compare it to 0
+		"ld_abs\t18\n"+ //load second half of argument 1
+		"jeq_x\t04\t00\n"+ // compare it to X
+		"ld_abs\t14\n"+ // load first half of argument 0
+		"jeq_k\t00\t03\t0\n"+ // compare it to 0
+		"ld_abs\t10\n"+ // load second half of argument 1
+		"jeq_x\t00\t01\n"+ // compare it to X
+		"ret_k	7FFF0000\n"+ //SECCOMP_RET_ALLOW
+		"ret_k	0\n") //SECCOMP_RET_KILL
+}

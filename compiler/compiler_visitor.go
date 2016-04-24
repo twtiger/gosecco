@@ -41,27 +41,41 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 	}
 }
 
-func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
-	// should also work for arguments in the inclusion list, and a numeric on the left side
-	if c.Positive == false {
-		cv.negated = true
-	}
-	c.Left.Accept(cv)
-	if c.Positive {
+func (cv *compilerVisitor) toggleTerminalJumps(b bool) {
+	if b == true {
 		cv.terminalJF = !cv.terminalJF
 	} else {
 		cv.terminalJT = !cv.terminalJT
 	}
-	for i, e := range c.Rights {
-		if i == len(c.Rights)-1 {
-			if c.Positive {
-				cv.terminalJF = !cv.terminalJF
-			} else {
-				cv.terminalJT = !cv.terminalJT
+}
+
+func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
+	if c.Positive == false {
+		cv.negated = true
+	}
+	c.Left.Accept(cv)
+	cv.toggleTerminalJumps(c.Positive)
+
+	_, isLit := c.Left.(tree.NumericLiteral)
+	if isLit {
+		cv.c.moveAtoX()
+
+		for i, e := range c.Rights {
+			if i == len(c.Rights)-1 {
+				cv.toggleTerminalJumps(c.Positive)
 			}
+			e.Accept(cv)
+			cv.c.jumpOnXComparison(tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
 		}
-		lit, _ := e.(tree.NumericLiteral)
-		cv.c.jumpOnKComparison(lit.Value, tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
+	} else {
+
+		for i, e := range c.Rights {
+			if i == len(c.Rights)-1 {
+				cv.toggleTerminalJumps(c.Positive)
+			}
+			lit, _ := e.(tree.NumericLiteral)
+			cv.c.jumpOnKComparison(lit.Value, tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
+		}
 	}
 }
 
