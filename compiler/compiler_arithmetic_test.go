@@ -23,7 +23,7 @@ func (s *CompilerArithmeticSuite) Test_compilationOfAdditionWithK(c *C) {
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
-				Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{Value: 12}, Right: tree.NumericLiteral{Value: 4}}},
+				Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{12}, Right: tree.NumericLiteral{4}}},
 			},
 		},
 	}
@@ -101,8 +101,8 @@ func (s *CompilerArithmeticSuite) Test_compilationOfMultiplicationWithK(c *C) {
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.MULT,
-						Left:  tree.NumericLiteral{Value: 3},
-						Right: tree.NumericLiteral{Value: 8},
+						Left:  tree.NumericLiteral{3},
+						Right: tree.NumericLiteral{8},
 					},
 				},
 			},
@@ -182,8 +182,8 @@ func (s *CompilerArithmeticSuite) Test_compilationOfSubtractionWithK(c *C) {
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.MINUS,
-						Left:  tree.NumericLiteral{Value: 3},
-						Right: tree.NumericLiteral{Value: 8},
+						Left:  tree.NumericLiteral{3},
+						Right: tree.NumericLiteral{8},
 					},
 				},
 			},
@@ -217,8 +217,8 @@ func (s *CompilerArithmeticSuite) Test_compilationOfDivisionWithK(c *C) {
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.DIV,
-						Left:  tree.NumericLiteral{Value: 10},
-						Right: tree.NumericLiteral{Value: 5},
+						Left:  tree.NumericLiteral{10},
+						Right: tree.NumericLiteral{5},
 					},
 				},
 			},
@@ -252,8 +252,8 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBinaryAndWithK(c *C) {
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.BINAND,
-						Left:  tree.NumericLiteral{Value: 4},
-						Right: tree.NumericLiteral{Value: 2},
+						Left:  tree.NumericLiteral{4},
+						Right: tree.NumericLiteral{2},
 					},
 				},
 			},
@@ -287,8 +287,8 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBinaryOrWithK(c *C) {
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.BINOR,
-						Left:  tree.NumericLiteral{Value: 4},
-						Right: tree.NumericLiteral{Value: 2},
+						Left:  tree.NumericLiteral{4},
+						Right: tree.NumericLiteral{2},
 					},
 				},
 			},
@@ -322,8 +322,8 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBitwiseLeftShiftWithK(c *C) 
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.LSH,
-						Left:  tree.NumericLiteral{Value: 4},
-						Right: tree.NumericLiteral{Value: 2},
+						Left:  tree.NumericLiteral{4},
+						Right: tree.NumericLiteral{2},
 					},
 				},
 			},
@@ -357,8 +357,8 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBitwiseRightShiftWithK(c *C)
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.RSH,
-						Left:  tree.NumericLiteral{Value: 4},
-						Right: tree.NumericLiteral{Value: 2},
+						Left:  tree.NumericLiteral{4},
+						Right: tree.NumericLiteral{2},
 					},
 				},
 			},
@@ -392,8 +392,8 @@ func (s *CompilerArithmeticSuite) Test_compilationOfModuloWithK(c *C) {
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.MOD,
-						Left:  tree.NumericLiteral{Value: 10},
-						Right: tree.NumericLiteral{Value: 3},
+						Left:  tree.NumericLiteral{10},
+						Right: tree.NumericLiteral{3},
 					},
 				},
 			},
@@ -428,8 +428,8 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBinaryXORWithK(c *C) {
 					Op:   tree.EQL,
 					Right: tree.Arithmetic{
 						Op:    tree.BINXOR,
-						Left:  tree.NumericLiteral{Value: 4},
-						Right: tree.NumericLiteral{Value: 3},
+						Left:  tree.NumericLiteral{4},
+						Right: tree.NumericLiteral{3},
 					},
 				},
 			},

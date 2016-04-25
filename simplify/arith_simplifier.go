@@ -13,34 +13,34 @@ func (s *simplifier) AcceptArithmetic(a tree.Arithmetic) {
 	if ok1 && ok2 {
 		switch a.Op {
 		case tree.PLUS:
-			s.result = tree.NumericLiteral{Value: pl + pr}
+			s.result = tree.NumericLiteral{pl + pr}
 			return
 		case tree.MINUS:
-			s.result = tree.NumericLiteral{Value: pl - pr}
+			s.result = tree.NumericLiteral{pl - pr}
 			return
 		case tree.MULT:
-			s.result = tree.NumericLiteral{Value: pl * pr}
+			s.result = tree.NumericLiteral{pl * pr}
 			return
 		case tree.DIV:
-			s.result = tree.NumericLiteral{Value: pl / pr}
+			s.result = tree.NumericLiteral{pl / pr}
 			return
 		case tree.MOD:
-			s.result = tree.NumericLiteral{Value: pl % pr}
+			s.result = tree.NumericLiteral{pl % pr}
 			return
 		case tree.BINAND:
-			s.result = tree.NumericLiteral{Value: pl & pr}
+			s.result = tree.NumericLiteral{pl & pr}
 			return
 		case tree.BINOR:
-			s.result = tree.NumericLiteral{Value: pl | pr}
+			s.result = tree.NumericLiteral{pl | pr}
 			return
 		case tree.BINXOR:
-			s.result = tree.NumericLiteral{Value: pl ^ pr}
+			s.result = tree.NumericLiteral{pl ^ pr}
 			return
 		case tree.LSH:
-			s.result = tree.NumericLiteral{Value: pl << pr}
+			s.result = tree.NumericLiteral{pl << pr}
 			return
 		case tree.RSH:
-			s.result = tree.NumericLiteral{Value: pl >> pr}
+			s.result = tree.NumericLiteral{pl >> pr}
 			return
 		}
 	}
