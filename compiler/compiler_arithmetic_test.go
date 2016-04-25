@@ -381,3 +381,75 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBitwiseRightShiftWithK(c *C)
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
 }
+
+func (s *CompilerArithmeticSuite) Test_compilationOfModuloWithK(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{
+					Left: tree.Argument{Index: 0},
+					Op:   tree.EQL,
+					Right: tree.Arithmetic{
+						Op:    tree.MOD,
+						Left:  tree.NumericLiteral{10},
+						Right: tree.NumericLiteral{3},
+					},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+
+	a := asm.Dump(res)
+
+	c.Assert(a, Equals, ""+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t08\t1\n"+
+		"ld_imm\tA\n"+
+		"mod_k\t3\n"+
+		"tax\n"+
+		"ld_abs\t14\n"+
+		"jeq_k\t00\t03\t0\n"+
+		"ld_abs\t10\n"+
+		"jeq_x\t00\t01\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
+}
+
+func (s *CompilerArithmeticSuite) Test_compilationOfBinaryXORWithK(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{
+					Left: tree.Argument{Index: 0},
+					Op:   tree.EQL,
+					Right: tree.Arithmetic{
+						Op:    tree.BINXOR,
+						Left:  tree.NumericLiteral{4},
+						Right: tree.NumericLiteral{3},
+					},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+
+	a := asm.Dump(res)
+
+	c.Assert(a, Equals, ""+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t08\t1\n"+
+		"ld_imm\t4\n"+
+		"xor_k\t3\n"+
+		"tax\n"+
+		"ld_abs\t14\n"+
+		"jeq_k\t00\t03\t0\n"+
+		"ld_abs\t10\n"+
+		"jeq_x\t00\t01\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
+}

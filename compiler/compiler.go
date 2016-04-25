@@ -121,6 +121,10 @@ func (c *compiler) performArithmetic(op tree.ArithmeticType, operand uint32) {
 		c.op(LSH_K, operand)
 	case tree.RSH:
 		c.op(RSH_K, operand)
+	case tree.MOD:
+		c.op(MOD_K, operand)
+	case tree.BINXOR:
+		c.op(XOR_K, operand)
 	}
 }
 
