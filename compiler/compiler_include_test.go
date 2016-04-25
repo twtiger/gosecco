@@ -24,7 +24,7 @@ func (s *IncludeCompilerSuite) Test_compliationOfIncludeOperation(c *C) {
 				Body: tree.Inclusion{
 					Positive: true,
 					Left:     tree.Argument{Index: 0},
-					Rights:   []tree.Numeric{tree.NumericLiteral{1}, tree.NumericLiteral{2}},
+					Rights:   []tree.Numeric{tree.NumericLiteral{Value: 1}, tree.NumericLiteral{Value: 2}},
 				},
 			},
 		},
@@ -52,7 +52,7 @@ func (s *IncludeCompilerSuite) Test_compliationOfNotIncludeOperation(c *C) {
 				Body: tree.Inclusion{
 					Positive: false,
 					Left:     tree.Argument{Index: 0},
-					Rights:   []tree.Numeric{tree.NumericLiteral{1}, tree.NumericLiteral{2}},
+					Rights:   []tree.Numeric{tree.NumericLiteral{Value: 1}, tree.NumericLiteral{Value: 2}},
 				},
 			},
 		},
@@ -79,7 +79,7 @@ func (s *IncludeCompilerSuite) Test_compliationOfArgumentsInIncludeList(c *C) {
 				Name: "write",
 				Body: tree.Inclusion{
 					Positive: true,
-					Left:     tree.NumericLiteral{1},
+					Left:     tree.NumericLiteral{Value: 1},
 					Rights:   []tree.Numeric{tree.Argument{Index: 1}, tree.Argument{Index: 0}},
 				},
 			},
@@ -112,8 +112,8 @@ func (s *IncludeCompilerSuite) Test_compliationOfIncludeExpressionofNumericWithM
 				Name: "write",
 				Body: tree.Inclusion{
 					Positive: true,
-					Left:     tree.NumericLiteral{1},
-					Rights:   []tree.Numeric{tree.Argument{Index: 1}, tree.NumericLiteral{42}},
+					Left:     tree.NumericLiteral{Value: 1},
+					Rights:   []tree.Numeric{tree.Argument{Index: 1}, tree.NumericLiteral{Value: 42}},
 				},
 			},
 		},
@@ -144,7 +144,7 @@ func (s *IncludeCompilerSuite) Test_compliationOfIncludeExpressionofArgumentWith
 				Body: tree.Inclusion{
 					Positive: true,
 					Left:     tree.Argument{Index: 1},
-					Rights:   []tree.Numeric{tree.Argument{Index: 1}, tree.NumericLiteral{0}},
+					Rights:   []tree.Numeric{tree.Argument{Index: 1}, tree.NumericLiteral{Value: 0}},
 				},
 			},
 		},

@@ -24,8 +24,8 @@ func (s *BoolCompilerSuite) Test_compliationOfOrOperation(c *C) {
 			tree.Rule{
 				Name: "write",
 				Body: tree.Or{
-					Left:  tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{12}, Right: tree.NumericLiteral{4}}},
-					Right: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{12}, Right: tree.NumericLiteral{4}}},
+					Left:  tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{Value: 12}, Right: tree.NumericLiteral{Value: 4}}},
+					Right: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{Value: 12}, Right: tree.NumericLiteral{Value: 4}}},
 				},
 			},
 		},
@@ -138,8 +138,8 @@ func (s *CompilerComparisonSuite) Test_compilationOfOrExpression(c *C) {
 			tree.Rule{
 				Name: "write",
 				Body: tree.Or{
-					Left:  tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
-					Right: tree.Comparison{Left: tree.Argument{Index: 1}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+					Left:  tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}},
+					Right: tree.Comparison{Left: tree.Argument{Index: 1}, Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}},
 				},
 			},
 		},
@@ -168,8 +168,8 @@ func (s *CompilerComparisonSuite) Test_compilationOfAndExpression(c *C) {
 			tree.Rule{
 				Name: "write",
 				Body: tree.And{
-					Left:  tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
-					Right: tree.Comparison{Left: tree.Argument{Index: 1}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+					Left:  tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}},
+					Right: tree.Comparison{Left: tree.Argument{Index: 1}, Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}},
 				},
 			},
 		},
@@ -200,8 +200,8 @@ func (s *CompilerComparisonSuite) Test_compilationOfNegatedExpression(c *C) {
 				Name: "write",
 				Body: tree.Negation{
 					Operand: tree.And{
-						Left:  tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
-						Right: tree.Comparison{Left: tree.Argument{Index: 1}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+						Left:  tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}},
+						Right: tree.Comparison{Left: tree.Argument{Index: 1}, Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}},
 					},
 				},
 			},
@@ -231,9 +231,9 @@ func (s *CompilerComparisonSuite) Test_compilationOfNestedNegatedExpression(c *C
 			tree.Rule{
 				Name: "write",
 				Body: tree.And{
-					Left: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+					Left: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}},
 					Right: tree.Negation{
-						Operand: tree.Comparison{Left: tree.Argument{Index: 1}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+						Operand: tree.Comparison{Left: tree.Argument{Index: 1}, Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}},
 					},
 				},
 			},

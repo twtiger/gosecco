@@ -403,7 +403,7 @@ func (ctx *parseContext) primary() (tree.Expression, error) {
 	case INT:
 		_, data := ctx.consume()
 		val, _ := strconv.ParseUint(string(data), 0, 32)
-		return tree.NumericLiteral{uint32(val)}, nil
+		return tree.NumericLiteral{Value: uint32(val)}, nil
 	case TRUE:
 		ctx.consume()
 		return tree.BooleanLiteral{true}, nil

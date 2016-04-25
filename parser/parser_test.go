@@ -12,96 +12,96 @@ var _ = Suite(&ParserSuite{})
 func (s *ParserSuite) Test_parsesNumber(c *C) {
 	result, _, _, _ := parseExpression("42")
 
-	c.Assert(result, DeepEquals, tree.NumericLiteral{42})
+	c.Assert(result, DeepEquals, tree.NumericLiteral{Value: 42})
 }
 
 func (s *ParserSuite) Test_parsesAddition(c *C) {
 	result, _, _, _ := parseExpression("42 + 15")
 
-	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{15}})
+	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 15}})
 }
 
 func (s *ParserSuite) Test_parsesMultiplication(c *C) {
 	result, _, _, _ := parseExpression("42 * 15")
 
-	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.MULT, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{15}})
+	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.MULT, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 15}})
 }
 
 func (s *ParserSuite) Test_parsesDivision(c *C) {
 	result, _, _, _ := parseExpression("42 / 15")
 
-	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.DIV, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{15}})
+	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.DIV, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 15}})
 }
 
 func (s *ParserSuite) Test_parsesModulo(c *C) {
 	result, _, _, _ := parseExpression("42 % 15")
 
-	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.MOD, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{15}})
+	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.MOD, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 15}})
 }
 
 func (s *ParserSuite) Test_parsesRSH(c *C) {
 	result, _, _, _ := parseExpression("42 >> 15")
 
-	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{15}})
+	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 15}})
 }
 
 func (s *ParserSuite) Test_parsesLSH(c *C) {
 	result, _, _, _ := parseExpression("42 << 15")
 
-	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.LSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{15}})
+	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.LSH, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 15}})
 }
 
 func (s *ParserSuite) Test_parsesOR(c *C) {
 	result, _, _, _ := parseExpression("42 | 15")
 
-	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.BINOR, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{15}})
+	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.BINOR, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 15}})
 }
 
 func (s *ParserSuite) Test_parsesAND(c *C) {
 	result, _, _, _ := parseExpression("42 & 15")
 
-	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.BINAND, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{15}})
+	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.BINAND, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 15}})
 }
 
 func (s *ParserSuite) Test_parsesXOR(c *C) {
 	result, _, _, _ := parseExpression("42 ^ 15")
 
-	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.BINXOR, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{15}})
+	c.Assert(result, DeepEquals, tree.Arithmetic{Op: tree.BINXOR, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 15}})
 }
 
 func (s *ParserSuite) Test_parsesMultiplicationAndAddition(c *C) {
 	result, _, _, _ := parseExpression("42 * 15 + 1")
 
 	c.Assert(result, DeepEquals,
-		tree.Arithmetic{Op: tree.PLUS, Left: tree.Arithmetic{Op: tree.MULT, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{15}}, Right: tree.NumericLiteral{1}})
+		tree.Arithmetic{Op: tree.PLUS, Left: tree.Arithmetic{Op: tree.MULT, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 15}}, Right: tree.NumericLiteral{Value: 1}})
 }
 
 func (s *ParserSuite) Test_parsesParens(c *C) {
 	result, _, _, _ := parseExpression("42 * (15 + 1)")
 
 	c.Assert(result, DeepEquals,
-		tree.Arithmetic{Op: tree.MULT, Left: tree.NumericLiteral{42}, Right: tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{15}, Right: tree.NumericLiteral{1}}})
+		tree.Arithmetic{Op: tree.MULT, Left: tree.NumericLiteral{Value: 42}, Right: tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{Value: 15}, Right: tree.NumericLiteral{Value: 1}}})
 }
 
 func (s *ParserSuite) Test_parsesArgument(c *C) {
 	result, _, _, _ := parseExpression("42 * arg1")
 
 	c.Assert(result, DeepEquals,
-		tree.Arithmetic{Op: tree.MULT, Left: tree.NumericLiteral{42}, Right: tree.Argument{Index: 1}})
+		tree.Arithmetic{Op: tree.MULT, Left: tree.NumericLiteral{Value: 42}, Right: tree.Argument{Index: 1}})
 }
 
 func (s *ParserSuite) Test_parsesVariable(c *C) {
 	result, _, _, _ := parseExpression("42 * arg6")
 
 	c.Assert(result, DeepEquals,
-		tree.Arithmetic{Op: tree.MULT, Left: tree.NumericLiteral{42}, Right: tree.Variable{"arg6"}})
+		tree.Arithmetic{Op: tree.MULT, Left: tree.NumericLiteral{Value: 42}, Right: tree.Variable{"arg6"}})
 }
 
 func (s *ParserSuite) Test_parsesUnaryNegation(c *C) {
 	result, _, _, _ := parseExpression("42 * ~arg6")
 
 	c.Assert(result, DeepEquals,
-		tree.Arithmetic{Op: tree.MULT, Left: tree.NumericLiteral{42}, Right: tree.BinaryNegation{tree.Variable{"arg6"}}})
+		tree.Arithmetic{Op: tree.MULT, Left: tree.NumericLiteral{Value: 42}, Right: tree.BinaryNegation{tree.Variable{"arg6"}}})
 }
 
 func (s *ParserSuite) Test_parsesBooleanExpression(c *C) {
@@ -120,19 +120,19 @@ func (s *ParserSuite) Test_parsesEquality(c *C) {
 	c.Assert(result, DeepEquals, tree.Comparison{Op: tree.EQL, Left: tree.BooleanLiteral{true}, Right: tree.BooleanLiteral{false}})
 
 	result, _, _, _ = parseExpression("42 != 1")
-	c.Assert(result, DeepEquals, tree.Comparison{Op: tree.NEQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}})
+	c.Assert(result, DeepEquals, tree.Comparison{Op: tree.NEQL, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 1}})
 
 	result, _, _, _ = parseExpression("42 > 1")
-	c.Assert(result, DeepEquals, tree.Comparison{Op: tree.GT, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}})
+	c.Assert(result, DeepEquals, tree.Comparison{Op: tree.GT, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 1}})
 
 	result, _, _, _ = parseExpression("42 >= 1")
-	c.Assert(result, DeepEquals, tree.Comparison{Op: tree.GTE, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}})
+	c.Assert(result, DeepEquals, tree.Comparison{Op: tree.GTE, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 1}})
 
 	result, _, _, _ = parseExpression("42 < 1")
-	c.Assert(result, DeepEquals, tree.Comparison{Op: tree.LT, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}})
+	c.Assert(result, DeepEquals, tree.Comparison{Op: tree.LT, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 1}})
 
 	result, _, _, _ = parseExpression("42 <= 1")
-	c.Assert(result, DeepEquals, tree.Comparison{Op: tree.LTE, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}})
+	c.Assert(result, DeepEquals, tree.Comparison{Op: tree.LTE, Left: tree.NumericLiteral{Value: 42}, Right: tree.NumericLiteral{Value: 1}})
 }
 
 func (s *ParserSuite) Test_parseCall(c *C) {
@@ -177,7 +177,7 @@ func (s *ParserSuite) Test_parsesAlmostSimpleRule(c *C) {
 	c.Assert(result, DeepEquals, tree.Comparison{
 		Left:  tree.Argument{Index: 0},
 		Op:    tree.GT,
-		Right: tree.NumericLiteral{0},
+		Right: tree.NumericLiteral{Value: 0},
 	})
 }
 
@@ -187,7 +187,7 @@ func (s *ParserSuite) Test_parseAnotherRule(c *C) {
 	c.Assert(result, DeepEquals, tree.Comparison{
 		Left:  tree.Argument{Index: 0},
 		Op:    tree.EQL,
-		Right: tree.NumericLiteral{4},
+		Right: tree.NumericLiteral{Value: 4},
 	})
 }
 
@@ -199,12 +199,12 @@ func (s *ParserSuite) Test_parseYetAnotherRule(c *C) {
 		Left: tree.Comparison{
 			Left:  tree.Argument{Index: 0},
 			Op:    tree.EQL,
-			Right: tree.NumericLiteral{4},
+			Right: tree.NumericLiteral{Value: 4},
 		},
 		Right: tree.Comparison{
 			Left:  tree.Argument{Index: 0},
 			Op:    tree.EQL,
-			Right: tree.NumericLiteral{5},
+			Right: tree.NumericLiteral{Value: 5},
 		},
 	})
 }
@@ -371,7 +371,7 @@ func (s *ParserSuite) Test_parseArgumentsCorrectly_andIncorrectly(c *C) {
 	c.Assert(result, DeepEquals, tree.Comparison{
 		Left:  tree.Variable{"arg6"},
 		Op:    tree.EQL,
-		Right: tree.NumericLiteral{0},
+		Right: tree.NumericLiteral{Value: 0},
 	})
 }
 

@@ -16,7 +16,7 @@ var _ = Suite(&CheckerSuite{})
 
 func (s *CheckerSuite) Test_checksNumber(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.NumericLiteral{42}},
+		tree.Rule{Name: "read", Body: tree.NumericLiteral{Value: 42}},
 	}}
 
 	val := EnsureValid(toCheck)
@@ -27,7 +27,7 @@ func (s *CheckerSuite) Test_checksNumber(c *C) {
 
 func (s *CheckerSuite) Test_checksComparisonRight(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.BooleanLiteral{false}}},
+		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{Value: 42}, Right: tree.BooleanLiteral{false}}},
 	}}
 
 	val := EnsureValid(toCheck)
@@ -38,7 +38,7 @@ func (s *CheckerSuite) Test_checksComparisonRight(c *C) {
 
 func (s *CheckerSuite) Test_checksComparisonLeft(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Right: tree.NumericLiteral{42}, Left: tree.BooleanLiteral{false}}},
+		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}, Left: tree.BooleanLiteral{false}}},
 	}}
 
 	val := EnsureValid(toCheck)
@@ -60,8 +60,8 @@ func (s *CheckerSuite) Test_checksSuccessfulSimpleCase(c *C) {
 func (s *CheckerSuite) Test_checksComparisonInNumericContext(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
 		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL,
-			Left:  tree.NumericLiteral{23},
-			Right: tree.Comparison{Op: tree.EQL, Right: tree.NumericLiteral{42}, Left: tree.NumericLiteral{15}}}},
+			Left:  tree.NumericLiteral{Value: 23},
+			Right: tree.Comparison{Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}, Left: tree.NumericLiteral{Value: 15}}}},
 	}}
 
 	val := EnsureValid(toCheck)
@@ -73,7 +73,7 @@ func (s *CheckerSuite) Test_checksComparisonInNumericContext(c *C) {
 func (s *CheckerSuite) Test_checksAndAsArgument(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
 		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL,
-			Left:  tree.NumericLiteral{23},
+			Left:  tree.NumericLiteral{Value: 23},
 			Right: tree.And{Left: tree.BooleanLiteral{true}, Right: tree.BooleanLiteral{true}}}},
 	}}
 
@@ -86,7 +86,7 @@ func (s *CheckerSuite) Test_checksAndAsArgument(c *C) {
 func (s *CheckerSuite) Test_checksAndArgumentLeft(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
 		tree.Rule{Name: "read", Body: tree.And{
-			Left:  tree.NumericLiteral{23},
+			Left:  tree.NumericLiteral{Value: 23},
 			Right: tree.BooleanLiteral{true},
 		}}}}
 
@@ -99,7 +99,7 @@ func (s *CheckerSuite) Test_checksAndArgumentLeft(c *C) {
 func (s *CheckerSuite) Test_checksAndArgumentRight(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
 		tree.Rule{Name: "read", Body: tree.And{
-			Right: tree.NumericLiteral{23},
+			Right: tree.NumericLiteral{Value: 23},
 			Left:  tree.BooleanLiteral{true},
 		}}}}
 
@@ -112,7 +112,7 @@ func (s *CheckerSuite) Test_checksAndArgumentRight(c *C) {
 func (s *CheckerSuite) Test_checksOrAsArgument(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
 		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL,
-			Left:  tree.NumericLiteral{23},
+			Left:  tree.NumericLiteral{Value: 23},
 			Right: tree.Or{Left: tree.BooleanLiteral{true}, Right: tree.BooleanLiteral{true}}}},
 	}}
 
@@ -125,7 +125,7 @@ func (s *CheckerSuite) Test_checksOrAsArgument(c *C) {
 func (s *CheckerSuite) Test_checksOrArgumentLeft(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
 		tree.Rule{Name: "read", Body: tree.Or{
-			Left:  tree.NumericLiteral{23},
+			Left:  tree.NumericLiteral{Value: 23},
 			Right: tree.BooleanLiteral{true},
 		}}}}
 
@@ -138,7 +138,7 @@ func (s *CheckerSuite) Test_checksOrArgumentLeft(c *C) {
 func (s *CheckerSuite) Test_checksOrArgumentRight(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
 		tree.Rule{Name: "read", Body: tree.Or{
-			Right: tree.NumericLiteral{23},
+			Right: tree.NumericLiteral{Value: 23},
 			Left:  tree.BooleanLiteral{true},
 		}}}}
 
@@ -159,7 +159,7 @@ func (s *CheckerSuite) Test_argumentShouldTypecheckAsNumeric(c *C) {
 
 func (s *CheckerSuite) Test_checksSuccessfulSimpleCaseWithArg(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Right: tree.NumericLiteral{42}, Left: tree.Argument{Index: 0}}},
+		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}, Left: tree.Argument{Index: 0}}},
 	}}
 
 	val := EnsureValid(toCheck)
@@ -191,7 +191,7 @@ func (s *CheckerSuite) Test_checksInvalidCall(c *C) {
 
 func (s *CheckerSuite) Test_checksSuccessfulSimpleCaseWithBinNeg(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Right: tree.NumericLiteral{42}, Left: tree.BinaryNegation{tree.NumericLiteral{42}}}},
+		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}, Left: tree.BinaryNegation{tree.NumericLiteral{Value: 42}}}},
 	}}
 
 	val := EnsureValid(toCheck)
@@ -201,7 +201,7 @@ func (s *CheckerSuite) Test_checksSuccessfulSimpleCaseWithBinNeg(c *C) {
 
 func (s *CheckerSuite) Test_checksInvalidSimpleArgumentToBinNeg(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Right: tree.NumericLiteral{42}, Left: tree.BinaryNegation{tree.BooleanLiteral{false}}}},
+		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}, Left: tree.BinaryNegation{tree.BooleanLiteral{false}}}},
 	}}
 
 	val := EnsureValid(toCheck)
@@ -212,7 +212,7 @@ func (s *CheckerSuite) Test_checksInvalidSimpleArgumentToBinNeg(c *C) {
 
 func (s *CheckerSuite) Test_checksInvalidCaseWithBinNeg(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.BinaryNegation{tree.NumericLiteral{42}}},
+		tree.Rule{Name: "read", Body: tree.BinaryNegation{tree.NumericLiteral{Value: 42}}},
 	}}
 
 	val := EnsureValid(toCheck)
@@ -223,7 +223,7 @@ func (s *CheckerSuite) Test_checksInvalidCaseWithBinNeg(c *C) {
 
 func (s *CheckerSuite) Test_checksArithRight(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Left: tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{42}, Right: tree.BooleanLiteral{false}}, Right: tree.NumericLiteral{42}}},
+		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Left: tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{Value: 42}, Right: tree.BooleanLiteral{false}}, Right: tree.NumericLiteral{Value: 42}}},
 	}}
 
 	val := EnsureValid(toCheck)
@@ -234,7 +234,7 @@ func (s *CheckerSuite) Test_checksArithRight(c *C) {
 
 func (s *CheckerSuite) Test_checksArithLeft(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Left: tree.Arithmetic{Op: tree.PLUS, Right: tree.NumericLiteral{42}, Left: tree.BooleanLiteral{false}}, Right: tree.NumericLiteral{5233}}},
+		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Left: tree.Arithmetic{Op: tree.PLUS, Right: tree.NumericLiteral{Value: 42}, Left: tree.BooleanLiteral{false}}, Right: tree.NumericLiteral{Value: 5233}}},
 	}}
 
 	val := EnsureValid(toCheck)
@@ -246,8 +246,8 @@ func (s *CheckerSuite) Test_checksArithLeft(c *C) {
 func (s *CheckerSuite) Test_checksArithAsArgument(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
 		tree.Rule{Name: "read", Body: tree.Arithmetic{Op: tree.PLUS,
-			Left:  tree.NumericLiteral{23},
-			Right: tree.NumericLiteral{24},
+			Left:  tree.NumericLiteral{Value: 23},
+			Right: tree.NumericLiteral{Value: 24},
 		}}}}
 
 	val := EnsureValid(toCheck)
@@ -267,7 +267,7 @@ func (s *CheckerSuite) Test_checksSuccess_booleanNegation(c *C) {
 
 func (s *CheckerSuite) Test_checksInvalidPlacement_booleanNegation(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Right: tree.NumericLiteral{42}, Left: tree.Negation{tree.BooleanLiteral{false}}}},
+		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Right: tree.NumericLiteral{Value: 42}, Left: tree.Negation{tree.BooleanLiteral{false}}}},
 	}}
 
 	val := EnsureValid(toCheck)
@@ -278,7 +278,7 @@ func (s *CheckerSuite) Test_checksInvalidPlacement_booleanNegation(c *C) {
 
 func (s *CheckerSuite) Test_checksInvalidArgument_booleanNegation(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.Negation{tree.NumericLiteral{42}}},
+		tree.Rule{Name: "read", Body: tree.Negation{tree.NumericLiteral{Value: 42}}},
 	}}
 
 	val := EnsureValid(toCheck)
@@ -289,7 +289,7 @@ func (s *CheckerSuite) Test_checksInvalidArgument_booleanNegation(c *C) {
 
 func (s *CheckerSuite) Test_inclusion_success(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.Inclusion{Positive: true, Left: tree.NumericLiteral{42}, Rights: []tree.Numeric{tree.NumericLiteral{42}, tree.NumericLiteral{42}, tree.NumericLiteral{42}}}}}}
+		tree.Rule{Name: "read", Body: tree.Inclusion{Positive: true, Left: tree.NumericLiteral{Value: 42}, Rights: []tree.Numeric{tree.NumericLiteral{Value: 42}, tree.NumericLiteral{Value: 42}, tree.NumericLiteral{Value: 42}}}}}}
 
 	val := EnsureValid(toCheck)
 
@@ -298,7 +298,7 @@ func (s *CheckerSuite) Test_inclusion_success(c *C) {
 
 func (s *CheckerSuite) Test_inclusion_badPlacement(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Left: tree.Inclusion{Positive: true, Left: tree.NumericLiteral{42}, Rights: []tree.Numeric{tree.NumericLiteral{42}, tree.NumericLiteral{42}, tree.NumericLiteral{42}}}, Right: tree.NumericLiteral{42}}}}}
+		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Left: tree.Inclusion{Positive: true, Left: tree.NumericLiteral{Value: 42}, Rights: []tree.Numeric{tree.NumericLiteral{Value: 42}, tree.NumericLiteral{Value: 42}, tree.NumericLiteral{Value: 42}}}, Right: tree.NumericLiteral{Value: 42}}}}}
 
 	val := EnsureValid(toCheck)
 
@@ -308,7 +308,7 @@ func (s *CheckerSuite) Test_inclusion_badPlacement(c *C) {
 
 func (s *CheckerSuite) Test_inclusion_badLeft(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.Inclusion{Positive: true, Left: tree.BooleanLiteral{false}, Rights: []tree.Numeric{tree.NumericLiteral{42}, tree.NumericLiteral{42}, tree.NumericLiteral{42}}}}}}
+		tree.Rule{Name: "read", Body: tree.Inclusion{Positive: true, Left: tree.BooleanLiteral{false}, Rights: []tree.Numeric{tree.NumericLiteral{Value: 42}, tree.NumericLiteral{Value: 42}, tree.NumericLiteral{Value: 42}}}}}}
 
 	val := EnsureValid(toCheck)
 
@@ -318,7 +318,7 @@ func (s *CheckerSuite) Test_inclusion_badLeft(c *C) {
 
 func (s *CheckerSuite) Test_inclusion_badRight(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
-		tree.Rule{Name: "read", Body: tree.Inclusion{Positive: true, Left: tree.NumericLiteral{23}, Rights: []tree.Numeric{tree.NumericLiteral{42}, tree.BooleanLiteral{false}, tree.NumericLiteral{42}}}}}}
+		tree.Rule{Name: "read", Body: tree.Inclusion{Positive: true, Left: tree.NumericLiteral{Value: 23}, Rights: []tree.Numeric{tree.NumericLiteral{Value: 42}, tree.BooleanLiteral{false}, tree.NumericLiteral{Value: 42}}}}}}
 
 	val := EnsureValid(toCheck)
 

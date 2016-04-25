@@ -8,6 +8,6 @@ func (s *simplifier) AcceptBinaryNegation(v tree.BinaryNegation) {
 	val2, ok := potentialExtractValue(val)
 	if ok {
 
-		s.result = tree.NumericLiteral{^val2}
+		s.result = tree.NumericLiteral{Value: ^val2}
 	}
 }
