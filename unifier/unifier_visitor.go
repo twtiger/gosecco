@@ -43,11 +43,18 @@ func (r *replacer) AcceptBinaryNegation(b tree.BinaryNegation) {
 func (r *replacer) AcceptBooleanLiteral(tree.BooleanLiteral) {}
 
 func (r *replacer) AcceptCall(b tree.Call) {
-	v := r.macros[b.Name]
+	v := r.macros[b.Name] // we get the name of the macro
+
+	// write: call(arg0)
+
+	// call becomes our macro name
+	// then we make macros like: arg0: x
+	// then we add it to our list of macros
+	// then we reduce it
 
 	nm := make(map[string]tree.Macro)
 	for i, e := range b.Args {
-		m := tree.Macro{Name: v.ArgumentNames[i], Body: e}
+		m := tree.Macro{Name: v.ArgumentNames[i], Body: e} // we make a new macro
 		nm[v.ArgumentNames[i]] = m
 	}
 
