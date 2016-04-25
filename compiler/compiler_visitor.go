@@ -73,8 +73,14 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 			if i == len(c.Rights)-1 {
 				cv.toggleTerminalJumps(c.Positive)
 			}
-			lit, _ := e.(tree.NumericLiteral)
-			cv.c.jumpOnKComparison(lit.Value, tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
+			lit, isLiteral := e.(tree.NumericLiteral)
+			if isLiteral {
+				cv.c.jumpOnKComparison(lit.Value, tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
+			} else {
+				cv.c.moveAtoX()
+				e.Accept(cv)
+				cv.c.jumpOnXComparison(tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
+			}
 		}
 	}
 }
