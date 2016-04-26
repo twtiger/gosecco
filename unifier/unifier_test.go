@@ -16,13 +16,12 @@ var _ = Suite(&UnifierSuite{})
 
 func (s *UnifierSuite) Test_Unify_withNothingToUnify(c *C) {
 	input := tree.RawPolicy{
+		ListType:     tree.WhiteList,
 		RuleOrMacros: []interface{}{},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 
-	c.Assert(output.DefaultPositiveAction, Equals, "")
-	c.Assert(output.DefaultNegativeAction, Equals, "")
 	c.Assert(len(output.Macros), Equals, 0)
 	c.Assert(len(output.Rules), Equals, 0)
 }
@@ -39,10 +38,8 @@ func (s *UnifierSuite) Test_Unify_withRuleToUnify(c *C) {
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 
-	c.Assert(output.DefaultPositiveAction, Equals, "")
-	c.Assert(output.DefaultNegativeAction, Equals, "")
 	c.Assert(len(output.Macros), Equals, 0)
 	c.Assert(len(output.Rules), Equals, 1)
 	c.Assert(output.Rules[0], Equals, rule)
@@ -66,10 +63,8 @@ func (s *UnifierSuite) Test_Unify_withRuleAndMacroThatDoesntUnify(c *C) {
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 
-	c.Assert(output.DefaultPositiveAction, Equals, "")
-	c.Assert(output.DefaultNegativeAction, Equals, "")
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["var1"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -94,7 +89,7 @@ func (s *UnifierSuite) Test_Unify_withRuleAndMacroToActuallyUnify(c *C) {
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["var1"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -118,6 +113,7 @@ func (s *UnifierSuite) Test_Unify_orExpression(c *C) {
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			macro1,
 			macro2,
@@ -125,7 +121,7 @@ func (s *UnifierSuite) Test_Unify_orExpression(c *C) {
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 	c.Assert(len(output.Macros), Equals, 2)
 	c.Assert(output.Macros["var1"], DeepEquals, macro1)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -144,13 +140,14 @@ func (s *UnifierSuite) Test_Unify_withAndExpressione(c *C) {
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			macro,
 			rule,
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["var1"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -169,13 +166,14 @@ func (s *UnifierSuite) Test_Unify_withArithmeticExpression(c *C) {
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			macro,
 			rule,
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["var1"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -197,13 +195,14 @@ func (s *UnifierSuite) Test_Unify_withInclusionExpression(c *C) {
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			macro,
 			rule,
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["var2"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -230,6 +229,7 @@ func (s *UnifierSuite) Test_Unify_withInclusionExpressionVariableLeft(c *C) {
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			macro1,
 			macro2,
@@ -237,7 +237,7 @@ func (s *UnifierSuite) Test_Unify_withInclusionExpressionVariableLeft(c *C) {
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 	c.Assert(len(output.Macros), Equals, 2)
 	c.Assert(output.Macros["var1"], DeepEquals, macro1)
 	c.Assert(output.Macros["var2"], DeepEquals, macro2)
@@ -257,13 +257,14 @@ func (s *UnifierSuite) Test_Unify_withNegationExpression(c *C) {
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			macro,
 			rule,
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["var1"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -283,13 +284,14 @@ func (s *UnifierSuite) Test_Unify_withCallExpression(c *C) {
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			macro,
 			rule,
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["compV1"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -309,13 +311,14 @@ func (s *UnifierSuite) Test_Unify_withCallExpressionWithMultipleVariables(c *C) 
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			macro,
 			rule,
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["compV1"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -340,6 +343,7 @@ func (s *UnifierSuite) Test_Unify_withCallExpressionWithPreviouslyDefinedVariabl
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			macro1,
 			macro2,
@@ -347,7 +351,7 @@ func (s *UnifierSuite) Test_Unify_withCallExpressionWithPreviouslyDefinedVariabl
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 	c.Assert(output.Macros["var2"], DeepEquals, macro1)
 	c.Assert(output.Macros["compV1"], DeepEquals, macro2)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -361,12 +365,13 @@ func (s *UnifierSuite) Test_Unify_withNoVariableDefinedRaisesNoVariableDefinedEr
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			rule,
 		},
 	}
 
-	_, error := Unify(input)
+	_, error := Unify(input, true)
 	// TODO handle being able to return nil?
 	//c.Assert(output, IsNil)
 	c.Assert(error, ErrorMatches, "Variable not defined")
@@ -384,16 +389,17 @@ func (s *UnifierSuite) Test_Unify_withDefaultPositiveNumericActionSetsPositiveAc
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			rule,
 			macro,
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 
 	c.Assert(output.DefaultPositiveAction, Equals, "42")
-	c.Assert(output.DefaultNegativeAction, Equals, "")
+	c.Assert(output.DefaultNegativeAction, Equals, "kill")
 	c.Assert(len(output.Macros), Equals, 0)
 	c.Assert(len(output.Rules), Equals, 1)
 	c.Assert(output.Rules[0], DeepEquals, rule)
@@ -411,16 +417,17 @@ func (s *UnifierSuite) Test_Unify_withDefaultPositiveVariableActionSetsPositiveA
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			rule,
 			macro,
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 
 	c.Assert(output.DefaultPositiveAction, Equals, "trace")
-	c.Assert(output.DefaultNegativeAction, Equals, "")
+	c.Assert(output.DefaultNegativeAction, Equals, "kill")
 	c.Assert(len(output.Macros), Equals, 0)
 	c.Assert(len(output.Rules), Equals, 1)
 	c.Assert(output.Rules[0], DeepEquals, rule)
@@ -438,15 +445,16 @@ func (s *UnifierSuite) Test_Unify_withDefaultNegativeNumericActionSetsNegativeAc
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			rule,
 			macro,
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 
-	c.Assert(output.DefaultPositiveAction, Equals, "")
+	c.Assert(output.DefaultPositiveAction, Equals, "allow")
 	c.Assert(output.DefaultNegativeAction, Equals, "0")
 	c.Assert(len(output.Macros), Equals, 0)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -465,15 +473,16 @@ func (s *UnifierSuite) Test_Unify_withDefaultNegativeVariableActionSetsNegativeA
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			rule,
 			macro,
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 
-	c.Assert(output.DefaultPositiveAction, Equals, "")
+	c.Assert(output.DefaultPositiveAction, Equals, "allow")
 	c.Assert(output.DefaultNegativeAction, Equals, "kill")
 	c.Assert(len(output.Macros), Equals, 0)
 	c.Assert(len(output.Rules), Equals, 1)
@@ -498,6 +507,7 @@ func (s *UnifierSuite) Test_Unify_withDefaultNegativeNumericActionSetsNegativeAc
 	}
 
 	input := tree.RawPolicy{
+		ListType: tree.WhiteList,
 		RuleOrMacros: []interface{}{
 			macro2,
 			macro1,
@@ -505,9 +515,9 @@ func (s *UnifierSuite) Test_Unify_withDefaultNegativeNumericActionSetsNegativeAc
 		},
 	}
 
-	output, _ := Unify(input)
+	output, _ := Unify(input, true)
 
-	c.Assert(output.DefaultPositiveAction, Equals, "")
+	c.Assert(output.DefaultPositiveAction, Equals, "allow")
 	c.Assert(output.DefaultNegativeAction, Equals, "0")
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(len(output.Rules), Equals, 1)

@@ -44,7 +44,7 @@ func parseLines(path string, lines []string) (tree.RawPolicy, error) {
 		}
 	}
 
-	return tree.RawPolicy{result}, nil
+	return tree.RawPolicy{RuleOrMacros: result}, nil
 }
 
 // ParseFile will parse the given file and return a raw parse tree or the error generated

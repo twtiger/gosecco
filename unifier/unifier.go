@@ -17,13 +17,59 @@ func getDefaultActions(t tree.Macro) string {
 	return def
 }
 
-// Unify variables within rules from macros
-func Unify(r tree.RawPolicy) (tree.Policy, error) {
-	var err error
-	var rules []tree.Rule
+func setDefaultActions(defaults []tree.Macro, pt tree.PolicyType, enforce bool) (string, string) {
 	var defpos string
 	var defneg string
+
+	for _, v := range defaults {
+		if v.Name == "DEFAULT_POSITIVE" {
+			defpos = getDefaultActions(v)
+		} else if v.Name == "DEFAULT_NEGATIVE" {
+			defneg = getDefaultActions(v)
+		}
+	}
+
+	if len(defpos) == 0 {
+		if enforce == true {
+			if pt == tree.WhiteList {
+				defpos = "allow"
+			} else { // only other option is Blacklist
+				defpos = "kill"
+			}
+		} else {
+			if pt == tree.WhiteList {
+				defpos = "allow"
+			} else {
+				defpos = "trace"
+			}
+		}
+	}
+
+	if len(defneg) == 0 {
+		if enforce == true {
+			if pt == tree.WhiteList {
+				defneg = "kill"
+			} else {
+				defneg = "allow"
+			}
+		} else {
+			if pt == tree.WhiteList {
+				defneg = "trace"
+			} else {
+				defneg = "allow"
+			}
+		}
+	}
+
+	return defpos, defneg
+}
+
+// Unify variables within rules from macros
+func Unify(r tree.RawPolicy, enforce bool) (tree.Policy, error) {
+	var err error
+	var rules []tree.Rule
 	macros := make(map[string]tree.Macro)
+	defs := make([]tree.Macro, 0)
 	for _, e := range r.RuleOrMacros {
 		switch v := e.(type) {
 		case tree.Rule:
@@ -31,15 +77,14 @@ func Unify(r tree.RawPolicy) (tree.Policy, error) {
 			r, err = replaceFreeNames(v, macros)
 			rules = append(rules, r)
 		case tree.Macro:
-			if v.Name == "DEFAULT_POSITIVE" {
-				defpos = getDefaultActions(v)
-			} else if v.Name == "DEFAULT_NEGATIVE" {
-				defneg = getDefaultActions(v)
-			} else {
+			if v.Name != "DEFAULT_POSITIVE" && v.Name != "DEFAULT_NEGATIVE" {
 				macros[v.Name] = v
+			} else {
+				defs = append(defs, v)
 			}
 		}
 	}
+	defpos, defneg := setDefaultActions(defs, r.ListType, enforce)
 	return tree.Policy{DefaultPositiveAction: defpos, DefaultNegativeAction: defneg, Macros: macros, Rules: rules}, err
 }
 
