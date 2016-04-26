@@ -45,28 +45,24 @@ func (r *replacer) AcceptBooleanLiteral(tree.BooleanLiteral) {}
 func (r *replacer) AcceptCall(b tree.Call) {
 	v := r.macros[b.Name] // we get the name of the macro
 
-	// write: call(arg0)
-
-	// call becomes our macro name
-	// then we make macros like: arg0: x
-	// then we add it to our list of macros
-	// then we reduce it
-
 	nm := make(map[string]tree.Macro)
-	for i, e := range b.Args {
-		m := tree.Macro{Name: v.ArgumentNames[i], Body: e} // we make a new macro
-		nm[v.ArgumentNames[i]] = m
+	for i, k := range b.Args {
+		var e tree.Expression
+		e, r.err = replace(k, r.macros)
+		if r.err == nil {
+			m := tree.Macro{Name: v.ArgumentNames[i], Body: e}
+			nm[v.ArgumentNames[i]] = m
+		} else {
+			return
+		}
 	}
-
-	exp, err := replace(v.Body, nm)
-	r.err = err
 
 	for k, v := range r.macros {
 		nm[k] = v
 	}
 
 	if r.err == nil {
-		r.expression, r.err = replace(exp, nm)
+		r.expression, r.err = replace(v.Body, nm)
 	}
 }
 

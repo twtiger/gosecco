@@ -290,9 +290,9 @@ func (s *UnifierSuite) Test_Unify_withCallExpression(c *C) {
 	}
 
 	output, _ := Unify(input)
-	//c.Assert(len(output.Macros), Equals, 1)
+	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["compV1"], DeepEquals, macro)
-	//c.Assert(len(output.Rules), Equals, 1)
+	c.Assert(len(output.Rules), Equals, 1)
 	c.Assert(tree.ExpressionString(output.Rules[0].Body), Equals, "(eq arg0 1)")
 }
 
@@ -325,11 +325,11 @@ func (s *UnifierSuite) Test_Unify_withCallExpressionWithMultipleVariables(c *C) 
 func (s *UnifierSuite) Test_Unify_withCallExpressionWithPreviouslyDefinedVariables(c *C) {
 	rule := tree.Rule{
 		Name: "write",
-		Body: tree.Call{Name: "compV1", Args: []tree.Any{tree.Argument{Index: 0}, tree.Variable{"var1"}}},
+		Body: tree.Call{Name: "compV1", Args: []tree.Any{tree.Argument{Index: 0}, tree.Variable{"var2"}}},
 	}
 
 	macro1 := tree.Macro{
-		Name: "var1",
+		Name: "var2",
 		Body: tree.Argument{Index: 5},
 	}
 
@@ -348,7 +348,7 @@ func (s *UnifierSuite) Test_Unify_withCallExpressionWithPreviouslyDefinedVariabl
 	}
 
 	output, _ := Unify(input)
-	c.Assert(output.Macros["var1"], DeepEquals, macro1)
+	c.Assert(output.Macros["var2"], DeepEquals, macro1)
 	c.Assert(output.Macros["compV1"], DeepEquals, macro2)
 	c.Assert(len(output.Rules), Equals, 1)
 	c.Assert(tree.ExpressionString(output.Rules[0].Body), Equals, "(eq arg0 arg5)")
