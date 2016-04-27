@@ -14,19 +14,32 @@ type compilerVisitor struct {
 	topLevel   bool
 }
 
+func (cv *compilerVisitor) getLower(k uint64) uint32 {
+	return uint32(k)
+}
+
+func (cv *compilerVisitor) getUpper(k uint64) uint32 {
+	return uint32(k >> 32)
+}
+
 func (cv *compilerVisitor) AcceptArgument(a tree.Argument) {
 	cv.topLevel = false
 	ix := argument[a.Index]
-	cv.c.loadAt(ix.upper)
-	cv.c.jumpOnComparison(0, tree.EQL)
-	cv.c.loadAt(ix.lower)
+	switch a.Type {
+	case tree.Hi:
+		cv.c.loadAt(ix.upper)
+	case tree.Low:
+		cv.c.loadAt(ix.lower)
+	default:
+		panic(fmt.Sprintf("Incorrect argument type"))
+	}
 }
 
 func (cv *compilerVisitor) AcceptArithmetic(a tree.Arithmetic) {
 	cv.topLevel = false
 	a.Left.Accept(cv)
 	rightOperand := a.Right.(tree.NumericLiteral)
-	cv.c.performArithmetic(a.Op, rightOperand.Value)
+	cv.c.performArithmetic(a.Op, uint32(rightOperand.Value))
 }
 
 func (cv *compilerVisitor) AcceptBinaryNegation(tree.BinaryNegation) {
@@ -46,16 +59,81 @@ func (cv *compilerVisitor) AcceptCall(tree.Call) {
 	panic(fmt.Sprintf("Programming error: there should never be any unexpanded calls if the unifier works correctly: syscall: %s - %s", cv.c.currentlyCompilingSyscall, tree.ExpressionString(cv.c.currentlyCompilingExpression)))
 }
 
+func detectSpecialCasesOn(e tree.Expression) (*tree.Argument, *tree.NumericLiteral, bool, bool) {
+	switch et := e.(type) {
+	case tree.Argument:
+		if et.Type == tree.Full {
+			return &et, nil, true, false
+		}
+	case tree.NumericLiteral:
+		return nil, &et, false, true
+	}
+	return nil, nil, false, false
+}
+
+func detectSpecialCases(c tree.Comparison) (argL *tree.Argument, argR *tree.Argument, litL *tree.NumericLiteral, litR *tree.NumericLiteral, leftIsArg bool, rightIsArg bool, leftIsLit bool, rightIsLit bool) {
+	argL, litL, leftIsArg, leftIsLit = detectSpecialCasesOn(c.Left)
+	argR, litR, rightIsArg, rightIsLit = detectSpecialCasesOn(c.Right)
+	return
+}
+
+func (cv *compilerVisitor) compareArgToLit(a *tree.Argument, l *tree.NumericLiteral, op tree.ComparisonType) {
+	ix := argument[a.Index]
+	cv.c.loadAt(ix.upper)
+	cv.c.jumpOnKComparison(cv.getUpper(l.Value), op, cv.terminalJF, !cv.terminalJT, cv.negated)
+	cv.c.loadAt(ix.lower)
+	cv.c.jumpOnKComparison(cv.getLower(l.Value), op, cv.terminalJF, cv.terminalJT, cv.negated)
+}
+
+func (cv *compilerVisitor) compareExpressionToArg(a *tree.Argument, e tree.Expression, op tree.ComparisonType) {
+	e.Accept(cv)
+	cv.c.moveAtoX()
+	lx := argument[a.Index]
+	cv.c.loadAt(lx.upper)
+	cv.c.jumpOnXComparison(op, true, false, cv.negated)
+	cv.c.loadAt(lx.lower)
+	cv.c.jumpOnXComparison(op, true, true, cv.negated)
+}
+
 func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 	cv.topLevel = false
-	lit, isLit := c.Right.(tree.NumericLiteral)
-	if isLit {
-		c.Left.Accept(cv)
-		cv.c.jumpOnKComparison(lit.Value, c.Op, cv.terminalJF, cv.terminalJT, cv.negated)
-	} else {
-		c.Right.Accept(cv)
+	argL, argR, litL, litR, leftArg, rightArg, leftLit, rightLit := detectSpecialCases(c)
+
+	if leftArg && rightLit {
+		cv.compareArgToLit(argL, litR, c.Op)
+	}
+
+	if leftLit && rightArg {
+		cv.compareArgToLit(argR, litL, c.Op)
+	}
+
+	if leftArg && rightArg {
+		rx := argument[argR.Index]
+		lx := argument[argL.Index]
+
+		cv.c.loadAt(rx.upper)
 		cv.c.moveAtoX()
+		cv.c.loadAt(lx.upper)
+		cv.c.jumpOnXComparison(c.Op, true, false, cv.negated)
+
+		cv.c.loadAt(rx.lower)
+		cv.c.moveAtoX()
+		cv.c.loadAt(lx.lower)
+		cv.c.jumpOnXComparison(c.Op, true, true, cv.negated)
+	}
+
+	if !rightArg && !rightLit && leftArg {
+		cv.compareExpressionToArg(argL, c.Right, c.Op)
+	}
+
+	if !leftArg && !leftLit && rightArg {
+		cv.compareExpressionToArg(argR, c.Left, c.Op)
+	}
+
+	if !leftLit && !leftArg && !rightLit && !rightArg {
 		c.Left.Accept(cv)
+		cv.c.moveAtoX()
+		c.Right.Accept(cv)
 		cv.c.jumpOnXComparison(c.Op, cv.terminalJF, cv.terminalJT, cv.negated)
 	}
 }
@@ -96,7 +174,7 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 			}
 			lit, isLiteral := e.(tree.NumericLiteral)
 			if isLiteral {
-				cv.c.jumpOnKComparison(lit.Value, tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
+				cv.c.jumpOnKComparison(cv.getLower(lit.Value), tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
 			} else {
 				cv.c.moveAtoX()
 				e.Accept(cv)
@@ -113,8 +191,6 @@ func (cv *compilerVisitor) AcceptNegation(c tree.Negation) {
 }
 
 func (cv *compilerVisitor) AcceptNumericLiteral(l tree.NumericLiteral) {
-	cv.topLevel = false
-	cv.c.loadLiteral(l.Value)
 }
 
 func (cv *compilerVisitor) AcceptAnd(c tree.And) {

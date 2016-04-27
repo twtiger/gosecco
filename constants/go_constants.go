@@ -5,6 +5,7 @@ import (
 	"syscall"
 )
 
+// TODO come back and investigate whether this can be a uint64
 var allConstants = make(map[string]int)
 var syscalls = make(map[string]int)
 
@@ -1678,5 +1679,5 @@ func init() {
 // GetSyscall returns the syscall number for the given name if it exists
 func GetSyscall(name string) (uint32, bool) {
 	res, ok := syscalls[strings.ToLower(name)]
-	return uint32(res), ok
+	return uint32(res), ok // is res 64?
 }

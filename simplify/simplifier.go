@@ -13,7 +13,7 @@ type simplifier struct {
 	result tree.Expression
 }
 
-func potentialExtractValue(a tree.Numeric) (uint32, bool) {
+func potentialExtractValue(a tree.Numeric) (uint64, bool) {
 	v, ok := a.(tree.NumericLiteral)
 	if ok {
 		return v.Value, ok

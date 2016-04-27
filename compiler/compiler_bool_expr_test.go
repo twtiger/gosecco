@@ -51,7 +51,7 @@ func (s *BoolCompilerSuite) Test_compliationOfOrOperation(c *C) {
 		"ret_k	0\n")
 }
 
-func (s *CompilerComparisonSuite) Test_compilationOfOrExpression(c *C) {
+func (s *BoolCompilerSuite) Test_compilationOfOrExpression(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -81,7 +81,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfOrExpression(c *C) {
 		"ret_k	0\n") //SECCOMP_RET_KILL
 }
 
-func (s *CompilerComparisonSuite) Test_compilationOfAndExpression(c *C) {
+func (s *BoolCompilerSuite) Test_compilationOfAndExpression(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -112,7 +112,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfAndExpression(c *C) {
 		"ret_k	0\n") //SECCOMP_RET_KILL
 }
 
-func (s *CompilerComparisonSuite) Test_compilationOfNegatedExpression(c *C) {
+func (s *BoolCompilerSuite) Test_compilationOfNegatedExpression(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -144,7 +144,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfNegatedExpression(c *C) {
 		"ret_k	0\n") //SECCOMP_RET_KILL
 }
 
-func (s *CompilerComparisonSuite) Test_compilationOfNestedNegatedExpression(c *C) {
+func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedExpression(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -176,7 +176,7 @@ func (s *CompilerComparisonSuite) Test_compilationOfNestedNegatedExpression(c *C
 		"ret_k	0\n") //SECCOMP_RET_KILL
 }
 
-func (s *CompilerComparisonSuite) Test_compilingBooleanInsideExpressionShouldPanicSinceItsAProgrammerError(c *C) {
+func (s *BoolCompilerSuite) Test_compilingBooleanInsideExpressionShouldPanicSinceItsAProgrammerError(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{

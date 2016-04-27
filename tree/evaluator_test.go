@@ -16,7 +16,7 @@ func (s *EvaluatorSuite) Test_simpleArithmetic(c *C) {
 	eval := &EvaluatorVisitor{}
 	a := Arithmetic{Op: MINUS, Left: NumericLiteral{42}, Right: NumericLiteral{23}}
 	a.Accept(eval)
-	c.Assert(eval.popNumeric(), Equals, uint32(0x13))
+	c.Assert(eval.popNumeric(), Equals, uint64(0x13))
 }
 
 func (s *EvaluatorSuite) Test_complicatedArithmetic(c *C) {
@@ -28,7 +28,7 @@ func (s *EvaluatorSuite) Test_complicatedArithmetic(c *C) {
 	}
 
 	a.Accept(eval)
-	c.Assert(eval.popNumeric(), Equals, uint32(0x24))
+	c.Assert(eval.popNumeric(), Equals, uint64(0x24))
 }
 
 func (s *EvaluatorSuite) Test_boolean(c *C) {

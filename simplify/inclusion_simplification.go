@@ -8,7 +8,7 @@ func (s *simplifier) AcceptInclusion(a tree.Inclusion) {
 	pl, pok := potentialExtractValue(l)
 
 	result := make([]tree.Numeric, len(a.Rights))
-	resultVals := make([]uint32, len(a.Rights))
+	resultVals := make([]uint64, len(a.Rights))
 	resultOks := make([]bool, len(a.Rights))
 	for ix, v := range a.Rights {
 		result[ix] = Simplify(v)

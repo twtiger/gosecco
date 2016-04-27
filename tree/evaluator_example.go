@@ -3,17 +3,17 @@ package tree
 // EvaluatorVisitor will generate an unambigious representation of an expression
 type EvaluatorVisitor struct {
 	booleanResults []bool
-	numericResults []uint32
+	numericResults []uint64
 }
 
-func (sv *EvaluatorVisitor) popNumeric() uint32 {
+func (sv *EvaluatorVisitor) popNumeric() uint64 {
 	last := sv.numericResults[0]
 	sv.numericResults = sv.numericResults[1:]
 	return last
 }
 
-func (sv *EvaluatorVisitor) pushNumeric(v uint32) {
-	sv.numericResults = append([]uint32{v}, sv.numericResults...)
+func (sv *EvaluatorVisitor) pushNumeric(v uint64) {
+	sv.numericResults = append([]uint64{v}, sv.numericResults...)
 }
 
 func (sv *EvaluatorVisitor) popBoolean() bool {

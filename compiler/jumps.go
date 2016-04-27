@@ -38,7 +38,7 @@ func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, termin
 	if isPos {
 		c.jumpTo(num, terminalJF, terminalJT, negated, positive, negative)
 	} else {
-		c.jumpTo(num, terminalJF, terminalJT, negated, negative, positive)
+		c.jumpTo(num, terminalJT, terminalJF, negated, negative, positive)
 	}
 }
 
@@ -49,6 +49,6 @@ func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, terminalJF, termin
 	if isPos {
 		c.jumpTo(num, terminalJF, terminalJT, negated, positive, negative)
 	} else {
-		c.jumpTo(num, terminalJF, terminalJT, negated, negative, positive)
+		c.jumpTo(num, terminalJT, terminalJF, negated, negative, positive)
 	}
 }

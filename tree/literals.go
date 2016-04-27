@@ -12,7 +12,7 @@ func (v BooleanLiteral) Accept(vs Visitor) {
 
 // NumericLiteral represents a numeric literal
 type NumericLiteral struct {
-	Value uint32
+	Value uint64
 }
 
 // Accept implements Expression
