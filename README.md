@@ -4,7 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/twtiger/gosecco/badge.svg?branch=master)](https://coveralls.io/github/twtiger/gosecco?branch=master)
 [![GoDoc](https://godoc.org/github.com/twtiger/gosecco?status.svg)](https://godoc.org/github.com/twtiger/gosecco)
 
-gosecco is a project to provide a full stack of tools necessary for working with SECCOMP BPF rules from Golang. The primary pieces of functionality the parser and compiler - but the project also supports a rudimentary assembler and disassembler. It also supports an emulator that can be tweaked to provide output on whether your rules actually do what you think they should do or not. None of these tools are exposed as command line tools - they are meant to be used as libraries for higher level applications and systems.
+gosecco is a project to provide a full stack of tools necessary for working with SECCOMP BPF rules from Golang. The primary pieces of functionality are the parser and compiler - but the project also supports a rudimentary assembler and disassembler. It also supports an emulator that can be tweaked to provide output on whether your rules actually do what you think they should do or not. None of these tools are exposed as command line tools - they are meant to be used as libraries for higher level applications and systems.
 
 gosecco is only compatible with Linux 3.7 and above. It has only been tested with Golang 1.6, and it assumes an amd64 architecture, although that is likely to change.
 
