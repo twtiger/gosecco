@@ -1,8 +1,5 @@
 ^parser/tokenizer\.go:
-^compiler/constants\.go:[[:digit:]]+:[[:digit:]]+: don't use ALL_CAPS in Go names; use CamelCase
-^compiler/constants\.go:[[:digit:]]+:[[:digit:]]+: exported const .* should have comment
-^asm/instructions\.go:[[:digit:]]+:[[:digit:]]+: don't use ALL_CAPS in Go names; use CamelCase
-^compiler/compiler\.go:[[:digit:]]+:[[:digit:]]+: exported const .* should have comment
-^compiler/compiler\.go:[[:digit:]]+:[[:digit:]]+: don't use underscores
-^compiler/compiler\.go:[[:digit:]]+:[[:digit:]]+: don't use ALL_CAPS in Go names; use CamelCase
-^emulator/emulator\.go:[[:digit:]]+:[[:digit:]]+: don't use ALL_CAPS in Go names; use CamelCase
+^compiler/(compiler|instructions|constants)\.go:[[:digit:]]+:[[:digit:]]+: exported const .* should have comment
+^compiler/(compiler|instructions)\.go:[[:digit:]]+:[[:digit:]]+: don't use underscores
+^compiler/(compiler|instructions|constants)\.go:[[:digit:]]+:[[:digit:]]+: don't use ALL_CAPS in Go names; use CamelCase
+^(emulator/emulator|asm/instructions)\.go:[[:digit:]]+:[[:digit:]]+: don't use ALL_CAPS in Go names; use CamelCase
