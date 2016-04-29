@@ -31,8 +31,8 @@ func (s *IncludeCompilerSuite) Test_compliationOfIncludeOperation(c *C) {
 	}
 
 	res, _ := Compile(p)
-	a := asm.Dump(res)
-	c.Assert(a, Equals, ""+
+
+	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs	0\n"+ // syscallNameIndex
 		"jeq_k	00	06	1\n"+ // syscall.SYS_WRITE
 		"ld_abs	14\n"+ //argumentindex[0][upper]
@@ -59,8 +59,8 @@ func (s *IncludeCompilerSuite) Test_compliationOfNotIncludeOperation(c *C) {
 	}
 
 	res, _ := Compile(p)
-	a := asm.Dump(res)
-	c.Assert(a, Equals, ""+
+
+	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs	0\n"+ // syscallNameIndex
 		"jeq_k	00	06	1\n"+ // syscall.SYS_WRITE
 		"ld_abs	14\n"+ //argumentindex[0][upper]
@@ -87,8 +87,8 @@ func (s *IncludeCompilerSuite) Test_compliationOfArgumentsInIncludeList(c *C) {
 	}
 
 	res, _ := Compile(p)
-	a := asm.Dump(res)
-	c.Assert(a, Equals, ""+
+
+	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t0\n"+ // syscallNameIndex
 		"jeq_k\t00\t0B\t1\n"+ // syscall.SYS_WRITE
 		"ld_imm\t1\n"+ // load K into A
@@ -120,8 +120,8 @@ func (s *IncludeCompilerSuite) Test_compliationOfIncludeExpressionofNumericWithM
 	}
 
 	res, _ := Compile(p)
-	a := asm.Dump(res)
-	c.Assert(a, Equals, ""+
+
+	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t0\n"+ // syscallNameIndex
 		"jeq_k\t00\t09\t1\n"+ // syscall.SYS_WRITE
 		"ld_imm\t1\n"+ // load K into A
@@ -151,8 +151,8 @@ func (s *IncludeCompilerSuite) Test_compliationOfIncludeExpressionofArgumentWith
 	}
 
 	res, _ := Compile(p)
-	a := asm.Dump(res)
-	c.Assert(a, Equals, ""+
+
+	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs	0\n"+ // syscallNameIndex
 		"jeq_k	00	0A	1\n"+ // syscall.SYS_WRITE
 		"ld_abs\t1C\n"+ // load argumentindex[0][upper]

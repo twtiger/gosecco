@@ -1,10 +1,7 @@
 package compiler
 
 import (
-	"syscall"
 	"testing"
-
-	"golang.org/x/sys/unix"
 
 	"github.com/twtiger/gosecco/asm"
 	"github.com/twtiger/gosecco/tree"
@@ -29,8 +26,8 @@ func (s *CompilerComparisonSuite) Test_compilationOfEqualsComparison(c *C) {
 	}
 
 	res, _ := Compile(p)
-	a := asm.Dump(res)
-	c.Assert(a, Equals, ""+
+
+	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs	0\n"+ // syscallNameIndex
 		"jeq_k	00	05	1\n"+ // syscall.SYS_WRITE
 		"ld_abs	14\n"+ //argumentindex[0][upper]
@@ -56,77 +53,17 @@ func (s *CompilerComparisonSuite) Test_compilationOfSimpleComparisonWithSecondRu
 	}
 
 	res, _ := Compile(p)
-
-	// Load current syscall
-	c.Assert(res[0], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    syscallNameIndex,
-	})
-
-	// ------------------------- RULE for SYS_WRITE -------------------
-
-	// Compare against the syscall for the current rule
-	c.Assert(res[1], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   4,
-		K:    syscall.SYS_WRITE,
-	})
-
-	c.Assert(res[2], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    argument[0].upper,
-	})
-
-	c.Assert(res[3], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   2,
-		K:    0,
-	})
-
-	// Load left hand side of the comparison into A (arg0)
-	c.Assert(res[4], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    argument[0].lower,
-	})
-
-	// Compare A against constant K
-	c.Assert(res[5], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   2,
-		Jf:   0,
-		K:    42,
-	})
-
-	// ------------------------- END RULE for SYS_WRITE -------------------
-
-	// Reload current system call number, since we clobbered A
-	c.Assert(res[6], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    0,
-	})
-
-	// ------------------------- RULE for SYS_VHANGUP -------------------
-
-	c.Assert(res[7], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   1,
-		K:    syscall.SYS_VHANGUP,
-	})
-
-	// ------------------------- SHARED RESULT ACTIONS -------------------
-
-	c.Assert(res[8], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_ALLOW,
-	})
-
-	c.Assert(res[9], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_KILL,
-	})
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	04	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	02	0\n"+
+		"ld_abs	10\n"+
+		"jeq_k	02	00	2A\n"+
+		"ld_abs	0\n"+
+		"jeq_k	00	01	99\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanComparisonToK(c *C) {
@@ -140,52 +77,15 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanComparisonToK(c *
 	}
 
 	res, _ := Compile(p)
-
-	c.Assert(res[0], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    syscallNameIndex,
-	})
-
-	c.Assert(res[1], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   5,
-		K:    syscall.SYS_WRITE,
-	})
-
-	c.Assert(res[2], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    argument[0].upper,
-	})
-
-	c.Assert(res[3], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   3,
-		K:    0,
-	})
-
-	c.Assert(res[4], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    argument[0].lower,
-	})
-
-	c.Assert(res[5], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JGT | BPF_K,
-		Jt:   0,
-		Jf:   1,
-		K:    42,
-	})
-
-	c.Assert(res[6], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_ALLOW,
-	})
-
-	c.Assert(res[7], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_KILL,
-	})
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	05	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	03	0\n"+
+		"ld_abs	10\n"+
+		"jgt_k	00	01	2A\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfComparisonAToX(c *C) {
@@ -199,61 +99,17 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonAToX(c *C) {
 	}
 
 	res, _ := Compile(p)
-
-	c.Assert(res[0], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    syscallNameIndex,
-	})
-
-	c.Assert(res[1], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   7,
-		K:    syscall.SYS_WRITE,
-	})
-
-	c.Assert(res[2], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    argument[0].upper,
-	})
-
-	c.Assert(res[3], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   5,
-		K:    0,
-	})
-
-	c.Assert(res[4], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    argument[0].lower,
-	})
-
-	c.Assert(res[5], DeepEquals, unix.SockFilter{
-		Code: BPF_MISC | BPF_TAX,
-	})
-
-	c.Assert(res[6], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_IMM,
-		K:    1,
-	})
-
-	c.Assert(res[7], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_X,
-		Jt:   0,
-		Jf:   1,
-		K:    0,
-	})
-
-	c.Assert(res[8], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_ALLOW,
-	})
-
-	c.Assert(res[9], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_KILL,
-	})
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	07	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	05	0\n"+
+		"ld_abs	10\n"+
+		"tax\n"+
+		"ld_imm	1\n"+
+		"jeq_x	00	01\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfLessThanComparisonToK(c *C) {
@@ -267,52 +123,15 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanComparisonToK(c *C) 
 	}
 
 	res, _ := Compile(p)
-
-	c.Assert(res[0], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    syscallNameIndex,
-	})
-
-	c.Assert(res[1], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   5,
-		K:    syscall.SYS_WRITE,
-	})
-
-	c.Assert(res[2], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    argument[0].upper,
-	})
-
-	c.Assert(res[3], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   3,
-		K:    0,
-	})
-
-	c.Assert(res[4], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    argument[0].lower,
-	})
-
-	c.Assert(res[5], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JGT | BPF_K,
-		Jt:   1,
-		Jf:   0,
-		K:    42,
-	})
-
-	c.Assert(res[6], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_ALLOW,
-	})
-
-	c.Assert(res[7], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_KILL,
-	})
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	05	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	03	0\n"+
+		"ld_abs	10\n"+
+		"jgt_k	01	00	2A\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanOrEqualsToComparisonToK(c *C) {
@@ -326,13 +145,15 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanOrEqualsToCompari
 	}
 
 	res, _ := Compile(p)
-
-	c.Assert(res[5], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JGE | BPF_K,
-		Jt:   0,
-		Jf:   1,
-		K:    42,
-	})
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	05	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	03	0\n"+
+		"ld_abs	10\n"+
+		"jge_k	00	01	2A\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfLessThanOrEqualsToComparisonToK(c *C) {
@@ -346,13 +167,15 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanOrEqualsToComparison
 	}
 
 	res, _ := Compile(p)
-
-	c.Assert(res[5], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JGE | BPF_K,
-		Jt:   1,
-		Jf:   0,
-		K:    42,
-	})
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	05	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	03	0\n"+
+		"ld_abs	10\n"+
+		"jge_k	01	00	2A\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfNotEqualsToK(c *C) {
@@ -366,13 +189,15 @@ func (s *CompilerComparisonSuite) Test_compilationOfNotEqualsToK(c *C) {
 	}
 
 	res, _ := Compile(p)
-
-	c.Assert(res[5], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   1,
-		Jf:   0,
-		K:    42,
-	})
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	05	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	03	0\n"+
+		"ld_abs	10\n"+
+		"jeq_k	01	00	2A\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanAToX(c *C) {
@@ -386,61 +211,17 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanAToX(c *C) {
 	}
 
 	res, _ := Compile(p)
-
-	c.Assert(res[0], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    syscallNameIndex,
-	})
-
-	c.Assert(res[1], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   7,
-		K:    syscall.SYS_WRITE,
-	})
-
-	c.Assert(res[2], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    argument[0].upper,
-	})
-
-	c.Assert(res[3], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   5,
-		K:    0,
-	})
-
-	c.Assert(res[4], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    argument[0].lower,
-	})
-
-	c.Assert(res[5], DeepEquals, unix.SockFilter{
-		Code: BPF_MISC | BPF_TAX,
-	})
-
-	c.Assert(res[6], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_IMM,
-		K:    1,
-	})
-
-	c.Assert(res[7], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JGT | BPF_X,
-		Jt:   0,
-		Jf:   1,
-		K:    0,
-	})
-
-	c.Assert(res[8], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_ALLOW,
-	})
-
-	c.Assert(res[9], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_KILL,
-	})
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	07	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	05	0\n"+
+		"ld_abs	10\n"+
+		"tax\n"+
+		"ld_imm	1\n"+
+		"jgt_x	00	01\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanOrEqualsToAToX(c *C) {
@@ -454,13 +235,17 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanOrEqualsToAToX(c 
 	}
 
 	res, _ := Compile(p)
-
-	c.Assert(res[7], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JGE | BPF_X,
-		Jt:   0,
-		Jf:   1,
-		K:    0,
-	})
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	07	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	05	0\n"+
+		"ld_abs	10\n"+
+		"tax\n"+
+		"ld_imm	1\n"+
+		"jge_x	00	01\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfLessThanAToX(c *C) {
@@ -474,13 +259,17 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanAToX(c *C) {
 	}
 
 	res, _ := Compile(p)
-
-	c.Assert(res[7], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JGT | BPF_X,
-		Jt:   1,
-		Jf:   0,
-		K:    0,
-	})
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	07	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	05	0\n"+
+		"ld_abs	10\n"+
+		"tax\n"+
+		"ld_imm	1\n"+
+		"jgt_x	01	00\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfLessOrEqualsToAToX(c *C) {
@@ -494,13 +283,17 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessOrEqualsToAToX(c *C) {
 	}
 
 	res, _ := Compile(p)
-
-	c.Assert(res[7], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JGE | BPF_X,
-		Jt:   1,
-		Jf:   0,
-		K:    0,
-	})
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	07	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	05	0\n"+
+		"ld_abs	10\n"+
+		"tax\n"+
+		"ld_imm	1\n"+
+		"jge_x	01	00\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfNotEqualsAToX(c *C) {
@@ -514,13 +307,17 @@ func (s *CompilerComparisonSuite) Test_compilationOfNotEqualsAToX(c *C) {
 	}
 
 	res, _ := Compile(p)
-
-	c.Assert(res[7], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP + BPF_JEQ + BPF_X,
-		Jt:   1,
-		Jf:   0,
-		K:    0,
-	})
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	07	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	05	0\n"+
+		"ld_abs	10\n"+
+		"tax\n"+
+		"ld_imm	1\n"+
+		"jeq_x	01	00\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfComparisonForFirstArgument(c *C) {
@@ -534,59 +331,15 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonForFirstArgument(c
 	}
 
 	res, _ := Compile(p)
-
-	c.Assert(res[0], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    syscallNameIndex,
-	})
-
-	c.Assert(res[1], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   7,
-		K:    syscall.SYS_WRITE,
-	})
-
-	c.Assert(res[2], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    argument[1].upper,
-	})
-
-	c.Assert(res[3], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_K,
-		Jt:   0,
-		Jf:   5,
-		K:    0,
-	})
-
-	c.Assert(res[4], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_W | BPF_ABS,
-		K:    argument[1].lower,
-	})
-
-	c.Assert(res[5], DeepEquals, unix.SockFilter{
-		Code: BPF_MISC | BPF_TAX,
-	})
-
-	c.Assert(res[6], DeepEquals, unix.SockFilter{
-		Code: BPF_LD | BPF_IMM,
-		K:    1,
-	})
-
-	c.Assert(res[7], DeepEquals, unix.SockFilter{
-		Code: BPF_JMP | BPF_JEQ | BPF_X,
-		Jt:   1,
-		Jf:   0,
-		K:    0,
-	})
-
-	c.Assert(res[8], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_ALLOW,
-	})
-
-	c.Assert(res[9], DeepEquals, unix.SockFilter{
-		Code: BPF_RET | BPF_K,
-		K:    SECCOMP_RET_KILL,
-	})
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	07	1\n"+
+		"ld_abs	1C\n"+
+		"jeq_k	00	05	0\n"+
+		"ld_abs	18\n"+
+		"tax\n"+
+		"ld_imm	1\n"+
+		"jeq_x	01	00\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
