@@ -352,3 +352,40 @@ func (s *CheckerSuite) Test_invalidSyscall(c *C) {
 	c.Assert(len(val), Equals, 1)
 	c.Assert(val[0], ErrorMatches, "\\[fluffipuff\\] invalid syscall")
 }
+
+func (s *CheckerSuite) Test_argument_leftSide_directComparison(c *C) {
+	toCheck := tree.Policy{Rules: []tree.Rule{
+		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Left: tree.Argument{Type: tree.Full, Index: 2}, Right: tree.NumericLiteral{42}}}}}
+
+	val := EnsureValid(toCheck)
+
+	c.Assert(len(val), Equals, 0)
+}
+
+func (s *CheckerSuite) Test_argument_rightSide_directComparison(c *C) {
+	toCheck := tree.Policy{Rules: []tree.Rule{
+		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Right: tree.Argument{Type: tree.Full, Index: 1}, Left: tree.NumericLiteral{1}}}}}
+
+	val := EnsureValid(toCheck)
+
+	c.Assert(len(val), Equals, 0)
+}
+
+func (s *CheckerSuite) Test_argument_inExpression_fails(c *C) {
+	toCheck := tree.Policy{Rules: []tree.Rule{
+		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Right: tree.Arithmetic{Op: tree.PLUS, Left: tree.Argument{Type: tree.Full, Index: 1}, Right: tree.NumericLiteral{1}}, Left: tree.NumericLiteral{1}}}}}
+
+	val := EnsureValid(toCheck)
+
+	c.Assert(len(val), Equals, 1)
+	c.Assert(val[0], ErrorMatches, "\\[read\\] full argument cannot be used in arithmetic expressions - use the 32bit accessors instead: arg1")
+}
+
+func (s *CheckerSuite) Test_hiargument_inExpression_succeeds(c *C) {
+	toCheck := tree.Policy{Rules: []tree.Rule{
+		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Right: tree.Arithmetic{Op: tree.PLUS, Left: tree.Argument{Type: tree.Hi, Index: 1}, Right: tree.NumericLiteral{1}}, Left: tree.NumericLiteral{1}}}}}
+
+	val := EnsureValid(toCheck)
+
+	c.Assert(len(val), Equals, 0)
+}

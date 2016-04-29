@@ -23,13 +23,6 @@ func typeCheckExpectingNumeric(x tree.Expression) error {
 	return tc.result
 }
 
-func either(e1, e2 error) error {
-	if e1 != nil {
-		return e1
-	}
-	return e2
-}
-
 // AcceptAnd implements Visitor
 func (t *typeChecker) AcceptAnd(v tree.And) {
 	if !t.expectBoolean {

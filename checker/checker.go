@@ -17,6 +17,9 @@ import (
 // Except for checking type validity, the checker will also make sure we don't have
 // more than one rule for the same syscall. This is also the place where we make sure
 // all the syscalls with rules are defined.
+// Further, we will also ensure that the usage of Arguments matches the behavior we are interested in
+// Specifically, full Arguments can only appear directly on the side of comparisons, never inside
+// arithmetic expressions.
 
 // EnsureValid takes a policy and returns all the errors encounterered for the given rules
 // If everything is valid, the return will be empty
@@ -70,6 +73,16 @@ func (v *validityChecker) check() []error {
 	return result
 }
 
+func either(e1, e2 error) error {
+	if e1 != nil {
+		return e1
+	}
+	return e2
+}
+
 func (v *validityChecker) checkRule(r tree.Rule) error {
-	return typeCheckExpectingBoolean(r.Body)
+	return either(
+		typeCheckExpectingBoolean(r.Body),
+		checkRestrictedArgumentUsage(r.Body))
+
 }
