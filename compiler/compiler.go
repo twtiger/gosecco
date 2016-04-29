@@ -142,7 +142,7 @@ func (c *compiler) checkCorrectSyscall(name string, setPosFlags bool) {
 	}
 
 	c.loadCurrentSyscall()
-	c.jumpOnKComparison(sys, tree.EQL, true, setPosFlags, false)
+	c.jumpOnKComparison(sys, tree.EQL, true, setPosFlags, false, false)
 }
 
 func (c *compiler) positiveAction(name string) {

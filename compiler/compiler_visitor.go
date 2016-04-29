@@ -80,9 +80,9 @@ func detectSpecialCases(c tree.Comparison) (argL *tree.Argument, argR *tree.Argu
 func (cv *compilerVisitor) compareArgToLit(a *tree.Argument, l *tree.NumericLiteral, op tree.ComparisonType) {
 	ix := argument[a.Index]
 	cv.c.loadAt(ix.upper)
-	cv.c.jumpOnKComparison(cv.getUpper(l.Value), op, cv.terminalJF, !cv.terminalJT, cv.negated)
+	cv.c.jumpOnKComparison(cv.getUpper(l.Value), op, cv.terminalJF, !cv.terminalJT, cv.negated, false)
 	cv.c.loadAt(ix.lower)
-	cv.c.jumpOnKComparison(cv.getLower(l.Value), op, cv.terminalJF, cv.terminalJT, cv.negated)
+	cv.c.jumpOnKComparison(cv.getLower(l.Value), op, cv.terminalJF, cv.terminalJT, cv.negated, false)
 }
 
 func (cv *compilerVisitor) compareExpressionToArg(a *tree.Argument, e tree.Expression, op tree.ComparisonType) {
@@ -149,39 +149,53 @@ func (cv *compilerVisitor) toggleTerminalJumps(b bool) {
 
 func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 	cv.topLevel = false
-	if c.Positive == false {
+	if !c.Positive {
 		cv.negated = true
 	}
-	c.Left.Accept(cv)
-	cv.toggleTerminalJumps(c.Positive)
 
-	_, isLit := c.Left.(tree.NumericLiteral)
-	if isLit {
-		cv.c.moveAtoX()
-
-		for i, e := range c.Rights {
+	argL, isArgL := c.Left.(tree.Argument)
+	if isArgL {
+		ix := argument[argL.Index]
+		for i, l := range c.Rights {
 			if i == len(c.Rights)-1 {
-				cv.toggleTerminalJumps(c.Positive)
-			}
-			e.Accept(cv)
-			cv.c.jumpOnXComparison(tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
-		}
-	} else {
+				// TODO
 
-		for i, e := range c.Rights {
-			if i == len(c.Rights)-1 {
-				cv.toggleTerminalJumps(c.Positive)
 			}
-			lit, isLiteral := e.(tree.NumericLiteral)
-			if isLiteral {
-				cv.c.jumpOnKComparison(cv.getLower(lit.Value), tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
-			} else {
-				cv.c.moveAtoX()
-				e.Accept(cv)
-				cv.c.jumpOnXComparison(tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
-			}
+			lit := l.(tree.NumericLiteral)
+			cv.c.loadAt(ix.upper)
+			cv.c.jumpOnKComparison(cv.getUpper(lit.Value), tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated, true)
+			cv.c.loadAt(ix.lower)
+			cv.c.jumpOnKComparison(cv.getLower(lit.Value), tree.EQL, !cv.terminalJF, cv.terminalJT, cv.negated, false)
 		}
 	}
+
+	//_, isLit := c.Left.(tree.NumericLiteral)
+	//if isLit {
+	//	cv.c.moveAtoX()
+
+	//	for i, e := range c.Rights {
+	//		if i == len(c.Rights)-1 {
+	//			cv.toggleTerminalJumps(c.Positive)
+	//		}
+	//		e.Accept(cv)
+	//		cv.c.jumpOnXComparison(tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
+	//	}
+	//} else {
+
+	//	for i, e := range c.Rights {
+	//		if i == len(c.Rights)-1 {
+	//			cv.toggleTerminalJumps(c.Positive)
+	//		}
+	//		lit, isLiteral := e.(tree.NumericLiteral)
+	//		if isLiteral {
+	//			cv.c.jumpOnKComparison(cv.getLower(lit.Value), tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
+	//		} else {
+	//			cv.c.moveAtoX()
+	//			e.Accept(cv)
+	//			cv.c.jumpOnXComparison(tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated)
+	//		}
+	//	}
+	//}
 }
 
 func (cv *compilerVisitor) AcceptNegation(c tree.Negation) {

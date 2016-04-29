@@ -1,44 +1,40 @@
 package compiler
 
-import "github.com/twtiger/gosecco/tree"
+import (
+	"github.com/twtiger/gosecco/tree"
+)
 
-func (c *compiler) positiveJumpTo(index uint, l label, neg bool) {
-	li := labelInfo{index, neg}
+func (c *compiler) positiveJumpTo(index uint, l label, neg, chained bool) {
+	li := labelInfo{index, neg, chained}
 	if l != noLabel {
 		c.positiveLabels[l] = append(c.positiveLabels[l], li)
 	}
 }
 
-func (c *compiler) negativeJumpTo(index uint, l label, neg bool) {
-	li := labelInfo{index, neg}
+func (c *compiler) negativeJumpTo(index uint, l label, neg, chained bool) {
+	li := labelInfo{index, neg, chained}
 	if l != noLabel {
 		c.negativeLabels[l] = append(c.negativeLabels[l], li)
 	}
 }
 
-func (c *compiler) jumpTo(num uint, terminalJF, terminalJT, neg bool, jt, jf label) {
+func (c *compiler) jumpTo(num uint, terminalJF, terminalJT, neg, chained bool, jt, jf label) {
 	if terminalJF {
-		c.negativeJumpTo(num, jf, neg)
+		c.negativeJumpTo(num, jf, neg, chained)
 	}
 	if terminalJT {
-		c.positiveJumpTo(num, jt, neg)
+		c.positiveJumpTo(num, jt, neg, chained)
 	}
 }
 
-func (c *compiler) jumpOnComparison(val uint32, cmp tree.ComparisonType) {
-	jc := comparisonOps[cmp].k
-	num := c.op(jc, val)
-	c.jumpTo(num, true, false, false, positive, negative)
-}
-
-func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, terminalJF, terminalJT, negated bool) {
+func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, terminalJF, terminalJT, negated, chained bool) {
 	_, isPos := posVals[cmp]
 	jc := comparisonOps[cmp].k
 	num := c.op(jc, val)
 	if isPos {
-		c.jumpTo(num, terminalJF, terminalJT, negated, positive, negative)
+		c.jumpTo(num, terminalJF, terminalJT, negated, chained, positive, negative)
 	} else {
-		c.jumpTo(num, terminalJT, terminalJF, negated, negative, positive)
+		c.jumpTo(num, terminalJT, terminalJF, negated, chained, negative, positive)
 	}
 }
 
@@ -47,8 +43,8 @@ func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, terminalJF, termin
 	jc := comparisonOps[cmp].x
 	num := c.op(jc, 0)
 	if isPos {
-		c.jumpTo(num, terminalJF, terminalJT, negated, positive, negative)
+		c.jumpTo(num, terminalJF, terminalJT, negated, false, positive, negative) // TODO fix up jumpOnX to take chained arg as well
 	} else {
-		c.jumpTo(num, terminalJT, terminalJF, negated, negative, positive)
+		c.jumpTo(num, terminalJT, terminalJF, negated, false, negative, positive)
 	}
 }
