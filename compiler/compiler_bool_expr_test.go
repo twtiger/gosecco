@@ -257,3 +257,20 @@ func (s *CompilerComparisonSuite) Test_compilationOfNestedNegatedExpression(c *C
 		"ret_k	7FFF0000\n"+ //SECCOMP_RET_ALLOW
 		"ret_k	0\n") //SECCOMP_RET_KILL
 }
+
+func (s *CompilerComparisonSuite) Test_compilingBooleanInsideExpressionShouldPanicSinceItsAProgrammerError(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.And{
+					Left:  tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+					Right: tree.BooleanLiteral{false},
+				},
+			},
+		},
+	}
+	c.Assert(func() {
+		Compile(p)
+	}, Panics, "Programming error: there should never be any boolean literals left outside of the toplevel if the simplifier works correctly: syscall: write - (and (eq arg0 42) false)")
+}

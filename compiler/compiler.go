@@ -24,10 +24,12 @@ func Compile(policy tree.Policy) ([]unix.SockFilter, error) {
 }
 
 type compiler struct {
-	result          []unix.SockFilter
-	currentlyLoaded int
-	positiveLabels  map[label][]labelInfo
-	negativeLabels  map[label][]labelInfo
+	result                       []unix.SockFilter
+	currentlyLoaded              int
+	positiveLabels               map[label][]labelInfo
+	negativeLabels               map[label][]labelInfo
+	currentlyCompilingSyscall    string
+	currentlyCompilingExpression tree.Expression
 }
 
 func (c *compiler) compile(rules []tree.Rule) {
@@ -39,7 +41,7 @@ func (c *compiler) compile(rules []tree.Rule) {
 }
 
 func (c *compiler) compileExpression(x tree.Expression) {
-	cv := &compilerVisitor{c, true, true, false}
+	cv := &compilerVisitor{c: c, terminalJF: true, terminalJT: true, negated: false, topLevel: true}
 	x.Accept(cv)
 }
 
@@ -47,6 +49,11 @@ func (c *compiler) compileRule(r tree.Rule) {
 	c.labelHere(negative)
 	_, isBoolLit := r.Body.(tree.BooleanLiteral)
 	c.checkCorrectSyscall(r.Name, isBoolLit) // set JT flag to final ret_allow only if the rule is a boolean literal
+
+	// These are useful for debugging and helpful error messages
+	c.currentlyCompilingSyscall = r.Name
+	c.currentlyCompilingExpression = r.Body
+
 	c.compileExpression(r.Body)
 }
 

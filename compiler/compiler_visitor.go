@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"fmt"
+
 	"github.com/twtiger/gosecco/tree"
 )
 
@@ -9,9 +11,11 @@ type compilerVisitor struct {
 	terminalJF bool
 	terminalJT bool
 	negated    bool
+	topLevel   bool
 }
 
 func (cv *compilerVisitor) AcceptArgument(a tree.Argument) {
+	cv.topLevel = false
 	ix := argument[a.Index]
 	cv.c.loadAt(ix.upper)
 	cv.c.jumpOnComparison(0, tree.EQL)
@@ -19,16 +23,31 @@ func (cv *compilerVisitor) AcceptArgument(a tree.Argument) {
 }
 
 func (cv *compilerVisitor) AcceptArithmetic(a tree.Arithmetic) {
+	cv.topLevel = false
 	a.Left.Accept(cv)
 	rightOperand := a.Right.(tree.NumericLiteral)
 	cv.c.performArithmetic(a.Op, rightOperand.Value)
 }
 
-func (cv *compilerVisitor) AcceptBinaryNegation(tree.BinaryNegation) {}
-func (cv *compilerVisitor) AcceptBooleanLiteral(tree.BooleanLiteral) {}
-func (cv *compilerVisitor) AcceptCall(tree.Call)                     {}
+func (cv *compilerVisitor) AcceptBinaryNegation(tree.BinaryNegation) {
+	cv.topLevel = false
+}
+
+func (cv *compilerVisitor) AcceptBooleanLiteral(val tree.BooleanLiteral) {
+	if cv.topLevel {
+		// TODO: compile here
+	} else {
+		panic(fmt.Sprintf("Programming error: there should never be any boolean literals left outside of the toplevel if the simplifier works correctly: syscall: %s - %s", cv.c.currentlyCompilingSyscall, tree.ExpressionString(cv.c.currentlyCompilingExpression)))
+	}
+	cv.topLevel = false
+}
+
+func (cv *compilerVisitor) AcceptCall(tree.Call) {
+	panic(fmt.Sprintf("Programming error: there should never be any unexpanded calls if the unifier works correctly: syscall: %s - %s", cv.c.currentlyCompilingSyscall, tree.ExpressionString(cv.c.currentlyCompilingExpression)))
+}
 
 func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
+	cv.topLevel = false
 	lit, isLit := c.Right.(tree.NumericLiteral)
 	if isLit {
 		c.Left.Accept(cv)
@@ -42,6 +61,7 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 }
 
 func (cv *compilerVisitor) toggleTerminalJumps(b bool) {
+	cv.topLevel = false
 	if b == true {
 		cv.terminalJF = !cv.terminalJF
 	} else {
@@ -50,6 +70,7 @@ func (cv *compilerVisitor) toggleTerminalJumps(b bool) {
 }
 
 func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
+	cv.topLevel = false
 	if c.Positive == false {
 		cv.negated = true
 	}
@@ -86,15 +107,18 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 }
 
 func (cv *compilerVisitor) AcceptNegation(c tree.Negation) {
+	cv.topLevel = false
 	cv.negated = true
 	c.Operand.Accept(cv)
 }
 
 func (cv *compilerVisitor) AcceptNumericLiteral(l tree.NumericLiteral) {
+	cv.topLevel = false
 	cv.c.loadLiteral(l.Value)
 }
 
 func (cv *compilerVisitor) AcceptAnd(c tree.And) {
+	cv.topLevel = false
 	cv.terminalJT = !cv.terminalJT
 	c.Left.Accept(cv)
 	cv.terminalJT = !cv.terminalJT
@@ -102,12 +126,16 @@ func (cv *compilerVisitor) AcceptAnd(c tree.And) {
 }
 
 func (cv *compilerVisitor) AcceptOr(c tree.Or) {
+	cv.topLevel = false
 	cv.terminalJF = false
 	c.Left.Accept(cv)
 	cv.terminalJF = true
 	c.Right.Accept(cv)
 }
-func (cv *compilerVisitor) AcceptVariable(tree.Variable) {}
+
+func (cv *compilerVisitor) AcceptVariable(tree.Variable) {
+	panic(fmt.Sprintf("Programming error: there should never be any unexpanded variables if the unifier works correctly: syscall: %s - %s", cv.c.currentlyCompilingSyscall, tree.ExpressionString(cv.c.currentlyCompilingExpression)))
+}
 
 // func peepHole(filters []unix.SockFilter) []unix.SockFilter {
 // 	one, two, three := filters[0], filters[1], filters[2]
