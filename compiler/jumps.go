@@ -4,6 +4,15 @@ import (
 	"github.com/twtiger/gosecco/tree"
 )
 
+type jumps string
+
+const (
+	jt      = "jt"
+	jf      = "jf"
+	neg     = "neg"
+	chained = "chained"
+)
+
 func (c *compiler) positiveJumpTo(index uint, l label, neg, chained bool) {
 	li := labelInfo{index, neg, chained}
 	if l != noLabel {

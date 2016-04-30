@@ -147,25 +147,77 @@ func (cv *compilerVisitor) toggleTerminalJumps(b bool) {
 	}
 }
 
+type jumpType string
+
+const (
+	hiTerm  = "hiTerm"
+	lowTerm = "lowTerm"
+	hi      = "hi"
+	low     = "low"
+	negHi   = "negHi"
+	negLow  = "negLow"
+)
+
+func (cv *compilerVisitor) getChainedJumps(j jumpType) map[jumps]bool {
+	hiT := map[jumps]bool{jf: cv.terminalJF, jt: !cv.terminalJT, neg: cv.negated, chained: false}
+	lowT := map[jumps]bool{jf: cv.terminalJF, jt: cv.terminalJT, neg: cv.negated, chained: false}
+	hiJ := map[jumps]bool{jf: cv.terminalJF, jt: cv.terminalJT, neg: cv.negated, chained: true}
+	lowJ := map[jumps]bool{jf: !cv.terminalJF, jt: cv.terminalJT, neg: cv.negated, chained: false}
+	negH := map[jumps]bool{jf: cv.terminalJF, jt: cv.terminalJT, neg: cv.negated, chained: true}
+	negL := map[jumps]bool{jf: cv.terminalJF, jt: !cv.terminalJT, neg: cv.negated, chained: false}
+
+	allPoints := map[jumpType]map[jumps]bool{
+		hiTerm:  hiT,
+		lowTerm: lowT,
+		hi:      hiJ,
+		low:     lowJ,
+		negHi:   negH,
+		negLow:  negL,
+	}
+	return allPoints[j]
+}
+
+func (cv *compilerVisitor) jumpOnKChained(l uint64, ix argumentPosition, hiChainJumps map[jumps]bool, lowChainJumps map[jumps]bool) {
+	cv.c.loadAt(ix.upper)
+	cv.c.jumpOnKComparison(cv.getUpper(l), tree.EQL, hiChainJumps[jf], hiChainJumps[jt], hiChainJumps[neg], hiChainJumps[chained])
+	cv.c.loadAt(ix.lower)
+	cv.c.jumpOnKComparison(cv.getLower(l), tree.EQL, lowChainJumps[jf], lowChainJumps[jt], lowChainJumps[neg], lowChainJumps[chained])
+}
+
+func (cv *compilerVisitor) compareArgToNumeric(l uint64, ix argumentPosition, isLast bool) {
+	if isLast {
+		cv.jumpOnKChained(l, ix, cv.getChainedJumps(hiTerm), cv.getChainedJumps(lowTerm))
+	} else {
+		if cv.negated {
+			cv.jumpOnKChained(l, ix, cv.getChainedJumps(negHi), cv.getChainedJumps(negLow))
+		} else {
+			cv.jumpOnKChained(l, ix, cv.getChainedJumps(hi), cv.getChainedJumps(low))
+		}
+	}
+}
+
 func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 	cv.topLevel = false
 	if !c.Positive {
 		cv.negated = true
 	}
 
-	argL, isArgL := c.Left.(tree.Argument)
-	if isArgL {
-		ix := argument[argL.Index]
+	switch et := c.Left.(type) {
+	case tree.Argument:
+		ix := argument[et.Index]
 		for i, l := range c.Rights {
-			if i == len(c.Rights)-1 {
-				// TODO
-
-			}
 			lit := l.(tree.NumericLiteral)
-			cv.c.loadAt(ix.upper)
-			cv.c.jumpOnKComparison(cv.getUpper(lit.Value), tree.EQL, cv.terminalJF, cv.terminalJT, cv.negated, true)
-			cv.c.loadAt(ix.lower)
-			cv.c.jumpOnKComparison(cv.getLower(lit.Value), tree.EQL, !cv.terminalJF, cv.terminalJT, cv.negated, false)
+			isLast := i == len(c.Rights)-1
+			cv.compareArgToNumeric(lit.Value, ix, isLast)
+		}
+	case tree.NumericLiteral:
+		for i, l := range c.Rights {
+			switch k := l.(type) {
+			case tree.Argument:
+				ix := argument[k.Index]
+				isLast := i == len(c.Rights)-1
+				cv.compareArgToNumeric(et.Value, ix, isLast)
+			}
 		}
 	}
 
