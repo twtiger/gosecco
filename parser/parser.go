@@ -402,7 +402,8 @@ func (ctx *parseContext) primary() (tree.Expression, error) {
 		return nil, ctx.genErr("'('")
 	case INT:
 		_, data := ctx.consume()
-		val, _ := strconv.ParseUint(string(data), 0, 32)
+		// This error is ignored since unless the tokenizer is completely broken, this should never break
+		val, _ := strconv.ParseUint(string(data), 0, 64)
 		return tree.NumericLiteral{uint64(val)}, nil
 	case TRUE:
 		ctx.consume()
