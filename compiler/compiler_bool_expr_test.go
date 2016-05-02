@@ -55,7 +55,6 @@ func (s *BoolCompilerSuite) Test_compliationOfOrOperation(c *C) {
 }
 
 func (s *BoolCompilerSuite) Test_compilationOfOrExpression(c *C) {
-	c.Skip("p")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -73,9 +72,9 @@ func (s *BoolCompilerSuite) Test_compilationOfOrExpression(c *C) {
 		"ld_abs	0\n"+
 		"jeq_k	00	09	1\n"+
 		"ld_abs	14\n"+
-		"jeq_k	00	02	0\n"+ // "jeq_k\t00\t07\t0\n" + // set terminal jump false
+		"jeq_k	00	02	0\n"+
 		"ld_abs	10\n"+
-		"jeq_k	04	00	2A\n"+ // "jeq_k\t04\t05\t2A\n" + // don't set jump terminal false
+		"jeq_k	04	00	2A\n"+
 		"ld_abs	1C\n"+
 		"jeq_k	00	03	0\n"+
 		"ld_abs	18\n"+
@@ -85,7 +84,6 @@ func (s *BoolCompilerSuite) Test_compilationOfOrExpression(c *C) {
 }
 
 func (s *BoolCompilerSuite) Test_compilationOfAndExpression(c *C) {
-	c.Skip("p")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -99,25 +97,23 @@ func (s *BoolCompilerSuite) Test_compilationOfAndExpression(c *C) {
 	}
 
 	res, _ := Compile(p)
-	a := asm.Dump(res)
-
-	c.Assert(a, Equals, ""+
-		"ld_abs	0\n"+ // syscallNameIndex
-		"jeq_k	00	09	1\n"+ // syscall.SYS_WRITE
-		"ld_abs	14\n"+ //argumentindex[0][upper]
-		"jeq_k	00	07	0\n"+
-		"ld_abs	10\n"+ //argumentindex[0][upper]
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	09	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	02	0\n"+
+		"ld_abs	10\n"+
 		"jeq_k	00	05	2A\n"+
-		"ld_abs	1C\n"+ //argumentindex[1][upper]
+		"ld_abs	1C\n"+
 		"jeq_k	00	03	0\n"+
-		"ld_abs	18\n"+ //argumentindex[1][upper]
+		"ld_abs	18\n"+
 		"jeq_k	00	01	2A\n"+
-		"ret_k	7FFF0000\n"+ //SECCOMP_RET_ALLOW
-		"ret_k	0\n") //SECCOMP_RET_KILL
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *BoolCompilerSuite) Test_compilationOfNegatedExpression(c *C) {
-	c.Skip("p")
+	c.Skip("fix up negated and terminal vs. not terminal")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -133,20 +129,19 @@ func (s *BoolCompilerSuite) Test_compilationOfNegatedExpression(c *C) {
 	}
 
 	res, _ := Compile(p)
-
 	c.Assert(asm.Dump(res), Equals, ""+
-		"ld_abs	0\n"+ // syscallNameIndex
-		"jeq_k	00	09	1\n"+ // syscall.SYS_WRITE
-		"ld_abs	14\n"+ //argumentindex[0][upper]
-		"jeq_k	00	07	0\n"+
-		"ld_abs	10\n"+ //argumentindex[0][upper]
-		"jeq_k	05	00	2A\n"+
-		"ld_abs	1C\n"+ //argumentindex[1][upper]
+		"ld_abs	0\n"+
+		"jeq_k	00	09	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	02	0\n"+
+		"ld_abs	10\n"+
+		"jeq_k	00	04	2A\n"+ // negated and not exclusive
+		"ld_abs	1C\n"+
 		"jeq_k	00	03	0\n"+
-		"ld_abs	18\n"+ //argumentindex[1][upper]
+		"ld_abs	18\n"+
 		"jeq_k	01	00	2A\n"+
-		"ret_k	7FFF0000\n"+ //SECCOMP_RET_ALLOW
-		"ret_k	0\n") //SECCOMP_RET_KILL
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedExpression(c *C) {

@@ -7,18 +7,18 @@ import (
 )
 
 type compilerVisitor struct {
-	c          *compiler
-	terminalJF bool
-	terminalJT bool
-	negated    bool
-	topLevel   bool
+	c         *compiler
+	terminal  bool
+	exclusive bool
+	negated   bool
+	topLevel  bool
 }
 
-func (cv *compilerVisitor) getLower(k uint64) uint32 {
+func getLower(k uint64) uint32 {
 	return uint32(k)
 }
 
-func (cv *compilerVisitor) getUpper(k uint64) uint32 {
+func getUpper(k uint64) uint32 {
 	return uint32(k >> 32)
 }
 
@@ -93,12 +93,12 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 
 	if leftArg && rightLit {
 		ix := argument[argL.Index]
-		cv.compareArgToNumeric(litR.Value, ix, c.Op, true)
+		cv.compareArgToNumeric(litR.Value, ix, c.Op, cv.terminal)
 	}
 
 	if leftLit && rightArg {
 		ix := argument[argR.Index]
-		cv.compareArgToNumeric(litL.Value, ix, c.Op, true)
+		cv.compareArgToNumeric(litL.Value, ix, c.Op, cv.terminal)
 	}
 
 	if leftArg && rightArg {
@@ -120,7 +120,7 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 		c.Left.Accept(cv)
 		cv.c.moveAtoX()
 		c.Right.Accept(cv)
-		cv.c.jumpOnXComparison(c.Op, cv.terminalJF, cv.terminalJT, cv.negated, false)
+		cv.c.jumpOnXComparison(c.Op, true, true, cv.negated, false)
 	}
 }
 
@@ -133,6 +133,8 @@ const (
 	low     = "low"
 	negHi   = "negHi"
 	negLow  = "negLow"
+	hiExl   = "hiExl"
+	lowExl  = "lowExl"
 )
 
 // TODO on init
@@ -141,6 +143,8 @@ func (cv *compilerVisitor) getChainedJumps(j jumpType) map[jumps]bool {
 	lowT := map[jumps]bool{jf: true, jt: true, neg: cv.negated, chained: false}
 	hiJ := map[jumps]bool{jf: true, jt: true, neg: cv.negated, chained: true}
 	lowJ := map[jumps]bool{jf: false, jt: true, neg: cv.negated, chained: false}
+	hiExcl := map[jumps]bool{jf: true, jt: true, neg: cv.negated, chained: true}
+	lowExcl := map[jumps]bool{jf: true, jt: false, neg: cv.negated, chained: false}
 	negH := map[jumps]bool{jf: true, jt: true, neg: cv.negated, chained: true}
 	negL := map[jumps]bool{jf: true, jt: false, neg: cv.negated, chained: false}
 
@@ -149,6 +153,8 @@ func (cv *compilerVisitor) getChainedJumps(j jumpType) map[jumps]bool {
 		lowTerm: lowT,
 		hi:      hiJ,
 		low:     lowJ,
+		hiExl:   hiExcl,
+		lowExl:  lowExcl,
 		negHi:   negH,
 		negLow:  negL,
 	}
@@ -157,9 +163,9 @@ func (cv *compilerVisitor) getChainedJumps(j jumpType) map[jumps]bool {
 
 func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.ComparisonType, hiJumps map[jumps]bool, lowJumps map[jumps]bool) {
 	cv.c.loadAt(ix.upper)
-	cv.c.jumpOnKComparison(cv.getUpper(l), op, hiJumps[jf], hiJumps[jt], hiJumps[neg], hiJumps[chained])
+	cv.c.jumpOnKComparison(getUpper(l), op, hiJumps[jf], hiJumps[jt], hiJumps[neg], hiJumps[chained])
 	cv.c.loadAt(ix.lower)
-	cv.c.jumpOnKComparison(cv.getLower(l), op, lowJumps[jf], lowJumps[jt], lowJumps[neg], lowJumps[chained])
+	cv.c.jumpOnKComparison(getLower(l), op, lowJumps[jf], lowJumps[jt], lowJumps[neg], lowJumps[chained])
 }
 
 func (cv *compilerVisitor) compareArgToNumeric(l uint64, ix argumentPosition, op tree.ComparisonType, isLast bool) {
@@ -168,6 +174,8 @@ func (cv *compilerVisitor) compareArgToNumeric(l uint64, ix argumentPosition, op
 	} else {
 		if cv.negated {
 			cv.jumpOnK(l, ix, op, cv.getChainedJumps(negHi), cv.getChainedJumps(negLow))
+		} else if cv.exclusive && !cv.terminal {
+			cv.jumpOnK(l, ix, op, cv.getChainedJumps(hiExl), cv.getChainedJumps(lowExl))
 		} else {
 			cv.jumpOnK(l, ix, op, cv.getChainedJumps(hi), cv.getChainedJumps(low))
 		}
@@ -234,17 +242,18 @@ func (cv *compilerVisitor) AcceptNumericLiteral(l tree.NumericLiteral) {
 
 func (cv *compilerVisitor) AcceptAnd(c tree.And) {
 	cv.topLevel = false
-	cv.terminalJT = !cv.terminalJT
+	cv.terminal = false
+	cv.exclusive = true
 	c.Left.Accept(cv)
-	cv.terminalJT = !cv.terminalJT
+	cv.terminal = true
 	c.Right.Accept(cv)
 }
 
 func (cv *compilerVisitor) AcceptOr(c tree.Or) {
 	cv.topLevel = false
-	cv.terminalJF = false
+	cv.terminal = false
 	c.Left.Accept(cv)
-	cv.terminalJF = true
+	cv.terminal = true
 	c.Right.Accept(cv)
 }
 

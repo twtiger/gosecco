@@ -41,7 +41,7 @@ func (c *compiler) compile(rules []tree.Rule) {
 }
 
 func (c *compiler) compileExpression(x tree.Expression) {
-	cv := &compilerVisitor{c: c, terminalJF: true, terminalJT: true, negated: false, topLevel: true}
+	cv := &compilerVisitor{c: c, terminal: true, exclusive: false, negated: false, topLevel: true}
 	x.Accept(cv)
 }
 
