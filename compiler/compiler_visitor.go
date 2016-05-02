@@ -77,15 +77,6 @@ func detectSpecialCases(c tree.Comparison) (argL *tree.Argument, argR *tree.Argu
 	return
 }
 
-// TODO refactor to replace jumpOnK with this.
-func (cv *compilerVisitor) compareArgToLit(a *tree.Argument, l *tree.NumericLiteral, op tree.ComparisonType) {
-	ix := argument[a.Index]
-	cv.c.loadAt(ix.upper)
-	cv.c.jumpOnKComparison(cv.getUpper(l.Value), op, cv.terminalJF, !cv.terminalJT, cv.negated, false)
-	cv.c.loadAt(ix.lower)
-	cv.c.jumpOnKComparison(cv.getLower(l.Value), op, cv.terminalJF, cv.terminalJT, cv.negated, false)
-}
-
 func (cv *compilerVisitor) compareExpressionToArg(a *tree.Argument, e tree.Expression, op tree.ComparisonType) {
 	e.Accept(cv)
 	cv.c.moveAtoX()
@@ -101,11 +92,13 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 	argL, argR, litL, litR, leftArg, rightArg, leftLit, rightLit := detectSpecialCases(c)
 
 	if leftArg && rightLit {
-		cv.compareArgToLit(argL, litR, c.Op)
+		ix := argument[argL.Index]
+		cv.compareArgToNumeric(litR.Value, ix, c.Op, true)
 	}
 
 	if leftLit && rightArg {
-		cv.compareArgToLit(argR, litL, c.Op)
+		ix := argument[argR.Index]
+		cv.compareArgToNumeric(litL.Value, ix, c.Op, true)
 	}
 
 	if leftArg && rightArg {
@@ -142,6 +135,7 @@ const (
 	negLow  = "negLow"
 )
 
+// TODO on init
 func (cv *compilerVisitor) getChainedJumps(j jumpType) map[jumps]bool {
 	hiT := map[jumps]bool{jf: true, jt: false, neg: cv.negated, chained: false}
 	lowT := map[jumps]bool{jf: true, jt: true, neg: cv.negated, chained: false}
@@ -161,21 +155,21 @@ func (cv *compilerVisitor) getChainedJumps(j jumpType) map[jumps]bool {
 	return allPoints[j]
 }
 
-func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, hiJumps map[jumps]bool, lowJumps map[jumps]bool) {
+func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.ComparisonType, hiJumps map[jumps]bool, lowJumps map[jumps]bool) {
 	cv.c.loadAt(ix.upper)
-	cv.c.jumpOnKComparison(cv.getUpper(l), tree.EQL, hiJumps[jf], hiJumps[jt], hiJumps[neg], hiJumps[chained])
+	cv.c.jumpOnKComparison(cv.getUpper(l), op, hiJumps[jf], hiJumps[jt], hiJumps[neg], hiJumps[chained])
 	cv.c.loadAt(ix.lower)
-	cv.c.jumpOnKComparison(cv.getLower(l), tree.EQL, lowJumps[jf], lowJumps[jt], lowJumps[neg], lowJumps[chained])
+	cv.c.jumpOnKComparison(cv.getLower(l), op, lowJumps[jf], lowJumps[jt], lowJumps[neg], lowJumps[chained])
 }
 
-func (cv *compilerVisitor) compareArgToNumeric(l uint64, ix argumentPosition, isLast bool) {
+func (cv *compilerVisitor) compareArgToNumeric(l uint64, ix argumentPosition, op tree.ComparisonType, isLast bool) {
 	if isLast {
-		cv.jumpOnK(l, ix, cv.getChainedJumps(hiTerm), cv.getChainedJumps(lowTerm))
+		cv.jumpOnK(l, ix, op, cv.getChainedJumps(hiTerm), cv.getChainedJumps(lowTerm))
 	} else {
 		if cv.negated {
-			cv.jumpOnK(l, ix, cv.getChainedJumps(negHi), cv.getChainedJumps(negLow))
+			cv.jumpOnK(l, ix, op, cv.getChainedJumps(negHi), cv.getChainedJumps(negLow))
 		} else {
-			cv.jumpOnK(l, ix, cv.getChainedJumps(hi), cv.getChainedJumps(low))
+			cv.jumpOnK(l, ix, op, cv.getChainedJumps(hi), cv.getChainedJumps(low))
 		}
 	}
 }
@@ -205,7 +199,7 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 			isLast := i == len(c.Rights)-1
 			switch k := l.(type) {
 			case tree.NumericLiteral:
-				cv.compareArgToNumeric(k.Value, ix, isLast)
+				cv.compareArgToNumeric(k.Value, ix, tree.EQL, isLast)
 			case tree.Argument:
 				rx := argument[k.Index]
 				if isLast {
@@ -224,7 +218,7 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 			k := l.(tree.Argument)
 			ix := argument[k.Index]
 			isLast := i == len(c.Rights)-1
-			cv.compareArgToNumeric(et.Value, ix, isLast)
+			cv.compareArgToNumeric(et.Value, ix, tree.EQL, isLast)
 		}
 	}
 }
