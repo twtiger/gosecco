@@ -11,6 +11,7 @@ type compilerVisitor struct {
 	terminal  bool
 	exclusive bool
 	negated   bool
+	inverted  bool
 	topLevel  bool
 }
 
@@ -82,9 +83,9 @@ func (cv *compilerVisitor) compareExpressionToArg(a *tree.Argument, e tree.Expre
 	cv.c.moveAtoX()
 	lx := argument[a.Index]
 	cv.c.loadAt(lx.upper)
-	cv.c.jumpOnXComparison(op, true, false, cv.negated, false)
+	cv.c.jumpOnXComparison(op, true, false, cv.inverted, false)
 	cv.c.loadAt(lx.lower)
-	cv.c.jumpOnXComparison(op, true, true, cv.negated, false)
+	cv.c.jumpOnXComparison(op, true, true, cv.inverted, false)
 }
 
 func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
@@ -120,7 +121,7 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 		c.Left.Accept(cv)
 		cv.c.moveAtoX()
 		c.Right.Accept(cv)
-		cv.c.jumpOnXComparison(c.Op, true, true, cv.negated, false)
+		cv.c.jumpOnXComparison(c.Op, true, true, cv.inverted, false)
 	}
 }
 
@@ -131,8 +132,10 @@ const (
 	lowTerm = "lowTerm"
 	hi      = "hi"
 	low     = "low"
-	negHi   = "negHi"
-	negLow  = "negLow"
+	negHi   = "hiNeg"
+	negLow  = "lowNeg"
+	invHi   = "negHi"
+	invLow  = "negLow"
 	hiExl   = "hiExl"
 	lowExl  = "lowExl"
 )
@@ -144,28 +147,31 @@ var jumpPoints = map[jumpType]map[jumps]bool{
 	low:     map[jumps]bool{jf: false, jt: true, chained: false},
 	hiExl:   map[jumps]bool{jf: true, jt: true, chained: true},
 	lowExl:  map[jumps]bool{jf: true, jt: false, chained: false},
-	negHi:   map[jumps]bool{jf: true, jt: true, chained: true},
+	invHi:   map[jumps]bool{jf: true, jt: true, chained: true},
+	invLow:  map[jumps]bool{jf: true, jt: false, chained: false},
+	negHi:   map[jumps]bool{jf: true, jt: false, chained: false},
 	negLow:  map[jumps]bool{jf: true, jt: false, chained: false},
 }
 
 func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.ComparisonType, hiJumps map[jumps]bool, lowJumps map[jumps]bool) {
 	cv.c.loadAt(ix.upper)
-	cv.c.jumpOnKComparison(getUpper(l), op, hiJumps[jf], hiJumps[jt], cv.negated, hiJumps[chained])
+	cv.c.jumpOnKComparison(getUpper(l), op, hiJumps[jf], hiJumps[jt], cv.negated, cv.inverted, hiJumps[chained])
 	cv.c.loadAt(ix.lower)
-	cv.c.jumpOnKComparison(getLower(l), op, lowJumps[jf], lowJumps[jt], cv.negated, lowJumps[chained])
+	cv.c.jumpOnKComparison(getLower(l), op, lowJumps[jf], lowJumps[jt], cv.negated, cv.inverted, lowJumps[chained])
 }
 
 func (cv *compilerVisitor) compareArgToNumeric(l uint64, ix argumentPosition, op tree.ComparisonType, isLast bool) {
-	if isLast {
+	switch {
+	case isLast:
 		cv.jumpOnK(l, ix, op, jumpPoints[hiTerm], jumpPoints[lowTerm])
-	} else {
-		if cv.negated {
-			cv.jumpOnK(l, ix, op, jumpPoints[negHi], jumpPoints[negLow])
-		} else if cv.exclusive && !cv.terminal {
-			cv.jumpOnK(l, ix, op, jumpPoints[hiExl], jumpPoints[lowExl])
-		} else {
-			cv.jumpOnK(l, ix, op, jumpPoints[hi], jumpPoints[low])
-		}
+	case !cv.exclusive && cv.negated:
+		cv.jumpOnK(l, ix, op, jumpPoints[negHi], jumpPoints[negLow])
+	case cv.inverted:
+		cv.jumpOnK(l, ix, op, jumpPoints[invHi], jumpPoints[invLow])
+	case cv.exclusive && !cv.terminal && !cv.negated:
+		cv.jumpOnK(l, ix, op, jumpPoints[hiExl], jumpPoints[lowExl])
+	default:
+		cv.jumpOnK(l, ix, op, jumpPoints[hi], jumpPoints[low])
 	}
 }
 
@@ -173,18 +179,18 @@ func (cv *compilerVisitor) jumpOnXChained(ix argumentPosition, rx argumentPositi
 	cv.c.loadAt(ix.upper)
 	cv.c.moveAtoX()
 	cv.c.loadAt(rx.upper)
-	cv.c.jumpOnXComparison(op, hiJumps[jf], hiJumps[jt], cv.negated, hiJumps[chained])
+	cv.c.jumpOnXComparison(op, hiJumps[jf], hiJumps[jt], cv.inverted, hiJumps[chained])
 
 	cv.c.loadAt(ix.lower)
 	cv.c.moveAtoX()
 	cv.c.loadAt(rx.lower)
-	cv.c.jumpOnXComparison(op, lowJumps[jf], lowJumps[jt], cv.negated, lowJumps[chained])
+	cv.c.jumpOnXComparison(op, lowJumps[jf], lowJumps[jt], cv.inverted, lowJumps[chained])
 }
 
 func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 	cv.topLevel = false
 	if !c.Positive {
-		cv.negated = true
+		cv.inverted = true
 	}
 
 	switch et := c.Left.(type) {
@@ -229,8 +235,8 @@ func (cv *compilerVisitor) AcceptNumericLiteral(l tree.NumericLiteral) {
 
 func (cv *compilerVisitor) AcceptAnd(c tree.And) {
 	cv.topLevel = false
-	cv.terminal = false
 	cv.exclusive = true
+	cv.terminal = false
 	c.Left.Accept(cv)
 	cv.terminal = true
 	c.Right.Accept(cv)

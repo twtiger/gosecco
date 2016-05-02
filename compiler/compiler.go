@@ -41,7 +41,7 @@ func (c *compiler) compile(rules []tree.Rule) {
 }
 
 func (c *compiler) compileExpression(x tree.Expression) {
-	cv := &compilerVisitor{c: c, terminal: true, exclusive: false, negated: false, topLevel: true}
+	cv := &compilerVisitor{c: c, terminal: true, exclusive: false, negated: false, inverted: false, topLevel: true}
 	x.Accept(cv)
 }
 
@@ -142,7 +142,7 @@ func (c *compiler) checkCorrectSyscall(name string, setPosFlags bool) {
 	}
 
 	c.loadCurrentSyscall()
-	c.jumpOnKComparison(sys, tree.EQL, true, setPosFlags, false, false)
+	c.jumpOnKComparison(sys, tree.EQL, true, setPosFlags, false, false, false)
 }
 
 func (c *compiler) positiveAction(name string) {
