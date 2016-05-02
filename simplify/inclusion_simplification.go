@@ -35,7 +35,7 @@ func (s *simplifier) AcceptInclusion(a tree.Inclusion) {
 		}
 		if len(newResults) == 0 {
 			s.result = tree.BooleanLiteral{!a.Positive}
-		} else if len(newResults) == 1 {
+		} else if a.Positive == true && len(newResults) == 1 {
 			s.result = tree.Comparison{Op: tree.EQL, Left: l, Right: newResults[0]}
 		} else {
 			s.result = tree.Inclusion{Positive: a.Positive, Left: l, Rights: newResults}

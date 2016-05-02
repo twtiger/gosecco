@@ -194,6 +194,42 @@ func (s *SimplifierSuite) Test_simplifyInclusion(c *C) {
 	c.Assert(tree.ExpressionString(sx), Equals, "(in arg0 42 168)")
 }
 
+func (s *SimplifierSuite) Test_simplifyNotInclusionWithNumericLiteral(c *C) {
+
+	sx := Simplify(tree.Inclusion{
+		Positive: false,
+		Left:     tree.Argument{Index: 0},
+		Rights: []tree.Numeric{
+			tree.NumericLiteral{1},
+		}})
+	c.Assert(tree.ExpressionString(sx), Equals, "(notIn arg0 1)")
+}
+
+func (s *SimplifierSuite) Test_simplifyInclusionWithSameArgumentOnLeftAndRight(c *C) {
+	c.Skip("What error are we raising here?")
+	sx := Simplify(tree.Inclusion{
+		Positive: true,
+		Left:     tree.Argument{Index: 0},
+		Rights: []tree.Numeric{
+			tree.NumericLiteral{4},
+			tree.NumericLiteral{5},
+			tree.Argument{Index: 0},
+		}})
+	c.Assert(tree.ExpressionString(sx), Equals, " ")
+}
+
+func (s *SimplifierSuite) Test_simplifyInclusionWithArgumentInRights(c *C) {
+	sx := Simplify(tree.Inclusion{
+		Positive: true,
+		Left:     tree.Argument{Index: 0},
+		Rights: []tree.Numeric{
+			tree.NumericLiteral{4},
+			tree.NumericLiteral{5},
+			tree.Argument{Index: 1},
+		}})
+	c.Assert(tree.ExpressionString(sx), Equals, "(in arg0 4 5 arg1)")
+}
+
 func (s *SimplifierSuite) Test_simplifyInclusionWithOnlyOneValueShouldBecomeComparison(c *C) {
 
 	sx := Simplify(tree.Inclusion{
@@ -204,6 +240,18 @@ func (s *SimplifierSuite) Test_simplifyInclusionWithOnlyOneValueShouldBecomeComp
 			tree.Arithmetic{Op: tree.LSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
 		}})
 	c.Assert(tree.ExpressionString(sx), Equals, "(eq 18446744073709551573 arg0)")
+}
+
+func (s *SimplifierSuite) Test_simplifyInclusionForAllLiteralRights(c *C) {
+	sx := Simplify(tree.Inclusion{
+		Positive: true,
+		Left:     tree.BinaryNegation{tree.NumericLiteral{5}},
+		Rights: []tree.Numeric{
+			tree.NumericLiteral{2},
+			tree.NumericLiteral{3},
+			tree.NumericLiteral{4},
+		}})
+	c.Assert(tree.ExpressionString(sx), Equals, "false")
 }
 
 func (s *SimplifierSuite) Test_simplifyNegation(c *C) {
