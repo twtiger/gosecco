@@ -47,13 +47,13 @@ func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, termin
 	}
 }
 
-func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, terminalJF, terminalJT, negated bool) {
+func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, terminalJF, terminalJT, negated bool, chained bool) {
 	_, isPos := posVals[cmp]
 	jc := comparisonOps[cmp].x
 	num := c.op(jc, 0)
 	if isPos {
-		c.jumpTo(num, terminalJF, terminalJT, negated, false, positive, negative) // TODO fix up jumpOnX to take chained arg as well
+		c.jumpTo(num, terminalJF, terminalJT, negated, chained, positive, negative)
 	} else {
-		c.jumpTo(num, terminalJT, terminalJF, negated, false, negative, positive)
+		c.jumpTo(num, terminalJT, terminalJF, negated, chained, negative, positive)
 	}
 }
