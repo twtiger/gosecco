@@ -105,7 +105,7 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 		rx := argument[argR.Index]
 		lx := argument[argL.Index]
 
-		cv.jumpOnXChained(rx, lx, c.Op, cv.getChainedJumps(hiTerm), cv.getChainedJumps(lowTerm))
+		cv.jumpOnXChained(rx, lx, c.Op, jumpPoints[hiTerm], jumpPoints[lowTerm])
 	}
 
 	if !rightArg && !rightLit && leftArg {
@@ -137,28 +137,15 @@ const (
 	lowExl  = "lowExl"
 )
 
-// TODO on init
-func (cv *compilerVisitor) getChainedJumps(j jumpType) map[jumps]bool {
-	hiT := map[jumps]bool{jf: true, jt: false, chained: false}
-	lowT := map[jumps]bool{jf: true, jt: true, chained: false}
-	hiJ := map[jumps]bool{jf: true, jt: true, chained: true}
-	lowJ := map[jumps]bool{jf: false, jt: true, chained: false}
-	hiExcl := map[jumps]bool{jf: true, jt: true, chained: true}
-	lowExcl := map[jumps]bool{jf: true, jt: false, chained: false}
-	negH := map[jumps]bool{jf: true, jt: true, chained: true}
-	negL := map[jumps]bool{jf: true, jt: false, chained: false}
-
-	allPoints := map[jumpType]map[jumps]bool{
-		hiTerm:  hiT,
-		lowTerm: lowT,
-		hi:      hiJ,
-		low:     lowJ,
-		hiExl:   hiExcl,
-		lowExl:  lowExcl,
-		negHi:   negH,
-		negLow:  negL,
-	}
-	return allPoints[j]
+var jumpPoints = map[jumpType]map[jumps]bool{
+	hiTerm:  map[jumps]bool{jf: true, jt: false, chained: false},
+	lowTerm: map[jumps]bool{jf: true, jt: true, chained: false},
+	hi:      map[jumps]bool{jf: true, jt: true, chained: true},
+	low:     map[jumps]bool{jf: false, jt: true, chained: false},
+	hiExl:   map[jumps]bool{jf: true, jt: true, chained: true},
+	lowExl:  map[jumps]bool{jf: true, jt: false, chained: false},
+	negHi:   map[jumps]bool{jf: true, jt: true, chained: true},
+	negLow:  map[jumps]bool{jf: true, jt: false, chained: false},
 }
 
 func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.ComparisonType, hiJumps map[jumps]bool, lowJumps map[jumps]bool) {
@@ -170,14 +157,14 @@ func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.Compar
 
 func (cv *compilerVisitor) compareArgToNumeric(l uint64, ix argumentPosition, op tree.ComparisonType, isLast bool) {
 	if isLast {
-		cv.jumpOnK(l, ix, op, cv.getChainedJumps(hiTerm), cv.getChainedJumps(lowTerm))
+		cv.jumpOnK(l, ix, op, jumpPoints[hiTerm], jumpPoints[lowTerm])
 	} else {
 		if cv.negated {
-			cv.jumpOnK(l, ix, op, cv.getChainedJumps(negHi), cv.getChainedJumps(negLow))
+			cv.jumpOnK(l, ix, op, jumpPoints[negHi], jumpPoints[negLow])
 		} else if cv.exclusive && !cv.terminal {
-			cv.jumpOnK(l, ix, op, cv.getChainedJumps(hiExl), cv.getChainedJumps(lowExl))
+			cv.jumpOnK(l, ix, op, jumpPoints[hiExl], jumpPoints[lowExl])
 		} else {
-			cv.jumpOnK(l, ix, op, cv.getChainedJumps(hi), cv.getChainedJumps(low))
+			cv.jumpOnK(l, ix, op, jumpPoints[hi], jumpPoints[low])
 		}
 	}
 }
@@ -211,12 +198,12 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 			case tree.Argument:
 				rx := argument[k.Index]
 				if isLast {
-					cv.jumpOnXChained(ix, rx, tree.EQL, cv.getChainedJumps(hiTerm), cv.getChainedJumps(lowTerm))
+					cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[hiTerm], jumpPoints[lowTerm])
 				} else {
 					if cv.negated {
-						cv.jumpOnXChained(ix, rx, tree.EQL, cv.getChainedJumps(negHi), cv.getChainedJumps(negLow))
+						cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[negHi], jumpPoints[negLow])
 					} else {
-						cv.jumpOnXChained(ix, rx, tree.EQL, cv.getChainedJumps(hi), cv.getChainedJumps(low))
+						cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[hi], jumpPoints[low])
 					}
 				}
 			}
