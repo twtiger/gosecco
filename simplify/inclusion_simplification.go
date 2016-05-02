@@ -24,11 +24,19 @@ func (s *simplifier) AcceptInclusion(a tree.Inclusion) {
 					return
 				}
 			} else {
-				newResults = append(newResults, v)
+				switch v.(type) {
+				case tree.NumericLiteral:
+					// Don't append value to the list because it is not equal to the left value
+					break
+				default:
+					newResults = append(newResults, v)
+				}
 			}
 		}
 		if len(newResults) == 0 {
 			s.result = tree.BooleanLiteral{!a.Positive}
+		} else if len(newResults) == 1 {
+			s.result = tree.Comparison{Op: tree.EQL, Left: l, Right: newResults[0]}
 		} else {
 			s.result = tree.Inclusion{Positive: a.Positive, Left: l, Rights: newResults}
 		}

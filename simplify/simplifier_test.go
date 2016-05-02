@@ -195,7 +195,7 @@ func (s *SimplifierSuite) Test_simplifyInclusion(c *C) {
 }
 
 func (s *SimplifierSuite) Test_simplifyInclusionWithOnlyOneValueShouldBecomeComparison(c *C) {
-	c.Skip("TODO")
+
 	sx := Simplify(tree.Inclusion{
 		Positive: true,
 		Left:     tree.BinaryNegation{tree.NumericLiteral{42}},
