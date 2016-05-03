@@ -6,10 +6,10 @@ type argumentPosition struct {
 }
 
 var argument = []argumentPosition{
-	argumentPosition{lower: 0x10, upper: 0x14},
-	argumentPosition{lower: 0x18, upper: 0x1c},
-	argumentPosition{lower: 0x20, upper: 0x24},
-	argumentPosition{lower: 0x28, upper: 0x2c},
-	argumentPosition{lower: 0x30, upper: 0x34},
-	argumentPosition{lower: 0x38, upper: 0x3c},
+	argumentPosition{upper: 0x10, lower: 0x14},
+	argumentPosition{upper: 0x18, lower: 0x1c},
+	argumentPosition{upper: 0x20, lower: 0x24},
+	argumentPosition{upper: 0x28, lower: 0x2c},
+	argumentPosition{upper: 0x30, lower: 0x34},
+	argumentPosition{upper: 0x38, lower: 0x3c},
 }

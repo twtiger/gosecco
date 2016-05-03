@@ -15,7 +15,7 @@ type CompilerComparisonSuite struct{}
 
 var _ = Suite(&CompilerComparisonSuite{})
 
-func (s *CompilerComparisonSuite) Test_compilationOfEqualsComparison(c *C) {
+func (s *CompilerComparisonSuite) Test_compilationOfEqualsComparison_withLeftArgAndRightLit(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -27,15 +27,18 @@ func (s *CompilerComparisonSuite) Test_compilationOfEqualsComparison(c *C) {
 
 	res, _ := Compile(p)
 
+	allow_system_call := "ret_k\t7FFF0000\n"
+	kill_system_call := "ret_k\t0\n"
+
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs	0\n"+
-		"jeq_k	00	05	1\n"+
-		"ld_abs	14\n"+
-		"jeq_k	00	03	0\n"+
-		"ld_abs	10\n"+
-		"jeq_k	00	01	2A\n"+
-		"ret_k	7FFF0000\n"+
-		"ret_k	0\n")
+		"jeq_k	00	05	1\n"+ // is value in accumulator the system call write, where 1 is write?
+		"ld_abs	10\n"+ // load upper half of arg0 into A
+		"jeq_k	00	03	0\n"+ // compare what is in A to upper half of our constant, 42 (which is also 64 bits)
+		"ld_abs	14\n"+ // load the lower half of argument 0 which is a 32 bit value into A
+		"jeq_k	00	01	2A\n"+ // compare what is in A to lower half of our constant, 42 (which is also 64 bits)
+		allow_system_call+
+		kill_system_call)
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfComparisonWithLargerNumber(c *C) {
@@ -53,14 +56,14 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonWithLargerNumber(c
 	res, _ := Compile(p)
 	a := asm.Dump(res)
 	c.Assert(a, Equals, ""+
-		"ld_abs	0\n"+ // syscallNameIndex
-		"jeq_k	00	05	1\n"+ // syscall.SYS_WRITE
-		"ld_abs	14\n"+ //argumentindex[0][upper]
-		"jeq_k	00	03	7FFFFFFF\n"+ // compare to upper half of numeric 64 bit number
-		"ld_abs	10\n"+ //argumentindex[0][upper]
-		"jeq_k	00	01	FFFFFFFF\n"+ // compare to lower half of numeric 64 bit number
-		"ret_k	7FFF0000\n"+ //SECCOMP_RET_ALLOW
-		"ret_k	0\n") //SECCOMP_RET_KILL
+		"ld_abs	0\n"+
+		"jeq_k	00	05	1\n"+
+		"ld_abs	10\n"+
+		"jeq_k	00	03	7FFFFFFF\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	01	FFFFFFFF\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
 }
 
 func (s *CompilerComparisonSuite) Test_compilationOfSimpleComparisonWithSecondRule(c *C) {
@@ -82,9 +85,9 @@ func (s *CompilerComparisonSuite) Test_compilationOfSimpleComparisonWithSecondRu
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	04	1\n"+
-		"ld_abs	14\n"+
-		"jeq_k	00	02	0\n"+
 		"ld_abs	10\n"+
+		"jeq_k	00	02	0\n"+
+		"ld_abs	14\n"+
 		"jeq_k	02	00	2A\n"+
 		"ld_abs	0\n"+
 		"jeq_k	00	01	99\n"+
@@ -106,9 +109,9 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanComparisonToK(c *
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
-		"ld_abs	14\n"+
-		"jgt_k	00	03	0\n"+
 		"ld_abs	10\n"+
+		"jgt_k	00	03	0\n"+
+		"ld_abs	14\n"+
 		"jgt_k	00	01	2A\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -129,9 +132,9 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanComparisonToK(c *C) 
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
-		"ld_abs	14\n"+
-		"jgt_k	03	00	0\n"+
 		"ld_abs	10\n"+
+		"jgt_k	03	00	0\n"+
+		"ld_abs	14\n"+
 		"jgt_k	01	00	2A\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -152,9 +155,9 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanOrEqualsToCompari
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
-		"ld_abs	14\n"+
-		"jge_k	00	03	0\n"+
 		"ld_abs	10\n"+
+		"jge_k	00	03	0\n"+
+		"ld_abs	14\n"+
 		"jge_k	00	01	2A\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -175,9 +178,9 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanOrEqualsToComparison
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
-		"ld_abs	14\n"+
-		"jge_k	03	00	0\n"+
 		"ld_abs	10\n"+
+		"jge_k	03	00	0\n"+
+		"ld_abs	14\n"+
 		"jge_k	01	00	2A\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -198,9 +201,9 @@ func (s *CompilerComparisonSuite) Test_compilationOfNotEqualsToK(c *C) {
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
-		"ld_abs	14\n"+
-		"jeq_k	03	00	0\n"+
 		"ld_abs	10\n"+
+		"jeq_k	03	00	0\n"+
+		"ld_abs	14\n"+
 		"jeq_k	01	00	2A\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -221,9 +224,9 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterThanRightSide(c *C) {
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
-		"ld_abs	14\n"+
-		"jgt_k	00	03	0\n"+
 		"ld_abs	10\n"+
+		"jgt_k	00	03	0\n"+
+		"ld_abs	14\n"+
 		"jgt_k	00	01	1\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -244,9 +247,9 @@ func (s *CompilerComparisonSuite) Test_compilationOfGreaterOrEqualsToRightSide(c
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
-		"ld_abs	14\n"+
-		"jge_k	00	03	0\n"+
 		"ld_abs	10\n"+
+		"jge_k	00	03	0\n"+
+		"ld_abs	14\n"+
 		"jge_k	00	01	1\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -267,9 +270,9 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessThanKLeftSide(c *C) {
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
-		"ld_abs	14\n"+
-		"jgt_k	03	00	0\n"+
 		"ld_abs	10\n"+
+		"jgt_k	03	00	0\n"+
+		"ld_abs	14\n"+
 		"jgt_k	01	00	1\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -290,9 +293,9 @@ func (s *CompilerComparisonSuite) Test_compilationOfLessOrEqualsToKLeftSide(c *C
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
-		"ld_abs	14\n"+
-		"jge_k	03	00	0\n"+
 		"ld_abs	10\n"+
+		"jge_k	03	00	0\n"+
+		"ld_abs	14\n"+
 		"jge_k	01	00	1\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -313,9 +316,9 @@ func (s *CompilerComparisonSuite) Test_compilationOfNotEqualsKLeftSide(c *C) {
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
-		"ld_abs	14\n"+
-		"jeq_k	03	00	0\n"+
 		"ld_abs	10\n"+
+		"jeq_k	03	00	0\n"+
+		"ld_abs	14\n"+
 		"jeq_k	01	00	1\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -336,9 +339,9 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonForFirstArgument(c
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
-		"ld_abs	1C\n"+
-		"jeq_k	03	00	0\n"+
 		"ld_abs	18\n"+
+		"jeq_k	03	00	0\n"+
+		"ld_abs	1C\n"+
 		"jeq_k	01	00	1\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -359,13 +362,13 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonofAtoXOfTwoArgumen
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	09	1\n"+
-		"ld_abs	1C\n"+
-		"tax\n"+
-		"ld_abs	14\n"+
-		"jeq_x	05	00\n"+
 		"ld_abs	18\n"+
 		"tax\n"+
 		"ld_abs	10\n"+
+		"jeq_x	05	00\n"+
+		"ld_abs	1C\n"+
+		"tax\n"+
+		"ld_abs	14\n"+
 		"jeq_x	01	00\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -388,12 +391,12 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonofAtoXOfArgumentLe
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	08	1\n"+
-		"ld_abs	10\n"+
+		"ld_abs	14\n"+
 		"add_k\t4\n"+
 		"tax\n"+
-		"ld_abs	1C\n"+
-		"jeq_x	03	00\n"+
 		"ld_abs	18\n"+
+		"jeq_x	03	00\n"+
+		"ld_abs	1C\n"+
 		"jeq_x	01	00\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -417,12 +420,12 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonofAtoXOfArgumentRi
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	08	1\n"+
-		"ld_abs	10\n"+
+		"ld_abs	14\n"+
 		"add_k\t4\n"+
 		"tax\n"+
-		"ld_abs	1C\n"+
-		"jeq_x	03	00\n"+
 		"ld_abs	18\n"+
+		"jeq_x	03	00\n"+
+		"ld_abs	1C\n"+
 		"jeq_x	01	00\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -447,10 +450,10 @@ func (s *CompilerComparisonSuite) Test_compilationOfComparisonofAtoXOfExpression
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	07	1\n"+
-		"ld_abs	10\n"+
+		"ld_abs	14\n"+
 		"add_k\tA\n"+
 		"tax\n"+
-		"ld_abs	18\n"+
+		"ld_abs	1C\n"+
 		"sub_k\t5\n"+
 		"jeq_x	01	00\n"+
 		"ret_k	7FFF0000\n"+

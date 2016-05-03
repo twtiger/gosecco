@@ -32,12 +32,12 @@ func (s *CompilerArithmeticSuite) Test_compilationOfAdditionWithK(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t08\t1\n"+
-		"ld_abs\t18\n"+
+		"ld_abs\t1C\n"+
 		"add_k\t4\n"+
 		"tax\n"+
-		"ld_abs\t14\n"+
-		"jeq_x\t00\t03\n"+
 		"ld_abs\t10\n"+
+		"jeq_x\t00\t03\n"+
+		"ld_abs\t14\n"+
 		"jeq_x\t00\t01\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
@@ -65,12 +65,12 @@ func (s *CompilerArithmeticSuite) Test_compilationOfMultiplicationWithK(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t08\t1\n"+
-		"ld_abs\t18\n"+
+		"ld_abs\t1C\n"+
 		"mul_k\t8\n"+
 		"tax\n"+
-		"ld_abs\t14\n"+
-		"jeq_x\t00\t03\n"+
 		"ld_abs\t10\n"+
+		"jeq_x\t00\t03\n"+
+		"ld_abs\t14\n"+
 		"jeq_x\t00\t01\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
@@ -98,12 +98,12 @@ func (s *CompilerArithmeticSuite) Test_compilationOfSubtractionWithK(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t08\t1\n"+
-		"ld_abs\t18\n"+
+		"ld_abs\t1C\n"+
 		"sub_k\t8\n"+
 		"tax\n"+
-		"ld_abs\t14\n"+
-		"jeq_x\t00\t03\n"+
 		"ld_abs\t10\n"+
+		"jeq_x\t00\t03\n"+
+		"ld_abs\t14\n"+
 		"jeq_x\t00\t01\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
@@ -131,12 +131,12 @@ func (s *CompilerArithmeticSuite) Test_compilationOfDivisionWithK(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t08\t1\n"+
-		"ld_abs\t18\n"+
+		"ld_abs\t1C\n"+
 		"div_k\t5\n"+
 		"tax\n"+
-		"ld_abs\t14\n"+
-		"jeq_x\t00\t03\n"+
 		"ld_abs\t10\n"+
+		"jeq_x\t00\t03\n"+
+		"ld_abs\t14\n"+
 		"jeq_x\t00\t01\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
@@ -164,12 +164,12 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBinaryAndWithK(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t08\t1\n"+
-		"ld_abs\t18\n"+
+		"ld_abs\t1C\n"+
 		"and_k\t2\n"+
 		"tax\n"+
-		"ld_abs\t14\n"+
-		"jeq_x\t00\t03\n"+
 		"ld_abs\t10\n"+
+		"jeq_x\t00\t03\n"+
+		"ld_abs\t14\n"+
 		"jeq_x\t00\t01\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
@@ -197,12 +197,12 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBinaryOrWithK(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t08\t1\n"+
-		"ld_abs\t18\n"+
+		"ld_abs\t1C\n"+
 		"or_k\t2\n"+
 		"tax\n"+
-		"ld_abs\t14\n"+
-		"jeq_x\t00\t03\n"+
 		"ld_abs\t10\n"+
+		"jeq_x\t00\t03\n"+
+		"ld_abs\t14\n"+
 		"jeq_x\t00\t01\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
@@ -230,12 +230,12 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBitwiseLeftShiftWithK(c *C) 
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t08\t1\n"+
-		"ld_abs\t18\n"+
+		"ld_abs\t1C\n"+
 		"lsh_k\t2\n"+
 		"tax\n"+
-		"ld_abs\t14\n"+
-		"jeq_x\t00\t03\n"+
 		"ld_abs\t10\n"+
+		"jeq_x\t00\t03\n"+
+		"ld_abs\t14\n"+
 		"jeq_x\t00\t01\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
@@ -263,12 +263,12 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBitwiseRightShiftWithK(c *C)
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t08\t1\n"+
-		"ld_abs\t18\n"+
+		"ld_abs\t1C\n"+
 		"rsh_k\t2\n"+
 		"tax\n"+
-		"ld_abs\t14\n"+
-		"jeq_x\t00\t03\n"+
 		"ld_abs\t10\n"+
+		"jeq_x\t00\t03\n"+
+		"ld_abs\t14\n"+
 		"jeq_x\t00\t01\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
@@ -296,12 +296,12 @@ func (s *CompilerArithmeticSuite) Test_compilationOfModuloWithK(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t08\t1\n"+
-		"ld_abs\t18\n"+
+		"ld_abs\t1C\n"+
 		"mod_k\t3\n"+
 		"tax\n"+
-		"ld_abs\t14\n"+
-		"jeq_x\t00\t03\n"+
 		"ld_abs\t10\n"+
+		"jeq_x\t00\t03\n"+
+		"ld_abs\t14\n"+
 		"jeq_x\t00\t01\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
@@ -329,12 +329,12 @@ func (s *CompilerArithmeticSuite) Test_compilationOfBinaryXORWithK(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t08\t1\n"+
-		"ld_abs\t18\n"+
+		"ld_abs\t1C\n"+
 		"xor_k\t3\n"+
 		"tax\n"+
-		"ld_abs\t14\n"+
-		"jeq_x\t00\t03\n"+
 		"ld_abs\t10\n"+
+		"jeq_x\t00\t03\n"+
+		"ld_abs\t14\n"+
 		"jeq_x\t00\t01\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
