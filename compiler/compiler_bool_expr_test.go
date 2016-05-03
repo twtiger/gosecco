@@ -134,10 +134,9 @@ func (s *BoolCompilerSuite) Test_compilationOfNegatedOrExpression(c *C) {
 		"jeq_k	01	00	2A\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
-
 }
 
-func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedExpression(c *C) {
+func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedAndExpression(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -166,6 +165,63 @@ func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedExpression(c *C) {
 		"jeq_k	01	00	2A\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
+}
+
+func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedOrExpression(c *C) {
+	c.Skip("p")
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Or{
+					Left: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+					Right: tree.Negation{
+						Operand: tree.Comparison{Left: tree.Argument{Index: 1}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+					},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	09	1\n"+
+		"ld_abs	14\n"+
+		"jeq_k	00	02	0\n"+
+		"ld_abs	10\n"+
+		"jeq_k	00	05	2A\n"+
+		"ld_abs	1C\n"+
+		"jeq_k	03	00	0\n"+
+		"ld_abs	18\n"+
+		"jeq_k	01	00	2A\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
+}
+
+func (s *CompilerComparisonSuite) Test_compilationOfNegatedEqualsComparison(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Negation{
+					Operand: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.NumericLiteral{42}},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t05\t1\n"+
+		"ld_abs\t14\n"+
+		"jeq_k\t03\t00\t0\n"+
+		"ld_abs\t10\n"+
+		"jeq_k\t01\t00\t2A\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
 }
 
 func (s *BoolCompilerSuite) Test_compilingBooleanInsideExpressionShouldPanicSinceItsAProgrammerError(c *C) {

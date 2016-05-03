@@ -140,24 +140,28 @@ const (
 	lowExl  = "lowExl"
 )
 
-var jumpPoints = map[jumpType]map[jumps]bool{
-	hiTerm:  map[jumps]bool{jf: true, jt: false, chained: false},
-	lowTerm: map[jumps]bool{jf: true, jt: true, chained: false},
-	hi:      map[jumps]bool{jf: true, jt: true, chained: true},
-	low:     map[jumps]bool{jf: false, jt: true, chained: false},
-	hiExl:   map[jumps]bool{jf: true, jt: true, chained: true},
-	lowExl:  map[jumps]bool{jf: true, jt: false, chained: false},
-	invHi:   map[jumps]bool{jf: true, jt: true, chained: true},
-	invLow:  map[jumps]bool{jf: true, jt: false, chained: false},
-	negHi:   map[jumps]bool{jf: true, jt: false, chained: false},
-	negLow:  map[jumps]bool{jf: true, jt: false, chained: false},
+type jumpPoint struct {
+	jf, jt, chained bool
 }
 
-func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.ComparisonType, hiJumps map[jumps]bool, lowJumps map[jumps]bool) {
+var jumpPoints = map[jumpType]jumpPoint{
+	hiTerm:  jumpPoint{true, false, false},
+	lowTerm: jumpPoint{true, true, false},
+	hi:      jumpPoint{true, true, true},
+	low:     jumpPoint{false, true, false},
+	hiExl:   jumpPoint{true, true, true},
+	lowExl:  jumpPoint{true, false, false},
+	invHi:   jumpPoint{true, true, true},
+	invLow:  jumpPoint{true, false, false},
+	negHi:   jumpPoint{true, false, false},
+	negLow:  jumpPoint{true, false, false},
+}
+
+func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.ComparisonType, hiJumps jumpPoint, lowJumps jumpPoint) {
 	cv.c.loadAt(ix.upper)
-	cv.c.jumpOnKComparison(getUpper(l), op, hiJumps[jf], hiJumps[jt], cv.negated, cv.inverted, hiJumps[chained])
+	cv.c.jumpOnKComparison(getUpper(l), op, hiJumps.jf, hiJumps.jt, cv.negated, cv.inverted, hiJumps.chained)
 	cv.c.loadAt(ix.lower)
-	cv.c.jumpOnKComparison(getLower(l), op, lowJumps[jf], lowJumps[jt], cv.negated, cv.inverted, lowJumps[chained])
+	cv.c.jumpOnKComparison(getLower(l), op, lowJumps.jf, lowJumps.jt, cv.negated, cv.inverted, lowJumps.chained)
 }
 
 func (cv *compilerVisitor) compareArgToNumeric(l uint64, ix argumentPosition, op tree.ComparisonType, isLast bool) {
@@ -175,16 +179,16 @@ func (cv *compilerVisitor) compareArgToNumeric(l uint64, ix argumentPosition, op
 	}
 }
 
-func (cv *compilerVisitor) jumpOnXChained(ix argumentPosition, rx argumentPosition, op tree.ComparisonType, hiJumps map[jumps]bool, lowJumps map[jumps]bool) {
+func (cv *compilerVisitor) jumpOnXChained(ix argumentPosition, rx argumentPosition, op tree.ComparisonType, hiJumps jumpPoint, lowJumps jumpPoint) {
 	cv.c.loadAt(ix.upper)
 	cv.c.moveAtoX()
 	cv.c.loadAt(rx.upper)
-	cv.c.jumpOnXComparison(op, hiJumps[jf], hiJumps[jt], cv.inverted, hiJumps[chained])
+	cv.c.jumpOnXComparison(op, hiJumps.jf, hiJumps.jt, cv.inverted, hiJumps.chained)
 
 	cv.c.loadAt(ix.lower)
 	cv.c.moveAtoX()
 	cv.c.loadAt(rx.lower)
-	cv.c.jumpOnXComparison(op, lowJumps[jf], lowJumps[jt], cv.inverted, lowJumps[chained])
+	cv.c.jumpOnXComparison(op, lowJumps.jf, lowJumps.jt, cv.inverted, lowJumps.chained)
 }
 
 func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
