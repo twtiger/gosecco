@@ -83,9 +83,9 @@ func (cv *compilerVisitor) compareExpressionToArg(a *tree.Argument, e tree.Expre
 	cv.c.moveAtoX()
 	lx := argument[a.Index]
 	cv.c.loadAt(lx.upper)
-	cv.c.jumpOnXComparison(op, true, false, cv.inverted, false)
+	cv.c.jumpOnXComparison(op, jumpPoints[TermJf], cv.inverted)
 	cv.c.loadAt(lx.lower)
-	cv.c.jumpOnXComparison(op, true, true, cv.inverted, false)
+	cv.c.jumpOnXComparison(op, jumpPoints[TermJ], cv.inverted)
 }
 
 func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
@@ -106,7 +106,7 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 		rx := argument[argR.Index]
 		lx := argument[argL.Index]
 
-		cv.jumpOnXChained(rx, lx, c.Op, jumpPoints[jFTerm], jumpPoints[jFjTTerm])
+		cv.jumpOnXChained(rx, lx, c.Op, jumpPoints[TermJf], jumpPoints[TermJ])
 	}
 
 	if !rightArg && !rightLit && leftArg {
@@ -121,50 +121,29 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 		c.Left.Accept(cv)
 		cv.c.moveAtoX()
 		c.Right.Accept(cv)
-		cv.c.jumpOnXComparison(c.Op, true, true, cv.inverted, false)
+		cv.c.jumpOnXComparison(c.Op, jumpPoints[TermJ], cv.inverted)
 	}
 }
 
-type jumpType string
-
-const (
-	jFTerm    = "jFTerm"
-	jFjTTerm  = "jFjTTerm"
-	jFjTChain = "jFjTChain"
-	jTChain   = "jTChain"
-)
-
-type jumpPoint struct {
-	jf, jt, chained bool
-}
-
-var jumpPoints = map[jumpType]jumpPoint{
-	jFTerm:    jumpPoint{true, false, false},
-	jFjTTerm:  jumpPoint{true, true, false},
-	jFjTChain: jumpPoint{true, true, true},
-	jTChain:   jumpPoint{false, true, false},
-}
-
 func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.ComparisonType, hiJumps jumpPoint, lowJumps jumpPoint) {
-	// TODO set negation here
 	cv.c.loadAt(ix.upper)
-	cv.c.jumpOnKComparison(getUpper(l), op, hiJumps.jf, hiJumps.jt, cv.negated, cv.inverted, hiJumps.chained)
+	cv.c.jumpOnKComp(getUpper(l), op, hiJumps, cv.negated, cv.inverted)
 	cv.c.loadAt(ix.lower)
-	cv.c.jumpOnKComparison(getLower(l), op, lowJumps.jf, lowJumps.jt, cv.negated, cv.inverted, lowJumps.chained)
+	cv.c.jumpOnKComp(getLower(l), op, lowJumps, cv.negated, cv.inverted)
 }
 
 func (cv *compilerVisitor) compareArgToNumeric(l uint64, ix argumentPosition, op tree.ComparisonType, isLast bool) {
 	switch {
 	case isLast:
-		cv.jumpOnK(l, ix, op, jumpPoints[jFTerm], jumpPoints[jFjTTerm])
+		cv.jumpOnK(l, ix, op, jumpPoints[TermJf], jumpPoints[TermJ])
 	case cv.negated:
-		cv.jumpOnK(l, ix, op, jumpPoints[jFTerm], jumpPoints[jFTerm])
+		cv.jumpOnK(l, ix, op, jumpPoints[TermJf], jumpPoints[TermJf])
 	case cv.inverted:
-		cv.jumpOnK(l, ix, op, jumpPoints[jFjTChain], jumpPoints[jFTerm])
+		cv.jumpOnK(l, ix, op, jumpPoints[ChainJ], jumpPoints[TermJf])
 	case cv.exclusive:
-		cv.jumpOnK(l, ix, op, jumpPoints[jFjTChain], jumpPoints[jFTerm])
+		cv.jumpOnK(l, ix, op, jumpPoints[ChainJ], jumpPoints[TermJf])
 	default:
-		cv.jumpOnK(l, ix, op, jumpPoints[jFjTChain], jumpPoints[jTChain])
+		cv.jumpOnK(l, ix, op, jumpPoints[ChainJ], jumpPoints[ChainJt])
 	}
 }
 
@@ -172,12 +151,12 @@ func (cv *compilerVisitor) jumpOnXChained(ix argumentPosition, rx argumentPositi
 	cv.c.loadAt(ix.upper)
 	cv.c.moveAtoX()
 	cv.c.loadAt(rx.upper)
-	cv.c.jumpOnXComparison(op, hiJumps.jf, hiJumps.jt, cv.inverted, hiJumps.chained)
+	cv.c.jumpOnXComparison(op, hiJumps, cv.inverted)
 
 	cv.c.loadAt(ix.lower)
 	cv.c.moveAtoX()
 	cv.c.loadAt(rx.lower)
-	cv.c.jumpOnXComparison(op, lowJumps.jf, lowJumps.jt, cv.inverted, lowJumps.chained)
+	cv.c.jumpOnXComparison(op, lowJumps, cv.inverted)
 }
 
 func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
@@ -197,12 +176,12 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 			case tree.Argument:
 				rx := argument[k.Index]
 				if isLast {
-					cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[jFTerm], jumpPoints[jFjTTerm])
+					cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[TermJf], jumpPoints[TermJ])
 				} else {
 					if cv.negated {
-						cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[jFTerm], jumpPoints[jFTerm])
+						cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[TermJf], jumpPoints[TermJf])
 					} else {
-						cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[jFjTChain], jumpPoints[jTChain])
+						cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[ChainJ], jumpPoints[ChainJt])
 					}
 				}
 			}

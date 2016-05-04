@@ -13,6 +13,26 @@ const (
 	chained = "chained"
 )
 
+type jumpType string
+
+const (
+	TermJf  = "TermJf"
+	TermJ   = "TermJ"
+	ChainJ  = "ChainJ"
+	ChainJt = "ChainJt"
+)
+
+type jumpPoint struct {
+	jf, jt, chained bool
+}
+
+var jumpPoints = map[jumpType]jumpPoint{
+	TermJf:  jumpPoint{true, false, false},
+	TermJ:   jumpPoint{true, true, false},
+	ChainJ:  jumpPoint{true, true, true},
+	ChainJt: jumpPoint{false, true, false},
+}
+
 func (c *compiler) positiveJumpTo(index uint, l label, neg, chained bool) {
 	li := labelInfo{index, neg, chained}
 	if l != noLabel {
@@ -36,25 +56,31 @@ func (c *compiler) jumpTo(num uint, terminalJF, terminalJT, inv, chained bool, j
 	}
 }
 
-func (c *compiler) jumpOnKComparison(val uint32, cmp tree.ComparisonType, terminalJF, terminalJT, negated, inverted, chained bool) {
+func (c *compiler) jumpOnSyscallComparison(val uint32, cmp tree.ComparisonType, terminalJF, terminalJT bool) {
+	jc := comparisonOps[cmp].k
+	num := c.op(jc, val)
+	c.jumpTo(num, terminalJF, terminalJT, false, false, positive, negative)
+}
+
+func (c *compiler) jumpOnKComp(val uint32, cmp tree.ComparisonType, jp jumpPoint, negated, inverted bool) {
 	_, isPos := posVals[cmp]
 	jc := comparisonOps[cmp].k
 	num := c.op(jc, val)
 	if !isPos || negated {
-		c.jumpTo(num, terminalJT, terminalJF, inverted, chained, negative, positive)
+		c.jumpTo(num, jp.jt, jp.jf, inverted, jp.chained, negative, positive)
 	} else {
-		c.jumpTo(num, terminalJF, terminalJT, inverted, chained, positive, negative)
+		c.jumpTo(num, jp.jf, jp.jt, inverted, jp.chained, positive, negative)
 	}
 }
 
 //TODO add negation here
-func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, terminalJF, terminalJT, inverted bool, chained bool) {
+func (c *compiler) jumpOnXComparison(cmp tree.ComparisonType, jp jumpPoint, inverted bool) {
 	_, isPos := posVals[cmp]
 	jc := comparisonOps[cmp].x
 	num := c.op(jc, 0)
 	if isPos {
-		c.jumpTo(num, terminalJF, terminalJT, inverted, chained, positive, negative)
+		c.jumpTo(num, jp.jf, jp.jt, inverted, jp.chained, positive, negative)
 	} else {
-		c.jumpTo(num, terminalJT, terminalJF, inverted, chained, negative, positive)
+		c.jumpTo(num, jp.jt, jp.jf, inverted, jp.chained, negative, positive)
 	}
 }
