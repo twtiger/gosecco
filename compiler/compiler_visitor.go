@@ -106,7 +106,7 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 		rx := argument[argR.Index]
 		lx := argument[argL.Index]
 
-		cv.jumpOnXChained(rx, lx, c.Op, jumpPoints[hiTerm], jumpPoints[lowTerm])
+		cv.jumpOnXChained(rx, lx, c.Op, jumpPoints[jFTerm], jumpPoints[jFjTTerm])
 	}
 
 	if !rightArg && !rightLit && leftArg {
@@ -128,16 +128,10 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 type jumpType string
 
 const (
-	hiTerm  = "hiTerm"
-	lowTerm = "lowTerm"
-	hi      = "hi"
-	low     = "low"
-	negHi   = "hiNeg"
-	negLow  = "lowNeg"
-	invHi   = "negHi"
-	invLow  = "negLow"
-	hiExl   = "hiExl"
-	lowExl  = "lowExl"
+	jFTerm    = "jFTerm"
+	jFjTTerm  = "jFjTTerm"
+	jFjTChain = "jFjTChain"
+	jTChain   = "jTChain"
 )
 
 type jumpPoint struct {
@@ -145,19 +139,14 @@ type jumpPoint struct {
 }
 
 var jumpPoints = map[jumpType]jumpPoint{
-	hiTerm:  jumpPoint{true, false, false},
-	lowTerm: jumpPoint{true, true, false},
-	hi:      jumpPoint{true, true, true},
-	low:     jumpPoint{false, true, false},
-	hiExl:   jumpPoint{true, true, true},
-	lowExl:  jumpPoint{true, false, false},
-	invHi:   jumpPoint{true, true, true},
-	invLow:  jumpPoint{true, false, false},
-	negHi:   jumpPoint{true, false, false},
-	negLow:  jumpPoint{true, false, false},
+	jFTerm:    jumpPoint{true, false, false},
+	jFjTTerm:  jumpPoint{true, true, false},
+	jFjTChain: jumpPoint{true, true, true},
+	jTChain:   jumpPoint{false, true, false},
 }
 
 func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.ComparisonType, hiJumps jumpPoint, lowJumps jumpPoint) {
+	// TODO set negation here
 	cv.c.loadAt(ix.upper)
 	cv.c.jumpOnKComparison(getUpper(l), op, hiJumps.jf, hiJumps.jt, cv.negated, cv.inverted, hiJumps.chained)
 	cv.c.loadAt(ix.lower)
@@ -167,15 +156,15 @@ func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.Compar
 func (cv *compilerVisitor) compareArgToNumeric(l uint64, ix argumentPosition, op tree.ComparisonType, isLast bool) {
 	switch {
 	case isLast:
-		cv.jumpOnK(l, ix, op, jumpPoints[hiTerm], jumpPoints[lowTerm])
-	case !cv.exclusive && cv.negated:
-		cv.jumpOnK(l, ix, op, jumpPoints[negHi], jumpPoints[negLow])
+		cv.jumpOnK(l, ix, op, jumpPoints[jFTerm], jumpPoints[jFjTTerm])
+	case cv.negated:
+		cv.jumpOnK(l, ix, op, jumpPoints[jFTerm], jumpPoints[jFTerm])
 	case cv.inverted:
-		cv.jumpOnK(l, ix, op, jumpPoints[invHi], jumpPoints[invLow])
-	case cv.exclusive && !cv.terminal && !cv.negated:
-		cv.jumpOnK(l, ix, op, jumpPoints[hiExl], jumpPoints[lowExl])
+		cv.jumpOnK(l, ix, op, jumpPoints[jFjTChain], jumpPoints[jFTerm])
+	case cv.exclusive:
+		cv.jumpOnK(l, ix, op, jumpPoints[jFjTChain], jumpPoints[jFTerm])
 	default:
-		cv.jumpOnK(l, ix, op, jumpPoints[hi], jumpPoints[low])
+		cv.jumpOnK(l, ix, op, jumpPoints[jFjTChain], jumpPoints[jTChain])
 	}
 }
 
@@ -208,12 +197,12 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 			case tree.Argument:
 				rx := argument[k.Index]
 				if isLast {
-					cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[hiTerm], jumpPoints[lowTerm])
+					cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[jFTerm], jumpPoints[jFjTTerm])
 				} else {
 					if cv.negated {
-						cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[negHi], jumpPoints[negLow])
+						cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[jFTerm], jumpPoints[jFTerm])
 					} else {
-						cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[hi], jumpPoints[low])
+						cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[jFjTChain], jumpPoints[jTChain])
 					}
 				}
 			}
