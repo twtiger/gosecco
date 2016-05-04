@@ -5,7 +5,7 @@ import "fmt"
 %%{
     machine gosecco_tokenizer;
 
-    BIN_DIGIT = [0-1] ;
+    BIN_DIGIT = [01] ;
     OCT_DIGIT = [0-7] ;
 
     INTBIN = "0b"i BIN_DIGIT+ ;
