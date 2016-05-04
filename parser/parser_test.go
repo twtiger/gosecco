@@ -254,6 +254,10 @@ func (s *ParserSuite) Test_parseAExpressionBinaryNegation(c *C) {
 	c.Assert(parseExpectSuccess(c, "arg0 == ~0"), Equals, "(eq arg0 (binNeg 0))")
 }
 
+func (s *ParserSuite) Test_parseAExpressionWithBinaryNegationTwice(c *C) {
+	c.Assert(parseExpectSuccess(c, "arg0 == ~~0"), Equals, "(eq arg0 (binNeg (binNeg 0)))")
+}
+
 func (s *ParserSuite) Test_parseAExpressionLeftShift(c *C) {
 	result, _, _, _ := parseExpression("arg0 == 2 << 1")
 	c.Assert(tree.ExpressionString(result), Equals, "(eq arg0 (lsh 2 1))")
@@ -281,6 +285,10 @@ func (s *ParserSuite) Test_parseAExpressionWithBooleanAnd(c *C) {
 
 func (s *ParserSuite) Test_parseAExpressionWithBooleanNegation(c *C) {
 	c.Assert(parseExpectSuccess(c, "!(arg0 == 1)"), Equals, "(not (eq arg0 1))")
+}
+
+func (s *ParserSuite) Test_parseAExpressionWithDoubleBooleanNegation(c *C) {
+	c.Assert(parseExpectSuccess(c, "!!(arg0 == 1)"), Equals, "(not (not (eq arg0 1)))")
 }
 
 func (s *ParserSuite) Test_parseAExpressionWithNotEqual(c *C) {

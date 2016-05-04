@@ -296,14 +296,14 @@ func (ctx *parseContext) unaryExpression() (tree.Expression, error) {
 	switch ctx.next() {
 	case INV:
 		ctx.consume()
-		left, e := ctx.primary()
+		left, e := ctx.unaryExpression()
 		if e != nil {
 			return nil, e
 		}
 		return tree.BinaryNegation{left}, nil
 	case NOT:
 		ctx.consume()
-		left, e := ctx.primary()
+		left, e := ctx.unaryExpression()
 		if e != nil {
 			return nil, e
 		}
