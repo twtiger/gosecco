@@ -20,17 +20,20 @@ const (
 	TermJ   = "TermJ"
 	ChainJ  = "ChainJ"
 	ChainJt = "ChainJt"
+	ExlHi   = "ExlHi"
 )
 
 type jumpPoint struct {
 	jf, jt, chained bool
 }
 
+// need to take another look at the chain attribute
 var jumpPoints = map[jumpType]jumpPoint{
-	TermJf:  jumpPoint{true, false, false},
-	TermJ:   jumpPoint{true, true, false},
-	ChainJ:  jumpPoint{true, true, true},
-	ChainJt: jumpPoint{false, true, false},
+	TermJf:  jumpPoint{jf: true, jt: false, chained: false},
+	TermJ:   jumpPoint{jf: true, jt: true, chained: false},
+	ChainJ:  jumpPoint{jf: true, jt: true, chained: true},
+	ExlHi:   jumpPoint{jf: true, jt: false, chained: false},
+	ChainJt: jumpPoint{jf: false, jt: true, chained: false},
 }
 
 func (c *compiler) positiveJumpTo(index uint, l label, neg, chained bool) {

@@ -36,6 +36,7 @@ func (s *BoolCompilerSuite) Test_orExpressionBetweenEqualityComparisons(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	09	1\n"+
+
 		"ld_abs	10\n"+
 		"jeq_k	00	02	0\n"+
 		"ld_abs	14\n"+
@@ -45,12 +46,12 @@ func (s *BoolCompilerSuite) Test_orExpressionBetweenEqualityComparisons(c *C) {
 		"jeq_k	00	03	0\n"+
 		"ld_abs	1C\n"+
 		"jeq_k	00	01	2A\n"+
+
 		defaultPositiveReturn+
 		defaultNegativeReturn)
 }
 
 func (s *BoolCompilerSuite) Test_compilationOfAndExpression(c *C) {
-	c.Skip("fail on upper half of first expression should go to final fail")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -68,7 +69,7 @@ func (s *BoolCompilerSuite) Test_compilationOfAndExpression(c *C) {
 		"ld_abs	0\n"+
 		"jeq_k	00	09	1\n"+
 		"ld_abs	10\n"+
-		"jeq_k	00	07	0\n"+ // TODO should go to final fail
+		"jeq_k	00	07	0\n"+
 		"ld_abs	14\n"+
 		"jeq_k	00	05	2A\n"+
 		"ld_abs	18\n"+
@@ -80,7 +81,6 @@ func (s *BoolCompilerSuite) Test_compilationOfAndExpression(c *C) {
 }
 
 func (s *BoolCompilerSuite) Test_negatedAndExpression(c *C) {
-	c.Skip("fixup")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -106,7 +106,7 @@ func (s *BoolCompilerSuite) Test_negatedAndExpression(c *C) {
 		"ld_abs	18\n"+
 		"jeq_k	00	02	0\n"+
 		"ld_abs	1C\n"+
-		"jeq_k	01	00	2A\n"+
+		"jeq_k	01	00	2A\n"+ // we aren't setting our jt, we are only setting jf to return allow
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
 }
@@ -131,7 +131,7 @@ func (s *BoolCompilerSuite) Test_compilationOfNegatedOrExpression(c *C) {
 		"ld_abs	0\n"+
 		"jeq_k	00	09	1\n"+
 		"ld_abs	10\n"+
-		"jeq_k	07	00	0\n"+
+		"jeq_k	07	00	0\n"+ // negated non-exclusive hi jump point
 		"ld_abs	14\n"+
 		"jeq_k	05	00	2A\n"+
 		"ld_abs	18\n"+

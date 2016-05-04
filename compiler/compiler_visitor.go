@@ -134,14 +134,18 @@ func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.Compar
 
 func (cv *compilerVisitor) compareArgToNumeric(l uint64, ix argumentPosition, op tree.ComparisonType, isLast bool) {
 	switch {
+	case cv.negated && cv.exclusive && !cv.terminal:
+		cv.jumpOnK(l, ix, op, jumpPoints[ChainJt], jumpPoints[ChainJt])
+	case cv.negated && cv.exclusive && cv.terminal:
+		cv.jumpOnK(l, ix, op, jumpPoints[ChainJt], jumpPoints[TermJ])
 	case isLast:
 		cv.jumpOnK(l, ix, op, jumpPoints[TermJf], jumpPoints[TermJ])
-	case cv.negated:
+	case cv.negated && !cv.exclusive:
 		cv.jumpOnK(l, ix, op, jumpPoints[TermJf], jumpPoints[TermJf])
 	case cv.inverted:
 		cv.jumpOnK(l, ix, op, jumpPoints[ChainJ], jumpPoints[TermJf])
 	case cv.exclusive:
-		cv.jumpOnK(l, ix, op, jumpPoints[ChainJ], jumpPoints[TermJf])
+		cv.jumpOnK(l, ix, op, jumpPoints[ExlHi], jumpPoints[TermJf])
 	default:
 		cv.jumpOnK(l, ix, op, jumpPoints[ChainJ], jumpPoints[ChainJt])
 	}
