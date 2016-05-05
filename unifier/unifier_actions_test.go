@@ -14,50 +14,23 @@ type UnifierActionsSuite struct{}
 
 var _ = Suite(&UnifierActionsSuite{})
 
-func (s *UnifierActionsSuite) Test_Unify_setsDefaultActionsForEnforcedWhitelist(c *C) {
-	input := tree.RawPolicy{
-		ListType:     tree.WhiteList,
-		RuleOrMacros: []interface{}{},
-	}
+func (s *UnifierActionsSuite) Test_Unify_setsDefaultActions1(c *C) {
+	input := tree.RawPolicy{RuleOrMacros: []interface{}{}}
 
-	output, _ := Unify(input, true)
+	output, _ := Unify(input, nil, "allow", "kill")
 
 	c.Assert(output.DefaultPositiveAction, Equals, "allow")
 	c.Assert(output.DefaultNegativeAction, Equals, "kill")
 }
 
-func (s *UnifierActionsSuite) Test_Unify_setsDefaultActionsForEnforcedBlacklist(c *C) {
+func (s *UnifierActionsSuite) Test_Unify_setsDefaultActions2(c *C) {
 	input := tree.RawPolicy{
-		ListType:     tree.BlackList,
 		RuleOrMacros: []interface{}{},
 	}
 
-	output, _ := Unify(input, true)
+	output, _ := Unify(input, nil, "kill", "allow")
 
 	c.Assert(output.DefaultPositiveAction, Equals, "kill")
 	c.Assert(output.DefaultNegativeAction, Equals, "allow")
 }
 
-func (s *UnifierActionsSuite) Test_Unify_setsDefaultActionsForNotEnforcedWhitelist(c *C) {
-	input := tree.RawPolicy{
-		ListType:     tree.WhiteList,
-		RuleOrMacros: []interface{}{},
-	}
-
-	output, _ := Unify(input, false)
-
-	c.Assert(output.DefaultPositiveAction, Equals, "allow")
-	c.Assert(output.DefaultNegativeAction, Equals, "trace")
-}
-
-func (s *UnifierActionsSuite) Test_Unify_setsDefaultActionsForNotEnforcedBlacklist(c *C) {
-	input := tree.RawPolicy{
-		ListType:     tree.BlackList,
-		RuleOrMacros: []interface{}{},
-	}
-
-	output, _ := Unify(input, false)
-
-	c.Assert(output.DefaultPositiveAction, Equals, "trace")
-	c.Assert(output.DefaultNegativeAction, Equals, "allow")
-}

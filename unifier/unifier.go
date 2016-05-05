@@ -6,70 +6,27 @@ import (
 	"github.com/twtiger/gosecco/tree"
 )
 
-func getDefaultActions(t tree.Macro) string {
-	var def string
+func getDefaultAction(t tree.Macro) string {
 	switch f := t.Body.(type) {
 	case tree.NumericLiteral:
-		def = strconv.Itoa(int(f.Value))
+		return strconv.Itoa(int(f.Value))
 	case tree.Variable:
-		def = f.Name
+		return f.Name
 	}
-	return def
+	panic("shouldn't happen")
 }
 
-func setDefaultActions(defaults []tree.Macro, pt tree.PolicyType, enforce bool) (string, string) {
-	var defpos string
-	var defneg string
-
-	for _, v := range defaults {
-		if v.Name == "DEFAULT_POSITIVE" {
-			defpos = getDefaultActions(v)
-		} else if v.Name == "DEFAULT_NEGATIVE" {
-			defneg = getDefaultActions(v)
-		}
-	}
-
-	if len(defpos) == 0 {
-		if enforce == true {
-			if pt == tree.WhiteList {
-				defpos = "allow"
-			} else { // only other option is Blacklist
-				defpos = "kill"
-			}
-		} else {
-			if pt == tree.WhiteList {
-				defpos = "allow"
-			} else {
-				defpos = "trace"
-			}
-		}
-	}
-
-	if len(defneg) == 0 {
-		if enforce == true {
-			if pt == tree.WhiteList {
-				defneg = "kill"
-			} else {
-				defneg = "allow"
-			}
-		} else {
-			if pt == tree.WhiteList {
-				defneg = "trace"
-			} else {
-				defneg = "allow"
-			}
-		}
-	}
-
-	return defpos, defneg
-}
-
-// Unify variables within rules from macros
-func Unify(r tree.RawPolicy, enforce bool) (tree.Policy, error) {
+// Unify will unify all variables and calls in the given rule set with the macros in the same file. The macros in the same file will
+// be evaluated linearly, so it is possible to use the same variable name multiple times. The additionalMacros provide access to 
+// variables defined in other files. The list of additional macros will be combined in such a way that the names in later maps override
+// the names in the earlier maps. The default positive and negative actions can be overridden in the files by providing DEFAULT_POSITIVE
+// and DEFAULT_NEGATIVE variables anywhere in the files. The default actions can only be defined once in a file, and will be in effect
+// for all rules in that file, unless a specific rule overrides the default actions.
+func Unify(r tree.RawPolicy, additionalMacros []map[string]tree.Macro, defaultPositive, defaultNegative string) (tree.Policy, error) {
+	// TODO: additionalMacros aren't used yet.
 	var err error
 	var rules []tree.Rule
 	macros := make(map[string]tree.Macro)
-	defs := make([]tree.Macro, 0)
 	for _, e := range r.RuleOrMacros {
 		switch v := e.(type) {
 		case tree.Rule:
@@ -77,15 +34,17 @@ func Unify(r tree.RawPolicy, enforce bool) (tree.Policy, error) {
 			r, err = replaceFreeNames(v, macros)
 			rules = append(rules, r)
 		case tree.Macro:
-			if v.Name != "DEFAULT_POSITIVE" && v.Name != "DEFAULT_NEGATIVE" {
+			switch v.Name {
+			case "DEFAULT_POSITIVE":
+				defaultPositive = getDefaultAction(v)
+			case "DEFAULT_NEGATIVE":
+				defaultNegative = getDefaultAction(v)
+			default:
 				macros[v.Name] = v
-			} else {
-				defs = append(defs, v)
 			}
 		}
 	}
-	defpos, defneg := setDefaultActions(defs, r.ListType, enforce)
-	return tree.Policy{DefaultPositiveAction: defpos, DefaultNegativeAction: defneg, Macros: macros, Rules: rules}, err
+	return tree.Policy{DefaultPositiveAction: defaultPositive, DefaultNegativeAction: defaultNegative, Macros: macros, Rules: rules}, err
 }
 
 func replaceFreeNames(r tree.Rule, macros map[string]tree.Macro) (tree.Rule, error) {
