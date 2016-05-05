@@ -507,3 +507,57 @@ func (s *UnifierSuite) Test_Unify_withDefaultNegativeNumericActionSetsNegativeAc
 	c.Assert(len(output.Rules), Equals, 1)
 	c.Assert(tree.ExpressionString(output.Rules[0].Body), Equals, "(or arg0 1)")
 }
+
+func (s *UnifierSuite) Test_Unify_earlierErrorShouldStillBeReported(c *C) {
+	rule := tree.Rule{
+		Name: "write",
+		Body: tree.Comparison{Op: tree.EQL, Left: tree.Argument{Index: 0}, Right: tree.Variable{"var1"}},
+	}
+	rule2 := tree.Rule{
+		Name: "read",
+		Body: tree.Comparison{Op: tree.EQL, Left: tree.Argument{Index: 0}, Right: tree.NumericLiteral{3}},
+	}
+
+	input := tree.RawPolicy{
+		RuleOrMacros: []interface{}{
+			rule,
+			rule2,
+		},
+	}
+
+	_, e := Unify(input, nil, "allow", "kill")
+
+	c.Assert(e, Not(IsNil))
+	c.Assert(e, ErrorMatches, "Variable not defined")
+}
+
+func (s *UnifierSuite) Test_Unify_withMacroDefinedInSeparateFile(c *C) {
+	rule := tree.Rule{
+		Name: "write",
+		Body: tree.Comparison{Op: tree.EQL, Left: tree.Argument{Index: 0}, Right: tree.Variable{"var1"}},
+	}
+
+	macro1 := tree.Macro{
+		Name: "var1",
+		Body: tree.NumericLiteral{42},
+	}
+
+	input := tree.RawPolicy{
+		RuleOrMacros: []interface{}{
+			rule,
+		},
+	}
+
+	otherInput := []map[string]tree.Macro{
+		map[string]tree.Macro{
+			"var1": macro1,
+		},
+	}
+
+	output, e := Unify(input, otherInput, "allow", "kill")
+
+	c.Assert(e, IsNil)
+	c.Assert(len(output.Macros), Equals, 0)
+	c.Assert(len(output.Rules), Equals, 1)
+	c.Assert(tree.ExpressionString(output.Rules[0].Body), Equals, "(eq arg0 42)")
+}

@@ -16,6 +16,22 @@ func getDefaultAction(t tree.Macro) string {
 	panic("shouldn't happen")
 }
 
+func addAllToMap(to, from map[string]tree.Macro) {
+	for k, v := range from {
+		to[k] = v
+	}
+}
+
+func combineMacroMaps(ms []map[string]tree.Macro) map[string]tree.Macro {
+	result := make(map[string]tree.Macro)
+
+	for _, mm := range ms {
+		addAllToMap(result, mm)
+	}
+
+	return result
+}
+
 // Unify will unify all variables and calls in the given rule set with the macros in the same file. The macros in the same file will
 // be evaluated linearly, so it is possible to use the same variable name multiple times. The additionalMacros provide access to
 // variables defined in other files. The list of additional macros will be combined in such a way that the names in later maps override
@@ -24,14 +40,16 @@ func getDefaultAction(t tree.Macro) string {
 // for all rules in that file, unless a specific rule overrides the default actions.
 func Unify(r tree.RawPolicy, additionalMacros []map[string]tree.Macro, defaultPositive, defaultNegative string) (tree.Policy, error) {
 	// TODO: additionalMacros aren't used yet.
-	var err error
 	var rules []tree.Rule
-	macros := make(map[string]tree.Macro)
+	macros := combineMacroMaps(additionalMacros)
+	collectedMacros := make(map[string]tree.Macro)
 	for _, e := range r.RuleOrMacros {
 		switch v := e.(type) {
 		case tree.Rule:
-			var r tree.Rule
-			r, err = replaceFreeNames(v, macros)
+			r, err := replaceFreeNames(v, macros)
+			if err != nil {
+				return tree.Policy{}, err
+			}
 			rules = append(rules, r)
 		case tree.Macro:
 			switch v.Name {
@@ -41,10 +59,11 @@ func Unify(r tree.RawPolicy, additionalMacros []map[string]tree.Macro, defaultPo
 				defaultNegative = getDefaultAction(v)
 			default:
 				macros[v.Name] = v
+				collectedMacros[v.Name] = v
 			}
 		}
 	}
-	return tree.Policy{DefaultPositiveAction: defaultPositive, DefaultNegativeAction: defaultNegative, Macros: macros, Rules: rules}, err
+	return tree.Policy{DefaultPositiveAction: defaultPositive, DefaultNegativeAction: defaultNegative, Macros: collectedMacros, Rules: rules}, nil
 }
 
 func replaceFreeNames(r tree.Rule, macros map[string]tree.Macro) (tree.Rule, error) {
