@@ -17,7 +17,7 @@ func getDefaultAction(t tree.Macro) string {
 }
 
 // Unify will unify all variables and calls in the given rule set with the macros in the same file. The macros in the same file will
-// be evaluated linearly, so it is possible to use the same variable name multiple times. The additionalMacros provide access to 
+// be evaluated linearly, so it is possible to use the same variable name multiple times. The additionalMacros provide access to
 // variables defined in other files. The list of additional macros will be combined in such a way that the names in later maps override
 // the names in the earlier maps. The default positive and negative actions can be overridden in the files by providing DEFAULT_POSITIVE
 // and DEFAULT_NEGATIVE variables anywhere in the files. The default actions can only be defined once in a file, and will be in effect

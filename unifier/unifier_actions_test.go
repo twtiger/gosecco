@@ -33,4 +33,3 @@ func (s *UnifierActionsSuite) Test_Unify_setsDefaultActions2(c *C) {
 	c.Assert(output.DefaultPositiveAction, Equals, "kill")
 	c.Assert(output.DefaultNegativeAction, Equals, "allow")
 }
-
