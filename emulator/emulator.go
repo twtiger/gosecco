@@ -267,7 +267,6 @@ func (e *emulator) next() (uint32, bool) {
 	}
 
 	current := e.filters[e.pointer]
-	//	log.Printf("%03d:  %s\n", e.pointer, formatInstruction(current))
 	e.pointer++
 	switch bpfClass(current.Code) {
 	case syscall.BPF_RET:
@@ -285,95 +284,4 @@ func (e *emulator) next() (uint32, bool) {
 	}
 
 	return 0, true
-}
-
-func instructionName(code uint16) string {
-	switch code {
-	case syscall.BPF_RET | syscall.BPF_K:
-		return "ret_k"
-	case syscall.BPF_RET | syscall.BPF_X:
-		return "ret_x"
-	case syscall.BPF_LD | syscall.BPF_W | syscall.BPF_ABS:
-		return "ld_abs"
-	case syscall.BPF_LD | syscall.BPF_W | syscall.BPF_IND:
-		return "ld_ind"
-	case syscall.BPF_LD | syscall.BPF_W | syscall.BPF_LEN:
-		return "ld_len"
-	case syscall.BPF_LD | syscall.BPF_W | syscall.BPF_IMM:
-		return "ld_imm"
-	case syscall.BPF_LDX | syscall.BPF_W | syscall.BPF_LEN:
-		return "ldx_len"
-	case syscall.BPF_LDX | syscall.BPF_W | syscall.BPF_IMM:
-		return "ldx_imm"
-	case syscall.BPF_ALU | syscall.BPF_ADD | syscall.BPF_K:
-		return "add_k"
-	case syscall.BPF_ALU | syscall.BPF_ADD | syscall.BPF_X:
-		return "add_x"
-	case syscall.BPF_ALU | syscall.BPF_SUB | syscall.BPF_K:
-		return "sub_k"
-	case syscall.BPF_ALU | syscall.BPF_SUB | syscall.BPF_X:
-		return "sub_x"
-	case syscall.BPF_ALU | syscall.BPF_MUL | syscall.BPF_K:
-		return "mul_k"
-	case syscall.BPF_ALU | syscall.BPF_MUL | syscall.BPF_X:
-		return "mul_x"
-	case syscall.BPF_ALU | syscall.BPF_DIV | syscall.BPF_K:
-		return "div_k"
-	case syscall.BPF_ALU | syscall.BPF_DIV | syscall.BPF_X:
-		return "div_x"
-	case syscall.BPF_ALU | syscall.BPF_AND | syscall.BPF_K:
-		return "and_k"
-	case syscall.BPF_ALU | syscall.BPF_AND | syscall.BPF_X:
-		return "and_x"
-	case syscall.BPF_ALU | syscall.BPF_OR | syscall.BPF_K:
-		return "or_k"
-	case syscall.BPF_ALU | syscall.BPF_OR | syscall.BPF_X:
-		return "or_x"
-	case syscall.BPF_ALU | BPF_XOR | syscall.BPF_K:
-		return "xor_k"
-	case syscall.BPF_ALU | BPF_XOR | syscall.BPF_X:
-		return "xor_x"
-	case syscall.BPF_ALU | syscall.BPF_LSH | syscall.BPF_K:
-		return "lsh_k"
-	case syscall.BPF_ALU | syscall.BPF_LSH | syscall.BPF_X:
-		return "lsh_x"
-	case syscall.BPF_ALU | syscall.BPF_RSH | syscall.BPF_K:
-		return "rsh_k"
-	case syscall.BPF_ALU | syscall.BPF_RSH | syscall.BPF_X:
-		return "rsh_x"
-	case syscall.BPF_ALU | BPF_MOD | syscall.BPF_K:
-		return "mod_k"
-	case syscall.BPF_ALU | BPF_MOD | syscall.BPF_X:
-		return "mod_x"
-	case syscall.BPF_ALU | syscall.BPF_NEG:
-		return "neg"
-	case syscall.BPF_MISC | syscall.BPF_TAX:
-		return "tax"
-	case syscall.BPF_MISC | syscall.BPF_TXA:
-		return "txa"
-	case syscall.BPF_JMP | syscall.BPF_JA:
-		return "jmp"
-	case syscall.BPF_JMP | syscall.BPF_JGT | syscall.BPF_K:
-		return "jgt_k"
-	case syscall.BPF_JMP | syscall.BPF_JGE | syscall.BPF_K:
-		return "jge_k"
-	case syscall.BPF_JMP | syscall.BPF_JEQ | syscall.BPF_K:
-		return "jeq_k"
-	case syscall.BPF_JMP | syscall.BPF_JSET | syscall.BPF_K:
-		return "jset_k"
-	case syscall.BPF_JMP | syscall.BPF_JGT | syscall.BPF_X:
-		return "jgt_x"
-	case syscall.BPF_JMP | syscall.BPF_JGE | syscall.BPF_X:
-		return "jge_x"
-	case syscall.BPF_JMP | syscall.BPF_JEQ | syscall.BPF_X:
-		return "jeq_x"
-	case syscall.BPF_JMP | syscall.BPF_JSET | syscall.BPF_X:
-		return "jset_x"
-	default:
-		return ""
-	}
-}
-
-func formatInstruction(current unix.SockFilter) string {
-	return fmt.Sprintf("%04x  %-10s   +%02x    -%02x    %08x", current.Code, instructionName(current.Code), current.Jt, current.Jf, current.K)
 }

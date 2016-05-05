@@ -103,6 +103,102 @@ func (s *EmulatorSuite) Test_loadValues(c *C) {
 	c.Assert(e.A, Equals, uint32(23))
 }
 
+func loadAbs(k uint32) unix.SockFilter {
+	return unix.SockFilter{
+		Code: syscall.BPF_LD | syscall.BPF_W | syscall.BPF_ABS,
+		K:    k,
+	}
+}
+
+func (s *EmulatorSuite) Test_loadWorkingMemory(c *C) {
+	e := &emulator{
+		data: data.SeccompWorkingMemory{NR: 15, InstructionPointer: 45365364654, Arch: 15, Args: [6]uint64{123234, 5465645, 12132, 12423423, 7766, 12124}},
+		filters: []unix.SockFilter{
+			loadAbs(0),
+			loadAbs(4),
+			loadAbs(8),
+			loadAbs(12),
+			loadAbs(16),
+			loadAbs(20),
+			loadAbs(24),
+			loadAbs(28),
+			loadAbs(32),
+			loadAbs(36),
+			loadAbs(40),
+			loadAbs(44),
+			loadAbs(48),
+			loadAbs(52),
+			loadAbs(56),
+			loadAbs(60),
+			loadAbs(3),
+		},
+		pointer: 0,
+	}
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0xF))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0xF))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0xA))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0x87AE))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0x1E162))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0x53662d))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0x2F64))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0xbd90ff))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0x1e56))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0x2f5c))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0))
+}
+
 func (s *EmulatorSuite) Test_loadValuesIntoX(c *C) {
 	e := &emulator{
 		data: data.SeccompWorkingMemory{},
