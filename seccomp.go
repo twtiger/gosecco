@@ -55,18 +55,34 @@ func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
 // Compile from the go-seccomp package and should provide the same behavior.
 // However, the modern interface is through the Prepare function
 func Compile(path string, enforce bool) ([]unix.SockFilter, error) {
-	// TODO: test once compiler is done, light testing needed, since main testing
-	// will be of the Prepare method
-	return nil, nil
+	// TODO: test when compiler is done
+
+	settings := SeccompSettings{}
+	settings.defaultPositiveAction = "allow"
+	if enforce {
+		settings.defaultNegativeAction = "kill"
+	} else {
+		settings.defaultNegativeAction = "trace"
+	}
+
+	return Prepare(path, settings)
 }
 
 // CompileBlacklist provides the compatibility interface for gosecco, for blacklist mode
 // It has the same signature as CompileBlacklist from Subgraphs go-seccomp and should provide the same behavior.
 // However, the modern interface is through the Prepare function
 func CompileBlacklist(path string, enforce bool) ([]unix.SockFilter, error) {
-	// TODO: test once compiler is done, light testing needed, since main testing
-	// will be of the Prepare method
-	return nil, nil
+	// TODO: test when compiler is done
+
+	settings := SeccompSettings{}
+	settings.defaultNegativeAction = "allow"
+	if enforce {
+		settings.defaultPositiveAction = "kill"
+	} else {
+		settings.defaultPositiveAction = "trace"
+	}
+
+	return Prepare(path, settings)
 }
 
 // Load makes the seccomp system call to install the bpf filter for
