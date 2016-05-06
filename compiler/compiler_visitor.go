@@ -7,12 +7,9 @@ import (
 )
 
 type compilerVisitor struct {
-	c         *compiler
-	terminal  bool
-	exclusive bool
-	negated   bool
-	inverted  bool
-	topLevel  bool
+	c        *compiler
+	topLevel bool
+	jf, jt   label
 }
 
 func getLower(k uint64) uint32 {
@@ -83,9 +80,16 @@ func (cv *compilerVisitor) compareExpressionToArg(a *tree.Argument, e tree.Expre
 	cv.c.moveAtoX()
 	lx := argument[a.Index]
 	cv.c.loadAt(lx.upper)
-	cv.c.jumpOnXComparison(op, jumpPoints[TermJf], cv.inverted)
+
+	switch op {
+	case tree.NEQL:
+		cv.c.jumpOnXComparison(op, cv.jt, noLabel)
+	case tree.EQL:
+		cv.c.jumpOnXComparison(op, next, cv.jf)
+	}
+
 	cv.c.loadAt(lx.lower)
-	cv.c.jumpOnXComparison(op, jumpPoints[TermJ], cv.inverted)
+	cv.c.jumpOnXComparison(op, cv.jt, cv.jf)
 }
 
 func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
@@ -94,19 +98,18 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 
 	if leftArg && rightLit {
 		ix := argument[argL.Index]
-		cv.compareArgToNumeric(litR.Value, ix, c.Op, cv.terminal)
+		cv.jumpOnK(litR.Value, ix, c.Op)
 	}
 
 	if leftLit && rightArg {
 		ix := argument[argR.Index]
-		cv.compareArgToNumeric(litL.Value, ix, c.Op, cv.terminal)
+		cv.jumpOnK(litL.Value, ix, c.Op)
 	}
 
 	if leftArg && rightArg {
 		rx := argument[argR.Index]
 		lx := argument[argL.Index]
-
-		cv.jumpOnXChained(rx, lx, c.Op, jumpPoints[TermJf], jumpPoints[TermJ])
+		cv.jumpOnX(rx, lx, c.Op)
 	}
 
 	if !rightArg && !rightLit && leftArg {
@@ -121,88 +124,84 @@ func (cv *compilerVisitor) AcceptComparison(c tree.Comparison) {
 		c.Left.Accept(cv)
 		cv.c.moveAtoX()
 		c.Right.Accept(cv)
-		cv.c.jumpOnXComparison(c.Op, jumpPoints[TermJ], cv.inverted)
+		cv.c.jumpOnXComparison(c.Op, cv.jt, cv.jf)
 	}
+
 }
 
-func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.ComparisonType, hiJumps jumpPoint, lowJumps jumpPoint) {
+var count = 0
+
+func nextLabel() label {
+	count += 1
+	return label(fmt.Sprintf("%d", count))
+}
+
+func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.ComparisonType) {
 	cv.c.loadAt(ix.upper)
-	cv.c.jumpOnKComp(getUpper(l), op, hiJumps, cv.negated, cv.inverted)
-	cv.c.loadAt(ix.lower)
-	cv.c.jumpOnKComp(getLower(l), op, lowJumps, cv.negated, cv.inverted)
-}
+	next := nextLabel()
 
-func (cv *compilerVisitor) compareArgToNumeric(l uint64, ix argumentPosition, op tree.ComparisonType, isLast bool) {
-	switch {
-	case cv.negated && cv.exclusive && !cv.terminal:
-		cv.jumpOnK(l, ix, op, jumpPoints[ChainJt], jumpPoints[ChainJt])
-	case cv.negated && cv.exclusive && cv.terminal:
-		cv.jumpOnK(l, ix, op, jumpPoints[ChainJt], jumpPoints[TermJ])
-	case isLast:
-		cv.jumpOnK(l, ix, op, jumpPoints[TermJf], jumpPoints[TermJ])
-	case cv.negated && !cv.exclusive:
-		cv.jumpOnK(l, ix, op, jumpPoints[TermJf], jumpPoints[TermJf])
-	case cv.inverted:
-		cv.jumpOnK(l, ix, op, jumpPoints[ChainJ], jumpPoints[TermJf])
-	case cv.exclusive:
-		cv.jumpOnK(l, ix, op, jumpPoints[ExlHi], jumpPoints[TermJf])
-	default:
-		cv.jumpOnK(l, ix, op, jumpPoints[ChainJ], jumpPoints[ChainJt])
+	switch op {
+	case tree.NEQL:
+		cv.c.jumpOnKComp(getUpper(l), op, cv.jt, noLabel)
+	case tree.EQL:
+		cv.c.jumpOnKComp(getUpper(l), op, next, cv.jf)
+	case tree.GT:
+		cv.c.jumpOnKComp(getUpper(l), op, next, cv.jf)
+	case tree.LT:
+		cv.c.jumpOnKComp(getUpper(l), op, next, cv.jf)
 	}
+	cv.c.labelHere(next)
+
+	cv.c.loadAt(ix.lower)
+	cv.c.jumpOnKComp(getLower(l), op, cv.jt, cv.jf)
 }
 
-func (cv *compilerVisitor) jumpOnXChained(ix argumentPosition, rx argumentPosition, op tree.ComparisonType, hiJumps jumpPoint, lowJumps jumpPoint) {
+func (cv *compilerVisitor) jumpOnX(ix argumentPosition, rx argumentPosition, op tree.ComparisonType) {
 	cv.c.loadAt(ix.upper)
 	cv.c.moveAtoX()
 	cv.c.loadAt(rx.upper)
-	cv.c.jumpOnXComparison(op, hiJumps, cv.inverted)
+	next := nextLabel()
+
+	switch op {
+	case tree.NEQL:
+		cv.c.jumpOnXComparison(op, cv.jt, noLabel)
+	case tree.EQL:
+		cv.c.jumpOnXComparison(op, next, cv.jf)
+	}
+	cv.c.labelHere(next)
 
 	cv.c.loadAt(ix.lower)
 	cv.c.moveAtoX()
 	cv.c.loadAt(rx.lower)
-	cv.c.jumpOnXComparison(op, lowJumps, cv.inverted)
+	cv.c.jumpOnXComparison(op, cv.jt, cv.jf)
 }
 
 func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 	cv.topLevel = false
-	if !c.Positive {
-		cv.inverted = true
-	}
 
 	switch et := c.Left.(type) {
 	case tree.Argument:
 		ix := argument[et.Index]
-		for i, l := range c.Rights {
-			isLast := i == len(c.Rights)-1
+		for _, l := range c.Rights {
 			switch k := l.(type) {
 			case tree.NumericLiteral:
-				cv.compareArgToNumeric(k.Value, ix, tree.EQL, isLast)
+				cv.jumpOnK(k.Value, ix, tree.EQL)
 			case tree.Argument:
 				rx := argument[k.Index]
-				if isLast {
-					cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[TermJf], jumpPoints[TermJ])
-				} else {
-					if cv.negated {
-						cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[TermJf], jumpPoints[TermJf])
-					} else {
-						cv.jumpOnXChained(ix, rx, tree.EQL, jumpPoints[ChainJ], jumpPoints[ChainJt])
-					}
-				}
+				cv.jumpOnX(ix, rx, tree.EQL)
 			}
 		}
 	case tree.NumericLiteral:
-		for i, l := range c.Rights {
+		for _, l := range c.Rights {
 			k := l.(tree.Argument)
 			ix := argument[k.Index]
-			isLast := i == len(c.Rights)-1
-			cv.compareArgToNumeric(et.Value, ix, tree.EQL, isLast)
+			cv.jumpOnK(et.Value, ix, tree.EQL)
 		}
 	}
 }
 
 func (cv *compilerVisitor) AcceptNegation(c tree.Negation) {
 	cv.topLevel = false
-	cv.negated = true
 	c.Operand.Accept(cv)
 }
 
@@ -211,36 +210,16 @@ func (cv *compilerVisitor) AcceptNumericLiteral(l tree.NumericLiteral) {
 
 func (cv *compilerVisitor) AcceptAnd(c tree.And) {
 	cv.topLevel = false
-	cv.exclusive = true
-	cv.terminal = false
 	c.Left.Accept(cv)
-	cv.terminal = true
 	c.Right.Accept(cv)
 }
 
 func (cv *compilerVisitor) AcceptOr(c tree.Or) {
 	cv.topLevel = false
-	cv.terminal = false
 	c.Left.Accept(cv)
-	cv.terminal = true
 	c.Right.Accept(cv)
 }
 
 func (cv *compilerVisitor) AcceptVariable(tree.Variable) {
 	panic(fmt.Sprintf("Programming error: there should never be any unexpanded variables if the unifier works correctly: syscall: %s - %s", cv.c.currentlyCompilingSyscall, tree.ExpressionString(cv.c.currentlyCompilingExpression)))
 }
-
-// func peepHole(filters []unix.SockFilter) []unix.SockFilter {
-// 	one, two, three := filters[0], filters[1], filters[2]
-// 	if one.Code == BPF_LD|BPF_IMM && two.Code == BPF_MISC|BPF_TAX && three.Code&(BPF_JMP|BPF_X) != 0 {
-// 		return []unix.SockFilter{
-// 			unix.SockFilter{
-// 				Code: (three.Code & ^BPF_X) | BPF_K,
-// 				Jt:   three.Jt,
-// 				Jf:   three.Jf,
-// 				K:    one.K,
-// 			},
-// 		}
-// 	}
-// 	return filters
-// }

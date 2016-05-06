@@ -9,8 +9,8 @@ import (
 func newCompiler() *compiler {
 	return &compiler{
 		currentlyLoaded: -1,
-		positiveLabels:  make(map[label][]labelInfo),
-		negativeLabels:  make(map[label][]labelInfo),
+		positiveLabels:  make(map[label][]uint),
+		negativeLabels:  make(map[label][]uint),
 	}
 }
 
@@ -26,8 +26,8 @@ func Compile(policy tree.Policy) ([]unix.SockFilter, error) {
 type compiler struct {
 	result                       []unix.SockFilter
 	currentlyLoaded              int
-	positiveLabels               map[label][]labelInfo
-	negativeLabels               map[label][]labelInfo
+	positiveLabels               map[label][]uint
+	negativeLabels               map[label][]uint
 	currentlyCompilingSyscall    string
 	currentlyCompilingExpression tree.Expression
 }
@@ -41,7 +41,7 @@ func (c *compiler) compile(rules []tree.Rule) {
 }
 
 func (c *compiler) compileExpression(x tree.Expression) {
-	cv := &compilerVisitor{c: c, terminal: true, exclusive: false, negated: false, inverted: false, topLevel: true}
+	cv := &compilerVisitor{c: c, topLevel: true, jf: negative, jt: positive}
 	x.Accept(cv)
 }
 
@@ -69,8 +69,8 @@ var comparisonOps = map[tree.ComparisonType]kexInstruction{
 	tree.NEQL: kexInstruction{k: JEQ_K, x: JEQ_X},
 	tree.GT:   kexInstruction{k: JEG_K, x: JEG_X},
 	tree.GTE:  kexInstruction{k: JEGE_K, x: JEGE_X},
-	tree.LT:   kexInstruction{k: JEG_K, x: JEG_X},
-	tree.LTE:  kexInstruction{k: JEGE_K, x: JEGE_X},
+	tree.LT:   kexInstruction{k: JEGE_K, x: JEGE_X},
+	tree.LTE:  kexInstruction{k: JEG_K, x: JEG_X},
 }
 
 var posVals = map[tree.ComparisonType]bool{
@@ -142,7 +142,8 @@ func (c *compiler) checkCorrectSyscall(name string, setPosFlags bool) {
 	}
 
 	c.loadCurrentSyscall()
-	c.jumpOnSyscallComparison(sys, tree.EQL, true, setPosFlags)
+	// TODO how to handle setPosFlags bool
+	c.jumpOnKComp(sys, tree.EQL, noLabel, negative)
 }
 
 func (c *compiler) positiveAction(name string) {
