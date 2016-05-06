@@ -186,9 +186,11 @@ func (cv *compilerVisitor) setJumpPoints(p bool) {
 	}
 }
 
-func (cv *compilerVisitor) goToNextComparison(i int, l int) label {
+func (cv *compilerVisitor) goToNextComparison(isExclusive bool) label {
 	n := nextLabel()
-	if i != l {
+	if isExclusive {
+		cv.jt = n
+	} else {
 		cv.jf = n
 	}
 	return n
@@ -204,7 +206,10 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 		ix := argument[et.Index]
 		for i, l := range c.Rights {
 
-			n := cv.goToNextComparison(i, len(c.Rights)-1)
+			var n label
+			if i != len(c.Rights)-1 {
+				n = cv.goToNextComparison(false)
+			}
 
 			switch k := l.(type) {
 			case tree.NumericLiteral:
@@ -220,7 +225,11 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 		}
 	case tree.NumericLiteral:
 		for i, l := range c.Rights {
-			n := cv.goToNextComparison(i, len(c.Rights)-1)
+
+			var n label
+			if i != len(c.Rights)-1 {
+				n = cv.goToNextComparison(false)
+			}
 
 			k := l.(tree.Argument)
 			ix := argument[k.Index]
@@ -236,21 +245,27 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 
 func (cv *compilerVisitor) AcceptNegation(c tree.Negation) {
 	cv.topLevel = false
-	c.Operand.Accept(cv)
+	a := &compilerVisitor{c: cv.c, topLevel: false, jf: cv.jt, jt: cv.jf}
+	c.Operand.Accept(a)
 }
 
 func (cv *compilerVisitor) AcceptNumericLiteral(l tree.NumericLiteral) {
 }
 
 func (cv *compilerVisitor) AcceptAnd(c tree.And) {
-	cv.topLevel = false
-	c.Left.Accept(cv)
+	n := nextLabel()
+	a := &compilerVisitor{c: cv.c, topLevel: false, jf: cv.jf, jt: n}
+	c.Left.Accept(a)
+	cv.c.labelHere(n)
 	c.Right.Accept(cv)
 }
 
 func (cv *compilerVisitor) AcceptOr(c tree.Or) {
+	n := nextLabel()
 	cv.topLevel = false
-	c.Left.Accept(cv)
+	a := &compilerVisitor{c: cv.c, topLevel: false, jf: n, jt: cv.jt}
+	c.Left.Accept(a)
+	cv.c.labelHere(n)
 	c.Right.Accept(cv)
 }
 

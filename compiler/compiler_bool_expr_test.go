@@ -17,7 +17,6 @@ type BoolCompilerSuite struct{}
 var _ = Suite(&BoolCompilerSuite{})
 
 func (s *BoolCompilerSuite) Test_orExpressionBetweenEqualityComparisons(c *C) {
-	c.Skip("p")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -53,7 +52,6 @@ func (s *BoolCompilerSuite) Test_orExpressionBetweenEqualityComparisons(c *C) {
 }
 
 func (s *BoolCompilerSuite) Test_compilationOfAndExpression(c *C) {
-	c.Skip("p")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -83,7 +81,6 @@ func (s *BoolCompilerSuite) Test_compilationOfAndExpression(c *C) {
 }
 
 func (s *BoolCompilerSuite) Test_negatedAndExpression(c *C) {
-	c.Skip("p")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -109,13 +106,12 @@ func (s *BoolCompilerSuite) Test_negatedAndExpression(c *C) {
 		"ld_abs	18\n"+
 		"jeq_k	00	02	0\n"+
 		"ld_abs	1C\n"+
-		"jeq_k	01	00	2A\n"+ // we aren't setting our jt, we are only setting jf to return allow
+		"jeq_k	01	00	2A\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
 }
 
 func (s *BoolCompilerSuite) Test_compilationOfNegatedOrExpression(c *C) {
-	c.Skip("p")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -135,19 +131,18 @@ func (s *BoolCompilerSuite) Test_compilationOfNegatedOrExpression(c *C) {
 		"ld_abs	0\n"+
 		"jeq_k	00	09	1\n"+
 		"ld_abs	10\n"+
-		"jeq_k	07	00	0\n"+ // negated non-exclusive hi jump point
+		"jeq_k	00	02	0\n"+
 		"ld_abs	14\n"+
 		"jeq_k	05	00	2A\n"+
 		"ld_abs	18\n"+
-		"jeq_k	03	00	0\n"+
+		"jeq_k	00	02	0\n"+
 		"ld_abs	1C\n"+
 		"jeq_k	01	00	2A\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
 }
 
-func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedAndExpressionLowerHalf(c *C) {
-	c.Skip("fix up upper first half chained")
+func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedAndExpressionRightSide(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -167,19 +162,18 @@ func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedAndExpressionLowerHal
 		"ld_abs	0\n"+
 		"jeq_k	00	09	1\n"+
 		"ld_abs	10\n"+
-		"jeq_k	00	07	0\n"+ // TODO JF should go to final fail
+		"jeq_k	00	07	0\n"+
 		"ld_abs	14\n"+
 		"jeq_k	00	05	2A\n"+
 		"ld_abs	18\n"+
-		"jeq_k	00	00	0\n"+
+		"jeq_k	00	02	0\n"+
 		"ld_abs	1C\n"+
 		"jeq_k	01	00	2A\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
 }
 
-func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedAndExpressionUpperHalf(c *C) {
-	c.Skip("fix up upper first half chained")
+func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedAndExpressionLeftSide(c *C) {
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -211,7 +205,6 @@ func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedAndExpressionUpperHal
 }
 
 func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedOrExpressionRightSide(c *C) {
-	c.Skip("fixup")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -235,7 +228,7 @@ func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedOrExpressionRightSide
 		"ld_abs	14\n"+
 		"jeq_k	04	00	2A\n"+
 		"ld_abs	18\n"+
-		"jeq_k	00	00	0\n"+ // TODO should we just do this for all upper half of comparisons?
+		"jeq_k	00	02	0\n"+
 		"ld_abs	1C\n"+
 		"jeq_k	01	00	2A\n"+
 		"ret_k	7FFF0000\n"+
@@ -243,7 +236,6 @@ func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedOrExpressionRightSide
 }
 
 func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedOrExpressionLeftSide(c *C) {
-	c.Skip("todo")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -266,16 +258,15 @@ func (s *BoolCompilerSuite) Test_compilationOfNestedNegatedOrExpressionLeftSide(
 		"jeq_k	00	06	0\n"+
 		"ld_abs	1C\n"+
 		"jeq_k	00	04	2A\n"+
-		"ld_abs	14\n"+
-		"jeq_k	00	03	0\n"+
 		"ld_abs	10\n"+
+		"jeq_k	00	03	0\n"+
+		"ld_abs	14\n"+
 		"jeq_k	00	01	2A\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
 }
 
 func (s *BoolCompilerSuite) Test_compilationOfNegatedEqualsComparison(c *C) {
-	c.Skip("p")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -293,7 +284,7 @@ func (s *BoolCompilerSuite) Test_compilationOfNegatedEqualsComparison(c *C) {
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t05\t1\n"+
 		"ld_abs\t10\n"+
-		"jeq_k\t03\t00\t0\n"+
+		"jeq_k\t00\t02\t0\n"+
 		"ld_abs\t14\n"+
 		"jeq_k\t01\t00\t2A\n"+
 		"ret_k\t7FFF0000\n"+
