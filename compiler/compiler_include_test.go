@@ -110,7 +110,6 @@ func (s *IncludeCompilerSuite) Test_compliationOfArgumentsInIncludeList(c *C) {
 }
 
 func (s *IncludeCompilerSuite) Test_compliationOfIncludeExpressionofArgumentWithMixedTypeList(c *C) {
-	c.Skip("p")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -131,7 +130,7 @@ func (s *IncludeCompilerSuite) Test_compliationOfIncludeExpressionofArgumentWith
 		"ld_abs\t18\n"+
 		"tax\n"+
 		"ld_abs\t10\n"+
-		"jeq_x\t00\t02\n"+
+		"jeq_x\t00\t04\n"+
 		"ld_abs\t1C\n"+
 		"tax\n"+
 		"ld_abs\t14\n"+

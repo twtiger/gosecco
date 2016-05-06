@@ -166,7 +166,6 @@ func (s *CompilerComparisonSuite) Test_lessThanComparisonToK(c *C) {
 }
 
 func (s *CompilerComparisonSuite) Test_greaterThanOrEqualsToComparisonToK(c *C) {
-	c.Skip("p")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -181,8 +180,10 @@ func (s *CompilerComparisonSuite) Test_greaterThanOrEqualsToComparisonToK(c *C) 
 	c.Assert(a, Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
+
 		"ld_abs	10\n"+
 		"jge_k	00	03	0\n"+
+
 		"ld_abs	14\n"+
 		"jge_k	00	01	2A\n"+
 		allow_system_call+
@@ -190,7 +191,6 @@ func (s *CompilerComparisonSuite) Test_greaterThanOrEqualsToComparisonToK(c *C) 
 }
 
 func (s *CompilerComparisonSuite) Test_lessThanOrEqualsToComparisonToK(c *C) {
-	c.Skip("p")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -206,9 +206,9 @@ func (s *CompilerComparisonSuite) Test_lessThanOrEqualsToComparisonToK(c *C) {
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
 		"ld_abs	10\n"+
-		"jge_k	03	00	0\n"+
+		"jgt_k	03	00	0\n"+
 		"ld_abs	14\n"+
-		"jge_k	01	00	2A\n"+
+		"jgt_k	01	00	2A\n"+
 		allow_system_call+
 		kill_system_call)
 }
@@ -260,7 +260,6 @@ func (s *CompilerComparisonSuite) Test_numericLiteralGreaterThanArgument(c *C) {
 }
 
 func (s *CompilerComparisonSuite) Test_numericLiteralGreaterThanOrEqualsArgument(c *C) {
-	c.Skip("p")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -307,7 +306,6 @@ func (s *CompilerComparisonSuite) Test_numericLiteralLessThanArgument(c *C) {
 }
 
 func (s *CompilerComparisonSuite) Test_numericLiteralLessOrEqualToArgument(c *C) {
-	c.Skip("p")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -323,9 +321,9 @@ func (s *CompilerComparisonSuite) Test_numericLiteralLessOrEqualToArgument(c *C)
 		"ld_abs	0\n"+
 		"jeq_k	00	05	1\n"+
 		"ld_abs	10\n"+
-		"jge_k	03	00	0\n"+
+		"jgt_k	03	00	0\n"+
 		"ld_abs	14\n"+
-		"jge_k	01	00	1\n"+
+		"jgt_k	01	00	1\n"+
 		allow_system_call+
 		kill_system_call)
 }

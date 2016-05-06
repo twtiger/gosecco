@@ -84,7 +84,7 @@ func (cv *compilerVisitor) compareExpressionToArg(a *tree.Argument, e tree.Expre
 	switch op {
 	case tree.NEQL:
 		cv.c.jumpOnXComparison(op, cv.jt, noLabel)
-	case tree.EQL:
+	default: // TODO write tests with other comparisons between expressions & args
 		cv.c.jumpOnXComparison(op, next, cv.jf)
 	}
 
@@ -143,11 +143,7 @@ func (cv *compilerVisitor) jumpOnK(l uint64, ix argumentPosition, op tree.Compar
 	switch op {
 	case tree.NEQL:
 		cv.c.jumpOnKComp(getUpper(l), op, cv.jt, noLabel)
-	case tree.EQL:
-		cv.c.jumpOnKComp(getUpper(l), op, next, cv.jf)
-	case tree.GT:
-		cv.c.jumpOnKComp(getUpper(l), op, next, cv.jf)
-	case tree.LT:
+	default:
 		cv.c.jumpOnKComp(getUpper(l), op, next, cv.jf)
 	}
 	cv.c.labelHere(next)
@@ -165,7 +161,7 @@ func (cv *compilerVisitor) jumpOnX(ix argumentPosition, rx argumentPosition, op 
 	switch op {
 	case tree.NEQL:
 		cv.c.jumpOnXComparison(op, cv.jt, noLabel)
-	case tree.EQL:
+	default: // TODO test cases of other comparisons between two arguments
 		cv.c.jumpOnXComparison(op, next, cv.jf)
 	}
 	cv.c.labelHere(next)
@@ -253,6 +249,7 @@ func (cv *compilerVisitor) AcceptNumericLiteral(l tree.NumericLiteral) {
 }
 
 func (cv *compilerVisitor) AcceptAnd(c tree.And) {
+	cv.topLevel = false
 	n := nextLabel()
 	a := &compilerVisitor{c: cv.c, topLevel: false, jf: cv.jf, jt: n}
 	c.Left.Accept(a)
@@ -261,8 +258,8 @@ func (cv *compilerVisitor) AcceptAnd(c tree.And) {
 }
 
 func (cv *compilerVisitor) AcceptOr(c tree.Or) {
-	n := nextLabel()
 	cv.topLevel = false
+	n := nextLabel()
 	a := &compilerVisitor{c: cv.c, topLevel: false, jf: n, jt: cv.jt}
 	c.Left.Accept(a)
 	cv.c.labelHere(n)

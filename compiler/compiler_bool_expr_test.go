@@ -292,7 +292,6 @@ func (s *BoolCompilerSuite) Test_compilationOfNegatedEqualsComparison(c *C) {
 }
 
 func (s *BoolCompilerSuite) Test_compilingBooleanInsideExpressionShouldPanicSinceItsAProgrammerError(c *C) {
-	c.Skip("p")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
