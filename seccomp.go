@@ -2,6 +2,8 @@ package gosecco
 
 import (
 	"fmt"
+	"runtime"
+	"syscall"
 
 	"github.com/twtiger/gosecco/data"
 	"github.com/twtiger/gosecco/native"
@@ -11,7 +13,18 @@ import (
 
 // CheckSupport checks for the required seccomp support in the kernel.
 func CheckSupport() error {
-	// TODO: no testing really possible
+	if err := native.CheckGetSeccomp(); err != nil {
+		return fmt.Errorf("seccomp not available: %v", err)
+	}
+	if err := native.CheckSetSeccompModeFilter(); err != syscall.EFAULT {
+		return fmt.Errorf("seccomp filter not available: %v", err)
+	}
+	if err := native.CheckSetSeccompModeFilterWithSeccomp(); err != syscall.EFAULT {
+		return fmt.Errorf("seccomp syscall not available: %v", err)
+	}
+	if err := native.CheckSetSeccompModeTsync(); err != syscall.EFAULT {
+		return fmt.Errorf("seccomp tsync not available: %v", err)
+	}
 	return nil
 }
 
@@ -64,6 +77,7 @@ func Load(bpf []unix.SockFilter) error {
 	if size, limit := len(bpf), 0xffff; size > limit {
 		return fmt.Errorf("filter program too big: %d bpf instructions (limit = %d)", size, limit)
 	}
+
 	prog := &data.SockFprog{
 		Filter: &bpf[0],
 		Len:    uint16(len(bpf)),
@@ -74,14 +88,17 @@ func Load(bpf []unix.SockFilter) error {
 
 // Install will install the given policy filters into the kernel
 func Install(bpf []unix.SockFilter) error {
-	// TODO, doesn't need testing (not really possible)
-	return nil
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+	if err := native.NoNewPrivs(); err != nil {
+		return err
+	}
+	return Load(bpf)
 }
 
 // InstallBlacklist makes the necessary system calls to install the Seccomp-BPF
 // filter for the current process (all threads). Install can be called
 // multiple times to install additional filters.
 func InstallBlacklist(bpf []unix.SockFilter) error {
-	// TODO, doesn't need testing (not really possible)
-	return nil
+	return Install(bpf)
 }
