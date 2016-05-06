@@ -176,13 +176,36 @@ func (cv *compilerVisitor) jumpOnX(ix argumentPosition, rx argumentPosition, op 
 	cv.c.jumpOnXComparison(op, cv.jt, cv.jf)
 }
 
+func (cv *compilerVisitor) setJumpPoints(p bool) {
+	if !p {
+		cv.jt = negative
+		cv.jf = positive
+	} else {
+		cv.jt = positive
+		cv.jf = negative
+	}
+}
+
+func (cv *compilerVisitor) goToNextComparison(i int, l int) label {
+	n := nextLabel()
+	if i != l {
+		cv.jf = n
+	}
+	return n
+}
+
 func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 	cv.topLevel = false
+
+	cv.setJumpPoints(c.Positive)
 
 	switch et := c.Left.(type) {
 	case tree.Argument:
 		ix := argument[et.Index]
-		for _, l := range c.Rights {
+		for i, l := range c.Rights {
+
+			n := cv.goToNextComparison(i, len(c.Rights)-1)
+
 			switch k := l.(type) {
 			case tree.NumericLiteral:
 				cv.jumpOnK(k.Value, ix, tree.EQL)
@@ -190,12 +213,23 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 				rx := argument[k.Index]
 				cv.jumpOnX(ix, rx, tree.EQL)
 			}
+			if i != len(c.Rights)-1 {
+				cv.setJumpPoints(c.Positive)
+				cv.c.labelHere(n)
+			}
 		}
 	case tree.NumericLiteral:
-		for _, l := range c.Rights {
+		for i, l := range c.Rights {
+			n := cv.goToNextComparison(i, len(c.Rights)-1)
+
 			k := l.(tree.Argument)
 			ix := argument[k.Index]
 			cv.jumpOnK(et.Value, ix, tree.EQL)
+
+			if i != len(c.Rights)-1 {
+				cv.setJumpPoints(c.Positive)
+				cv.c.labelHere(n)
+			}
 		}
 	}
 }

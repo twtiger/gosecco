@@ -142,8 +142,11 @@ func (c *compiler) checkCorrectSyscall(name string, setPosFlags bool) {
 	}
 
 	c.loadCurrentSyscall()
-	// TODO how to handle setPosFlags bool
-	c.jumpOnKComp(sys, tree.EQL, noLabel, negative)
+	if setPosFlags {
+		c.jumpOnKComp(sys, tree.EQL, positive, negative)
+	} else {
+		c.jumpOnKComp(sys, tree.EQL, noLabel, negative)
+	}
 }
 
 func (c *compiler) positiveAction(name string) {
