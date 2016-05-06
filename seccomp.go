@@ -1,9 +1,19 @@
 package gosecco
 
-import "golang.org/x/sys/unix"
+import (
+	"fmt"
+	"syscall"
+	"unsafe"
+
+	"golang.org/x/sys/unix"
+)
+
+// #include <linux/seccomp.h>
+import "C"
 
 // CheckSupport checks for the required seccomp support in the kernel.
 func CheckSupport() error {
+	// TODO: no testing really possible
 	return nil
 }
 
@@ -18,6 +28,15 @@ type SeccompSettings struct {
 // Prepare will take the given path and settings, parse and compile the given
 // data, combined with the settings - and returns the bytecode
 func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
+	// TODO: test when compiler is ready:
+	// - test that parser errors come through
+	// - test that unification works and that errors come through
+	// - test that default pos and neg actions come through
+	// - test that the type checker errors come through
+	// - test that the simplifier is invoked and simplifies stuff
+	// - test that simplifier errors come through
+	// - test that the compiler works and returns the expected results
+	// - test that compiler errors come through
 	return nil, nil
 }
 
@@ -25,7 +44,34 @@ func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
 // Compile from the go-seccomp package and should provide the same behavior.
 // However, the modern interface is through the Prepare function
 func Compile(path string, enforce bool) ([]unix.SockFilter, error) {
+	// TODO: test once compiler is done, light testing needed, since main testing
+	// will be of the Prepare method
 	return nil, nil
+}
+
+// CompileBlacklist provides the compatibility interface for gosecco, for blacklist mode
+// It has the same signature as CompileBlacklist from Subgraphs go-seccomp and should provide the same behavior.
+// However, the modern interface is through the Prepare function
+func CompileBlacklist(path string, enforce bool) ([]unix.SockFilter, error) {
+	// TODO: test once compiler is done, light testing needed, since main testing
+	// will be of the Prepare method
+	return nil, nil
+}
+
+type sockFprog struct {
+	Len    uint16      // Number of BPF machine instructions.
+	Filter *unix.SockFilter // Pointer to the first instruction.
+}
+
+// seccomp is a wrapper for the 'seccomp' system call.
+// See <linux/seccomp.h> for valid op and flag values.
+// uargs is typically a pointer to struct sock_fprog.
+func seccomp(op, flags uintptr, uargs unsafe.Pointer) error {
+	_, _, e := syscall.Syscall(syscall.PR_GET_SECCOMP, op, flags, uintptr(uargs))
+	if e != 0 {
+		return e
+	}
+	return nil
 }
 
 // Load makes the seccomp system call to install the bpf filter for
@@ -33,10 +79,26 @@ func Compile(path string, enforce bool) ([]unix.SockFilter, error) {
 // Install instead of Load, since Install ensures that prctl(set_no_new_privs, 1)
 // has been called
 func Load(bpf []unix.SockFilter) error {
-	return nil
+	if size, limit := len(bpf), 0xffff; size > limit {
+		return fmt.Errorf("filter program too big: %d bpf instructions (limit = %d)", size, limit)
+	}
+	prog := &sockFprog{
+		Filter: &bpf[0],
+		Len:    uint16(len(bpf)),
+	}
+	return seccomp(C.SECCOMP_SET_MODE_FILTER, C.SECCOMP_FILTER_FLAG_TSYNC, unsafe.Pointer(prog))
 }
 
 // Install will install the given policy filters into the kernel
 func Install(bpf []unix.SockFilter) error {
+	// TODO, doesn't need testing (not really possible)
+	return nil
+}
+
+// InstallBlacklist makes the necessary system calls to install the Seccomp-BPF
+// filter for the current process (all threads). Install can be called
+// multiple times to install additional filters.
+func InstallBlacklist(bpf []unix.SockFilter) error {
+	// TODO, doesn't need testing (not really possible)
 	return nil
 }
