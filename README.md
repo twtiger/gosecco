@@ -44,7 +44,7 @@ An emulator that takes a set of rules and an instance of working memory and exec
 
 The parser is divided up into a tokenizer implemented using Ragel and a very simple recursive descent parser. The language parsed is described in the document referred to above. The output will be a raw policy document where macro definitions and rule definitions appear in the order they were defined.
 
-### simplify
+### simplifier
 
 The simplification phase takes a tree and tries to do as much optimization as possible before hand. This means basically reducing all arithmetic expressions as much as possible based on constants. We don't do more complicated optimizations such as reorderings or inversions of mathematical operations - we simple execute as much as possible beforehand. THe assumption is that there are no free variables or calls at this stage.
 
