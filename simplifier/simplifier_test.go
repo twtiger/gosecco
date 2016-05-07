@@ -164,39 +164,44 @@ func (s *SimplifierSuite) Test_simplifyBooleanLiteral(c *C) {
 	c.Assert(tree.ExpressionString(sx), Equals, "true")
 }
 
+var inclusionSimplifiers = []Simplifier{
+	createArithmeticSimplifier(),
+	createInclusionSimplifier(),
+}
+
 func (s *SimplifierSuite) Test_simplifyInclusion(c *C) {
-	sx := Simplify(tree.Inclusion{
+	sx := reduceSimplify(tree.Inclusion{
 		Positive: true,
 		Left:     tree.BinaryNegation{tree.NumericLiteral{42}},
 		Rights: []tree.Numeric{
 			tree.NumericLiteral{42},
 			tree.Arithmetic{Op: tree.LSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
-		}})
+		}}, inclusionSimplifiers...)
 	c.Assert(tree.ExpressionString(sx), Equals, "false")
 
-	sx = Simplify(tree.Inclusion{
+	sx = reduceSimplify(tree.Inclusion{
 		Positive: true,
 		Left:     tree.BinaryNegation{tree.NumericLiteral{42}},
 		Rights: []tree.Numeric{
 			tree.Argument{Index: 0},
 			tree.Argument{Index: 2},
 			tree.Arithmetic{Op: tree.LSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
-		}})
+		}}, inclusionSimplifiers...)
 	c.Assert(tree.ExpressionString(sx), Equals, "(in 18446744073709551573 arg0 arg2)")
 
-	sx = Simplify(tree.Inclusion{
+	sx = reduceSimplify(tree.Inclusion{
 		Positive: true,
 		Left:     tree.Argument{Index: 0},
 		Rights: []tree.Numeric{
 			tree.NumericLiteral{42},
 			tree.Arithmetic{Op: tree.LSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
-		}})
+		}}, inclusionSimplifiers...)
 	c.Assert(tree.ExpressionString(sx), Equals, "(in arg0 42 168)")
 }
 
 func (s *SimplifierSuite) Test_simplifyNotInclusionWithNumericLiteral(c *C) {
 
-	sx := Simplify(tree.Inclusion{
+	sx := createInclusionSimplifier().Simplify(tree.Inclusion{
 		Positive: false,
 		Left:     tree.Argument{Index: 0},
 		Rights: []tree.Numeric{
@@ -207,7 +212,7 @@ func (s *SimplifierSuite) Test_simplifyNotInclusionWithNumericLiteral(c *C) {
 
 func (s *SimplifierSuite) Test_simplifyInclusionWithSameArgumentOnLeftAndRight(c *C) {
 	c.Skip("What error are we raising here?")
-	sx := Simplify(tree.Inclusion{
+	sx := createInclusionSimplifier().Simplify(tree.Inclusion{
 		Positive: true,
 		Left:     tree.Argument{Index: 0},
 		Rights: []tree.Numeric{
@@ -219,7 +224,7 @@ func (s *SimplifierSuite) Test_simplifyInclusionWithSameArgumentOnLeftAndRight(c
 }
 
 func (s *SimplifierSuite) Test_simplifyInclusionWithArgumentInRights(c *C) {
-	sx := Simplify(tree.Inclusion{
+	sx := createInclusionSimplifier().Simplify(tree.Inclusion{
 		Positive: true,
 		Left:     tree.Argument{Index: 0},
 		Rights: []tree.Numeric{
@@ -231,26 +236,25 @@ func (s *SimplifierSuite) Test_simplifyInclusionWithArgumentInRights(c *C) {
 }
 
 func (s *SimplifierSuite) Test_simplifyInclusionWithOnlyOneValueShouldBecomeComparison(c *C) {
-
-	sx := Simplify(tree.Inclusion{
+	sx := reduceSimplify(tree.Inclusion{
 		Positive: true,
 		Left:     tree.BinaryNegation{tree.NumericLiteral{42}},
 		Rights: []tree.Numeric{
 			tree.Argument{Index: 0},
 			tree.Arithmetic{Op: tree.LSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
-		}})
+		}}, inclusionSimplifiers...)
 	c.Assert(tree.ExpressionString(sx), Equals, "(eq 18446744073709551573 arg0)")
 }
 
 func (s *SimplifierSuite) Test_simplifyInclusionForAllLiteralRights(c *C) {
-	sx := Simplify(tree.Inclusion{
+	sx := reduceSimplify(tree.Inclusion{
 		Positive: true,
 		Left:     tree.BinaryNegation{tree.NumericLiteral{5}},
 		Rights: []tree.Numeric{
 			tree.NumericLiteral{2},
 			tree.NumericLiteral{3},
 			tree.NumericLiteral{4},
-		}})
+		}}, inclusionSimplifiers...)
 	c.Assert(tree.ExpressionString(sx), Equals, "false")
 }
 

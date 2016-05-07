@@ -21,12 +21,67 @@ func reduceSimplify(inp tree.Expression, ss ...Simplifier) tree.Expression {
 // Simplify will take an expression and reduce it as much as possible using state operations
 func Simplify(inp tree.Expression) tree.Expression {
 	return reduceSimplify(inp,
+		// X < Y    ==>  Y >= X
+		// X <= Y   ==>  Y > X
 		createLtExpressionsSimplifier(),
-		createArithmeticSimplifier(),
-		createComparisonSimplifier(),
-		createBooleanSimplifier(),
-		createBinaryNegationSimplifier(),
+
+		// X in [P]  ==>  P == Q
+		// X in [P, Q, R]  where X and R can be determined to not be equal  ==>  X in [P, Q]
+		// X in [P, Q, R]  where X and one of the values can be determined to be equal  ==>  true
+		// X notIn [P]  ==>  P != Q
+		// X notIn [P, Q, R]  where X and R can be determined to not be equal  ==>  X notIn [P, Q]
+		// X notIn [P, Q, R]  where X and one of the values can be determined to be equal  ==>  false
 		createInclusionSimplifier(),
+
+		// X in [P, Q, R]     ==>  X == P || X == Q || X == R
+		// X notIn [P, Q, R]  ==>  X != P && X != Q && X != R
+		createInclusionRemoverSimplifier(),
+
+		// Where X and Y can be determined statically:
+		// X + Y   ==>  [X+Y]
+		// X - Y   ==>  [X-Y]
+		// X * Y   ==>  [X*Y]
+		// X / Y   ==>  [X/Y]
+		// X % Y   ==>  [X%Y]
+		// X & Y   ==>  [X&Y]
+		// X | Y   ==>  [X|Y]
+		// X ^ Y   ==>  [X^Y]
+		// X << Y  ==>  [X<<Y]
+		// X >> Y  ==>  [X<<Y]
+		// ~X      ==>  [~X]
+		// Note that these calculations will all be done on 64bit unsigned values
+		// - this could lead to different result than if they were evaluated by the BPF engine.
+		createArithmeticSimplifier(),
+
+		// Where X and Y can be determined statically:
+		// X == Y  where X == Y  ==>  true
+		// X == Y  where X != Y  ==>  false
+		// X != Y  where X == Y  ==>  false
+		// X != Y  where X != Y  ==>  true
+		// X > Y   where X > Y   ==>  true
+		// X > Y   where X <= Y  ==>  false
+		// X >= Y  where X >= Y  ==>  true
+		// X >= Y  where X < Y   ==>  false
+		// X < Y   where X < Y   ==>  true
+		// X < Y   where X >= Y  ==>  false
+		// X <= Y  where X <= Y  ==>  true
+		// X <= Y  where X > Y   ==>  false
+		createComparisonSimplifier(),
+
+		// !true           ==>  false
+		// !false          ==>  true
+		// false || Y      ==>  Y
+		// false || true   ==>  true
+		// false || false  ==>  false
+		// true  || Y      ==>  true
+		// true  && true   ==>  true
+		// true  && false  ==>  false
+		// true  && Y      ==>  Y
+		// false && [any]  ==>  false
+		createBooleanSimplifier(),
+
+		// ~X  ==> X ^ 0xFFFFFFFFFFFFFFFF
+		createBinaryNegationSimplifier(),
 	)
 }
 
