@@ -193,10 +193,10 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 	cv.setJumpPoints(c.Positive)
 
 	var n label
+	argL, litL, isArg, isLit := detectSpecialCasesOn(c.Left)
 
-	switch et := c.Left.(type) {
-	case tree.Argument:
-		ix := argument[et.Index]
+	if isArg {
+		ix := argument[argL.Index]
 		for i, l := range c.Rights {
 
 			if i != len(c.Rights)-1 {
@@ -214,28 +214,26 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 			cv.c.labelHere(n)
 		}
 
-	case tree.NumericLiteral:
+	} else if isLit {
 		for i, l := range c.Rights {
 
 			if i != len(c.Rights)-1 {
 				n = cv.goToNextComparison()
 			}
 
-			switch l.(type) {
+			switch k := l.(type) {
 			case tree.Argument:
-				k := l.(tree.Argument)
 				ix := argument[k.Index]
-				cv.jumpOnK(et.Value, ix, tree.EQL)
-
+				cv.jumpOnK(litL.Value, ix, tree.EQL)
 			default:
 				l.Accept(cv)
-				cv.c.jumpOnKComp(getLower(et.Value), tree.EQL, cv.jt, cv.jf)
+				cv.c.jumpOnKComp(getLower(litL.Value), tree.EQL, cv.jt, cv.jf)
 			}
 			cv.setJumpPoints(c.Positive)
 			cv.c.labelHere(n)
 		}
-	default:
-		et.Accept(cv)
+	} else {
+		c.Left.Accept(cv)
 		for i, l := range c.Rights {
 
 			if i != len(c.Rights)-1 {
