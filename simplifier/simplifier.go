@@ -21,9 +21,11 @@ func reduceSimplify(inp tree.Expression, ss ...Simplifier) tree.Expression {
 // Simplify will take an expression and reduce it as much as possible using state operations
 func Simplify(inp tree.Expression) tree.Expression {
 	return reduceSimplify(inp,
+		createLtExpressionsSimplifier(),
 		createArithmeticSimplifier(),
 		createComparisonSimplifier(),
 		createBooleanSimplifier(),
+		createBinaryNegationSimplifier(),
 		createInclusionSimplifier(),
 	)
 }

@@ -5,9 +5,7 @@ import "github.com/twtiger/gosecco/tree"
 // AcceptBinaryNegation implements Visitor
 func (s *arithmeticSimplifier) AcceptBinaryNegation(v tree.BinaryNegation) {
 	val := s.Simplify(v.Operand)
-	val2, ok := potentialExtractValue(val)
-	if ok {
-
+	if val2, ok := potentialExtractValue(val); ok {
 		s.result = tree.NumericLiteral{^val2}
 	}
 }
