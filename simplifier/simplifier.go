@@ -21,10 +21,6 @@ func reduceSimplify(inp tree.Expression, ss ...Simplifier) tree.Expression {
 // Simplify will take an expression and reduce it as much as possible using state operations
 func Simplify(inp tree.Expression) tree.Expression {
 	return reduceSimplify(inp,
-		// X < Y    ==>  Y >= X
-		// X <= Y   ==>  Y > X
-		createLtExpressionsSimplifier(),
-
 		// X in [P]  ==>  P == Q
 		// X in [P, Q, R]  where X and R can be determined to not be equal  ==>  X in [P, Q]
 		// X in [P, Q, R]  where X and one of the values can be determined to be equal  ==>  true
@@ -36,6 +32,10 @@ func Simplify(inp tree.Expression) tree.Expression {
 		// X in [P, Q, R]     ==>  X == P || X == Q || X == R
 		// X notIn [P, Q, R]  ==>  X != P && X != Q && X != R
 		createInclusionRemoverSimplifier(),
+
+		// X < Y    ==>  Y >= X
+		// X <= Y   ==>  Y > X
+		createLtExpressionsSimplifier(),
 
 		// Where X and Y can be determined statically:
 		// X + Y   ==>  [X+Y]
@@ -87,6 +87,14 @@ func Simplify(inp tree.Expression) tree.Expression {
 
 type simplifier struct {
 	result tree.Expression
+}
+
+func potentialExtractFullArgument(a tree.Expression) (int, bool) {
+	v, ok := a.(tree.Argument)
+	if ok && v.Type == tree.Full {
+		return v.Index, ok
+	}
+	return 0, false
 }
 
 func potentialExtractValue(a tree.Numeric) (uint64, bool) {

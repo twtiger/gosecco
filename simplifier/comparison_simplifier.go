@@ -33,7 +33,6 @@ func (s *comparisonSimplifier) AcceptComparison(a tree.Comparison) {
 		}
 	}
 	s.result = tree.Comparison{Op: a.Op, Left: l, Right: r}
-
 }
 
 // comparisonSimplifier simplifies comparison expressions by calculating them as much as possible
