@@ -2,11 +2,30 @@ package simplifier
 
 import "github.com/twtiger/gosecco/tree"
 
+// Simplifier is something that can simplify expression
+type Simplifier interface {
+	tree.Visitor
+	Simplify(tree.Expression) tree.Expression
+}
+
+func reduceSimplify(inp tree.Expression, ss ...Simplifier) tree.Expression {
+	result := inp
+
+	for _, s := range ss {
+		result = s.Simplify(result)
+	}
+
+	return result
+}
+
 // Simplify will take an expression and reduce it as much as possible using state operations
 func Simplify(inp tree.Expression) tree.Expression {
-	s := &simplifier{inp}
-	inp.Accept(s)
-	return s.result
+	return reduceSimplify(inp,
+		createArithmeticSimplifier(),
+		createComparisonSimplifier(),
+		createBooleanSimplifier(),
+		createInclusionSimplifier(),
+	)
 }
 
 type simplifier struct {

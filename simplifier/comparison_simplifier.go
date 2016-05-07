@@ -3,9 +3,9 @@ package simplifier
 import "github.com/twtiger/gosecco/tree"
 
 // AcceptComparison implements Visitor
-func (s *simplifier) AcceptComparison(a tree.Comparison) {
-	l := Simplify(a.Left)
-	r := Simplify(a.Right)
+func (s *comparisonSimplifier) AcceptComparison(a tree.Comparison) {
+	l := s.Simplify(a.Left)
+	r := s.Simplify(a.Right)
 
 	pl, ok1 := potentialExtractValue(l)
 	pr, ok2 := potentialExtractValue(r)
@@ -34,4 +34,15 @@ func (s *simplifier) AcceptComparison(a tree.Comparison) {
 	}
 	s.result = tree.Comparison{Op: a.Op, Left: l, Right: r}
 
+}
+
+// comparisonSimplifier simplifies comparison expressions by calculating them as much as possible
+type comparisonSimplifier struct {
+	nullSimplifier
+}
+
+func createComparisonSimplifier() Simplifier {
+	s := &comparisonSimplifier{}
+	s.realSelf = s
+	return s
 }

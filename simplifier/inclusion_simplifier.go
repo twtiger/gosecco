@@ -3,15 +3,15 @@ package simplifier
 import "github.com/twtiger/gosecco/tree"
 
 // AcceptInclusion implements Visitor
-func (s *simplifier) AcceptInclusion(a tree.Inclusion) {
-	l := Simplify(a.Left)
+func (s *inclusionSimplifier) AcceptInclusion(a tree.Inclusion) {
+	l := s.Simplify(a.Left)
 	pl, pok := potentialExtractValue(l)
 
 	result := make([]tree.Numeric, len(a.Rights))
 	resultVals := make([]uint64, len(a.Rights))
 	resultOks := make([]bool, len(a.Rights))
 	for ix, v := range a.Rights {
-		result[ix] = Simplify(v)
+		result[ix] = s.Simplify(v)
 		resultVals[ix], resultOks[ix] = potentialExtractValue(result[ix])
 	}
 
@@ -43,4 +43,15 @@ func (s *simplifier) AcceptInclusion(a tree.Inclusion) {
 	} else {
 		s.result = tree.Inclusion{Positive: a.Positive, Left: l, Rights: result}
 	}
+}
+
+// inclusionSimplifier simplifies inclusion expressions
+type inclusionSimplifier struct {
+	nullSimplifier
+}
+
+func createInclusionSimplifier() Simplifier {
+	s := &inclusionSimplifier{}
+	s.realSelf = s
+	return s
 }
