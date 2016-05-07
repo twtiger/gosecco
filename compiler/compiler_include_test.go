@@ -142,3 +142,66 @@ func (s *IncludeCompilerSuite) Test_compliationOfIncludeExpressionofArgumentWith
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
 }
+
+func (s *IncludeCompilerSuite) Test_compliationOfIncludeExpressionofExpressionToNumerics(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Inclusion{
+					Positive: true,
+					Left: tree.Arithmetic{Left: tree.Argument{Index: 1, Type: tree.Low},
+						Op:    tree.PLUS,
+						Right: tree.NumericLiteral{4}},
+					Rights: []tree.Numeric{tree.NumericLiteral{0}, tree.NumericLiteral{42}},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t05\t1\n"+
+		"ld_abs\t1C\n"+
+		"add_k\t4\n"+
+		"jeq_k\t01\t00\t0\n"+
+		"jeq_k\t00\t01\t2A\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
+}
+
+func (s *IncludeCompilerSuite) Test_compliationOfIncludeExpressionNumericLiteralInExpressionResults(c *C) {
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Inclusion{
+					Positive: true,
+					Left:     tree.NumericLiteral{42},
+					Rights: []tree.Numeric{
+						tree.Arithmetic{Left: tree.Argument{Index: 1, Type: tree.Low},
+							Op:    tree.PLUS,
+							Right: tree.NumericLiteral{4}},
+						tree.Arithmetic{Left: tree.Argument{Index: 0, Type: tree.Low},
+							Op:    tree.MINUS,
+							Right: tree.NumericLiteral{5}},
+					},
+				},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t07\t1\n"+
+		"ld_abs\t1C\n"+
+		"add_k\t4\n"+
+		"jeq_k\t03\t00\t2A\n"+
+		"ld_abs\t14\n"+
+		"sub_k\t5\n"+
+		"jeq_k\t00\t01\t2A\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
+}

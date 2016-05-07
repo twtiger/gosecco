@@ -219,17 +219,39 @@ func (cv *compilerVisitor) AcceptInclusion(c tree.Inclusion) {
 				cv.c.labelHere(n)
 			}
 		}
+
 	case tree.NumericLiteral:
 		for i, l := range c.Rights {
-
 			var n label
 			if i != len(c.Rights)-1 {
 				n = cv.goToNextComparison(false)
 			}
 
-			k := l.(tree.Argument)
-			ix := argument[k.Index]
-			cv.jumpOnK(et.Value, ix, tree.EQL)
+			switch l.(type) {
+			case tree.Argument:
+				k := l.(tree.Argument)
+				ix := argument[k.Index]
+				cv.jumpOnK(et.Value, ix, tree.EQL)
+
+			default:
+				l.Accept(cv)
+				cv.c.jumpOnKComp(getLower(et.Value), tree.EQL, cv.jt, cv.jf)
+			}
+
+			if i != len(c.Rights)-1 {
+				cv.setJumpPoints(c.Positive)
+				cv.c.labelHere(n)
+			}
+		}
+	default:
+		et.Accept(cv)
+		for i, l := range c.Rights {
+			var n label
+			if i != len(c.Rights)-1 {
+				n = cv.goToNextComparison(false)
+			}
+			r := l.(tree.NumericLiteral)
+			cv.c.jumpOnKComp(getLower(r.Value), tree.EQL, cv.jt, cv.jf)
 
 			if i != len(c.Rights)-1 {
 				cv.setJumpPoints(c.Positive)
