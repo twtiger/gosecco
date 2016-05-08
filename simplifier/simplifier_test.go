@@ -91,12 +91,12 @@ func (s *SimplifierSuite) Test_simplifyAnd(c *C) {
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.Variable{"foo"}},
 		},
 		tree.Comparison{
-			Left:  tree.Argument{Index: 2},
+			Left:  tree.Variable{"argxxx"},
 			Op:    tree.EQL,
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
 		},
 	})
-	c.Assert(tree.ExpressionString(sx), Equals, "(and (eq 168 (rsh 42 foo)) (eq arg2 10))")
+	c.Assert(tree.ExpressionString(sx), Equals, "(and (eq 168 (rsh 42 foo)) (eq argxxx 10))")
 }
 
 func (s *SimplifierSuite) Test_simplifyComparison(c *C) {
@@ -127,12 +127,12 @@ func (s *SimplifierSuite) Test_simplifyOr(c *C) {
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
 		},
 		tree.Comparison{
-			Left:  tree.Argument{Index: 2},
+			Left:  tree.Variable{"argxxx"},
 			Op:    tree.EQL,
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
 		},
 	})
-	c.Assert(tree.ExpressionString(sx), Equals, "(eq arg2 10)")
+	c.Assert(tree.ExpressionString(sx), Equals, "(eq argxxx 10)")
 
 	sx = Simplify(tree.Or{
 		tree.Comparison{
@@ -141,12 +141,12 @@ func (s *SimplifierSuite) Test_simplifyOr(c *C) {
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.Variable{"foo"}},
 		},
 		tree.Comparison{
-			Left:  tree.Argument{Index: 2},
+			Left:  tree.Variable{"argxxx"},
 			Op:    tree.EQL,
 			Right: tree.Arithmetic{Op: tree.RSH, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{2}},
 		},
 	})
-	c.Assert(tree.ExpressionString(sx), Equals, "(or (eq 168 (rsh 42 foo)) (eq arg2 10))")
+	c.Assert(tree.ExpressionString(sx), Equals, "(or (eq 168 (rsh 42 foo)) (eq argxxx 10))")
 }
 
 func (s *SimplifierSuite) Test_Argument(c *C) {

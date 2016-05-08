@@ -31,6 +31,18 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesEqualityWithArgAgai
 	c.Assert(tree.ExpressionString(sx), Equals, "(and (eq 2596069104 argL2) (eq 305419896 argH2))")
 }
 
+func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesEqualityWithArgAgainstArg(c *C) {
+	sx := createFullArgumentSplitterSimplifier().Simplify(
+		tree.Comparison{
+			Op:    tree.EQL,
+			Left:  tree.Argument{Type: tree.Full, Index: 2},
+			Right: tree.Argument{Type: tree.Full, Index: 4},
+		},
+	)
+
+	c.Assert(tree.ExpressionString(sx), Equals, "(and (eq argL2 argL4) (eq argH2 argH4))")
+}
+
 func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesNonequalityWithArgAgainstNumber(c *C) {
 	sx := createFullArgumentSplitterSimplifier().Simplify(
 		tree.Comparison{
@@ -40,7 +52,7 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesNonequalityWithArgA
 		},
 	)
 
-	c.Assert(tree.ExpressionString(sx), Equals, "(and (neq argL2 2596069104) (neq argH2 305419896))")
+	c.Assert(tree.ExpressionString(sx), Equals, "(or (neq argL2 2596069104) (neq argH2 305419896))")
 
 	sx = createFullArgumentSplitterSimplifier().Simplify(
 		tree.Comparison{
@@ -50,5 +62,85 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesNonequalityWithArgA
 		},
 	)
 
-	c.Assert(tree.ExpressionString(sx), Equals, "(and (neq 2596069104 argL2) (neq 305419896 argH2))")
+	c.Assert(tree.ExpressionString(sx), Equals, "(or (neq 2596069104 argL2) (neq 305419896 argH2))")
+}
+
+func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesNonequalityWithArgAgainstArg(c *C) {
+	sx := createFullArgumentSplitterSimplifier().Simplify(
+		tree.Comparison{
+			Op:    tree.NEQL,
+			Left:  tree.Argument{Type: tree.Full, Index: 2},
+			Right: tree.Argument{Type: tree.Full, Index: 1},
+		},
+	)
+
+	c.Assert(tree.ExpressionString(sx), Equals, "(or (neq argL2 argL1) (neq argH2 argH1))")
+}
+
+func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesGtWithArgAgainstNumber(c *C) {
+	sx := createFullArgumentSplitterSimplifier().Simplify(
+		tree.Comparison{
+			Op:    tree.GT,
+			Left:  tree.Argument{Type: tree.Full, Index: 2},
+			Right: tree.NumericLiteral{0x123456789ABCDEF0},
+		},
+	)
+
+	c.Assert(tree.ExpressionString(sx), Equals, "(or (gt argH2 305419896) (and (eq argH2 305419896) (gt argL2 2596069104)))")
+
+	sx = createFullArgumentSplitterSimplifier().Simplify(
+		tree.Comparison{
+			Op:    tree.GT,
+			Left:  tree.NumericLiteral{0x123456789ABCDEF0},
+			Right: tree.Argument{Type: tree.Full, Index: 2},
+		},
+	)
+
+	c.Assert(tree.ExpressionString(sx), Equals, "(or (gt 305419896 argH2) (and (eq 305419896 argH2) (gt 2596069104 argL2)))")
+}
+
+func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesGtWithArgAgainstArg(c *C) {
+	sx := createFullArgumentSplitterSimplifier().Simplify(
+		tree.Comparison{
+			Op:    tree.GT,
+			Left:  tree.Argument{Type: tree.Full, Index: 3},
+			Right: tree.Argument{Type: tree.Full, Index: 0},
+		},
+	)
+
+	c.Assert(tree.ExpressionString(sx), Equals, "(or (gt argH3 argH0) (and (eq argH3 argH0) (gt argL3 argL0)))")
+}
+
+func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesGteWithArgAgainstNumber(c *C) {
+	sx := createFullArgumentSplitterSimplifier().Simplify(
+		tree.Comparison{
+			Op:    tree.GTE,
+			Left:  tree.Argument{Type: tree.Full, Index: 2},
+			Right: tree.NumericLiteral{0x123456789ABCDEF0},
+		},
+	)
+
+	c.Assert(tree.ExpressionString(sx), Equals, "(or (gt argH2 305419896) (and (eq argH2 305419896) (gte argL2 2596069104)))")
+
+	sx = createFullArgumentSplitterSimplifier().Simplify(
+		tree.Comparison{
+			Op:    tree.GTE,
+			Left:  tree.NumericLiteral{0x123456789ABCDEF0},
+			Right: tree.Argument{Type: tree.Full, Index: 2},
+		},
+	)
+
+	c.Assert(tree.ExpressionString(sx), Equals, "(or (gt 305419896 argH2) (and (eq 305419896 argH2) (gte 2596069104 argL2)))")
+}
+
+func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesGteWithArgAgainstArg(c *C) {
+	sx := createFullArgumentSplitterSimplifier().Simplify(
+		tree.Comparison{
+			Op:    tree.GTE,
+			Left:  tree.Argument{Type: tree.Full, Index: 2},
+			Right: tree.Argument{Type: tree.Full, Index: 5},
+		},
+	)
+
+	c.Assert(tree.ExpressionString(sx), Equals, "(or (gt argH2 argH5) (and (eq argH2 argH5) (gte argL2 argL5)))")
 }

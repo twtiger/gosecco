@@ -82,6 +82,13 @@ func Simplify(inp tree.Expression) tree.Expression {
 
 		// ~X  ==> X ^ 0xFFFFFFFFFFFFFFFF
 		createBinaryNegationSimplifier(),
+
+		// Where X can be determined statically (the opposite order is also valid, and X can also be an arg)
+		// arg0 == X  ==>  argL0 == X.low && argH0 == X.high
+		// arg0 != X  ==>  argL0 != X.low || argH0 != X.high
+		// arg0 > X   ==>  argH0 > X.high || (argH0 == X.high && argL0 > X.low)
+		// arg0 >= X  ==>  argH0 > X.high || (argH0 == X.high && argL0 >= X.low)
+		createFullArgumentSplitterSimplifier(),
 	)
 }
 
@@ -103,6 +110,16 @@ func potentialExtractValue(a tree.Numeric) (uint64, bool) {
 		return v.Value, ok
 	}
 	return 0, false
+}
+
+func potentialExtractValueParts(a tree.Numeric) (uint64, uint64, bool) {
+	v, ok := a.(tree.NumericLiteral)
+	if ok {
+		low := v.Value & 0xFFFFFFFF
+		high := (v.Value >> 32) & 0xFFFFFFFF
+		return low, high, ok
+	}
+	return 0, 0, false
 }
 
 func potentialExtractBooleanValue(a tree.Boolean) (bool, bool) {
