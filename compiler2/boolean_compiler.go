@@ -10,14 +10,15 @@ import "github.com/twtiger/gosecco/tree"
 // The conditional compiler is also a boolean compiler
 
 type booleanCompilerVisitor struct {
-	ctx *compilerContext
-	err error
-	jt  label
-	jf  label
+	ctx      *compilerContext
+	err      error
+	topLevel bool
+	jt       label
+	jf       label
 }
 
-func compileBoolean(ctx *compilerContext, inp tree.Expression, jt, jf label) error {
-	v := &booleanCompilerVisitor{ctx: ctx, jt: jt, jf: jf}
+func compileBoolean(ctx *compilerContext, inp tree.Expression, topLevel bool, jt, jf label) error {
+	v := &booleanCompilerVisitor{ctx: ctx, jt: jt, jf: jf, topLevel: topLevel}
 	inp.Accept(v)
 	return v.err
 }
@@ -25,9 +26,9 @@ func compileBoolean(ctx *compilerContext, inp tree.Expression, jt, jf label) err
 func (s *booleanCompilerVisitor) AcceptAnd(v tree.And) {
 	// TODO: errors here
 	next := s.ctx.newLabel()
-	compileBoolean(s.ctx, v.Left, next, s.jf)
+	compileBoolean(s.ctx, v.Left, false, next, s.jf)
 	s.ctx.labelHere(next)
-	compileBoolean(s.ctx, v.Right, s.jt, s.jf)
+	compileBoolean(s.ctx, v.Right, false, s.jt, s.jf)
 }
 
 // AcceptArgument implements Visitor
@@ -47,7 +48,11 @@ func (s *booleanCompilerVisitor) AcceptBinaryNegation(v tree.BinaryNegation) {
 
 // AcceptBooleanLiteral implements Visitor
 func (s *booleanCompilerVisitor) AcceptBooleanLiteral(v tree.BooleanLiteral) {
-	panic("XXX: generate error here")
+	if s.topLevel {
+		// TODO: compile here
+	} else {
+		panic("XXX: generate error here")
+	}
 }
 
 // AcceptCall implements Visitor
@@ -62,7 +67,7 @@ func (s *booleanCompilerVisitor) AcceptInclusion(v tree.Inclusion) {
 
 // AcceptNegation implements Visitor
 func (s *booleanCompilerVisitor) AcceptNegation(v tree.Negation) {
-	s.err = compileBoolean(s.ctx, v.Operand, s.jf, s.jt)
+	s.err = compileBoolean(s.ctx, v.Operand, false, s.jf, s.jt)
 }
 
 // AcceptNumericLiteral implements Visitor
@@ -74,9 +79,9 @@ func (s *booleanCompilerVisitor) AcceptNumericLiteral(v tree.NumericLiteral) {
 func (s *booleanCompilerVisitor) AcceptOr(v tree.Or) {
 	// TODO: errors
 	next := s.ctx.newLabel()
-	compileBoolean(s.ctx, v.Left, s.jt, next)
+	compileBoolean(s.ctx, v.Left, false, s.jt, next)
 	s.ctx.labelHere(next)
-	compileBoolean(s.ctx, v.Right, s.jt, s.jf)
+	compileBoolean(s.ctx, v.Right, false, s.jt, s.jf)
 }
 
 // AcceptVariable implements Visitor

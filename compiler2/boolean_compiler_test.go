@@ -13,7 +13,7 @@ var _ = Suite(&BooleanCompilerSuite{})
 func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison(c *C) {
 	p := tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}}
 	ctx := createCompilerContext()
-	compileBoolean(ctx, p, "pos", "neg")
+	compileBoolean(ctx, p, false, "pos", "neg")
 
 	c.Assert(asm.Dump(ctx.result), Equals, ""+
 		"ld_imm	1\n"+
@@ -33,7 +33,7 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison(c *C) {
 func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison2(c *C) {
 	p := tree.Comparison{Op: tree.NEQL, Left: tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{25}}, Right: tree.NumericLiteral{1}}
 	ctx := createCompilerContext()
-	compileBoolean(ctx, p, "posx", "negx")
+	compileBoolean(ctx, p, false, "posx", "negx")
 
 	c.Assert(asm.Dump(ctx.result), Equals, ""+
 		"ld_imm	1\n"+
@@ -57,7 +57,7 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison2(c *C) {
 func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison3(c *C) {
 	p := tree.Comparison{Op: tree.GT, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}}
 	ctx := createCompilerContext()
-	compileBoolean(ctx, p, "pos", "neg")
+	compileBoolean(ctx, p, false, "pos", "neg")
 
 	c.Assert(asm.Dump(ctx.result), Equals, ""+
 		"ld_imm	1\n"+
@@ -77,7 +77,7 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison3(c *C) {
 func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison4(c *C) {
 	p := tree.Comparison{Op: tree.GTE, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}}
 	ctx := createCompilerContext()
-	compileBoolean(ctx, p, "pos", "neg")
+	compileBoolean(ctx, p, false, "pos", "neg")
 
 	c.Assert(asm.Dump(ctx.result), Equals, ""+
 		"ld_imm	1\n"+
@@ -97,7 +97,7 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison4(c *C) {
 func (s *BooleanCompilerSuite) Test_compilationOfInvalidComparison(c *C) {
 	p := tree.Comparison{Op: tree.LT, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}}
 	ctx := createCompilerContext()
-	res := compileBoolean(ctx, p, "pos", "neg")
+	res := compileBoolean(ctx, p, false, "pos", "neg")
 	c.Assert(res, Not(IsNil))
 	c.Assert(res, ErrorMatches, "this comparison type is not allowed - this is probably a programmer error: \\(lt 42 1\\)")
 }
@@ -108,7 +108,7 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleAnd(c *C) {
 		Right: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{41}, Right: tree.NumericLiteral{23}},
 	}
 	ctx := createCompilerContext()
-	compileBoolean(ctx, p, "pos", "neg")
+	compileBoolean(ctx, p, false, "pos", "neg")
 
 	c.Assert(asm.Dump(ctx.result), Equals, ""+
 		"ld_imm	1\n"+
@@ -140,7 +140,7 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleOr(c *C) {
 		Right: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{41}, Right: tree.NumericLiteral{23}},
 	}
 	ctx := createCompilerContext()
-	compileBoolean(ctx, p, "pos", "neg")
+	compileBoolean(ctx, p, false, "pos", "neg")
 
 	c.Assert(asm.Dump(ctx.result), Equals, ""+
 		"ld_imm	1\n"+
@@ -171,7 +171,7 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleNegation(c *C) {
 		Operand: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
 	}
 	ctx := createCompilerContext()
-	compileBoolean(ctx, p, "pos", "neg")
+	compileBoolean(ctx, p, false, "pos", "neg")
 
 	c.Assert(asm.Dump(ctx.result), Equals, ""+
 		"ld_imm	1\n"+
