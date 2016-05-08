@@ -37,8 +37,13 @@ func init() {
 	register("ld_ind", syscall.BPF_LD|syscall.BPF_W|syscall.BPF_IND, false, true)
 	register("ld_len", syscall.BPF_LD|syscall.BPF_W|syscall.BPF_LEN, false, false)
 	register("ld_imm", syscall.BPF_LD|syscall.BPF_W|syscall.BPF_IMM, false, true)
+	register("ld_mem", syscall.BPF_LD|syscall.BPF_W|syscall.BPF_MEM, false, true)
 	register("ldx_len", syscall.BPF_LDX|syscall.BPF_W|syscall.BPF_LEN, false, false)
 	register("ldx_imm", syscall.BPF_LDX|syscall.BPF_W|syscall.BPF_IMM, false, true)
+	register("ldx_mem", syscall.BPF_LDX|syscall.BPF_W|syscall.BPF_MEM, false, true)
+
+	register("st", syscall.BPF_ST, false, true)
+	register("stx", syscall.BPF_STX, false, true)
 
 	register("add_k", syscall.BPF_ALU|syscall.BPF_ADD|syscall.BPF_K, false, true)
 	register("sub_k", syscall.BPF_ALU|syscall.BPF_SUB|syscall.BPF_K, false, true)
