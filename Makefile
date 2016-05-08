@@ -41,6 +41,7 @@ run-cover: clean-cover
 	go test -coverprofile=.coverprofiles/constants.coverprofile     ./constants
 	go test -coverprofile=.coverprofiles/emulator.coverprofile     ./emulator
 	go test -coverprofile=.coverprofiles/parser.coverprofile     ./parser
+	go test -coverprofile=.coverprofiles/precompilation.coverprofile     ./precompilation
 	go test -coverprofile=.coverprofiles/simplifier.coverprofile ./simplifier
 	go test -coverprofile=.coverprofiles/unifier.coverprofile ./unifier
 	go test -coverprofile=.coverprofiles/compiler.coverprofile ./compiler

@@ -44,6 +44,10 @@ An emulator that takes a set of rules and an instance of working memory and exec
 
 The parser is divided up into a tokenizer implemented using Ragel and a very simple recursive descent parser. The language parsed is described in the document referred to above. The output will be a raw policy document where macro definitions and rule definitions appear in the order they were defined.
 
+### precompilation
+
+The precompilation package contains some checks that make sure that everything is ready for being compiled. It doesn't provide error messages for users of packages, but for implementors. Basically speaking, if this ever triggers, it's because someone has wired something wrong.
+
 ### simplifier
 
 The simplification phase takes a tree and tries to do as much optimization as possible before hand. This means basically reducing all arithmetic expressions as much as possible based on constants. We don't do more complicated optimizations such as reorderings or inversions of mathematical operations - we simple execute as much as possible beforehand. THe assumption is that there are no free variables or calls at this stage.
@@ -64,6 +68,7 @@ In general, this library will work by taking a file of definitions, parse it, co
 - Then, the unifier will take all the macro definitions and make sure the final tree is complete
 - After that, the type checker will run to make sure everything looks correct
 - Then, we use the simplifier to optimize and make everything smaller
+- After simplification, the tree should be ready for compilation. The precompilation package checks that and ensures we are all good.
 - Finally, the compiler takes the tree and turns it into bytecode
 - Optionally, at this point we will install the bytecode into a running process using either the seccomp or the prctl system call.
 

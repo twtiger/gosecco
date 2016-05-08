@@ -83,12 +83,22 @@ func Simplify(inp tree.Expression) tree.Expression {
 		// ~X  ==> X ^ 0xFFFFFFFFFFFFFFFF
 		createBinaryNegationSimplifier(),
 
-		// Where X can be determined statically (the opposite order is also valid, and X can also be an arg)
-		// arg0 == X  ==>  argL0 == X.low && argH0 == X.high
-		// arg0 != X  ==>  argL0 != X.low || argH0 != X.high
-		// arg0 > X   ==>  argH0 > X.high || (argH0 == X.high && argL0 > X.low)
-		// arg0 >= X  ==>  argH0 > X.high || (argH0 == X.high && argL0 >= X.low)
+		// Where X can be determined statically (the opposite order is also valid)
+		// arg0 == X     ==>  argL0 == X.low && argH0 == X.high
+		// arg0 != X     ==>  argL0 != X.low || argH0 != X.high
+		// arg0 > X      ==>  argH0 > X.high || (argH0 == X.high && argL0 > X.low)
+		// arg0 >= X     ==>  argH0 > X.high || (argH0 == X.high && argL0 >= X.low)
+		// arg0 == arg1  ==>  argL0 == argL1 && argH0 == argH1
+		// arg0 != arg1  ==>  argL0 != argL1 || argH0 != argH1
+		// arg0 > arg1   ==>  argH0 > argH1  || (argH0 == argH1 && argL0 > argL1)
+		// arg0 >= arg1  ==>  argH0 > argH1  || (argH0 == argH1 && argL0 >= argL1)
 		createFullArgumentSplitterSimplifier(),
+
+		// We repeat some of the simplifiers in the hope that the above operations have opened up new avenues of simplification
+		createArithmeticSimplifier(),
+		createComparisonSimplifier(),
+		createBooleanSimplifier(),
+		createBinaryNegationSimplifier(),
 	)
 }
 

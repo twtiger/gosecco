@@ -211,7 +211,7 @@ func (s *SimplifierSuite) Test_simplifyNotInclusionWithNumericLiteral(c *C) {
 }
 
 func (s *SimplifierSuite) Test_simplifyInclusionWithSameArgumentOnLeftAndRight(c *C) {
-	c.Skip("What error are we raising here?")
+	// I'm ok with this weirdness
 	sx := createInclusionSimplifier().Simplify(tree.Inclusion{
 		Positive: true,
 		Left:     tree.Argument{Index: 0},
@@ -220,7 +220,7 @@ func (s *SimplifierSuite) Test_simplifyInclusionWithSameArgumentOnLeftAndRight(c
 			tree.NumericLiteral{5},
 			tree.Argument{Index: 0},
 		}})
-	c.Assert(tree.ExpressionString(sx), Equals, " ")
+	c.Assert(tree.ExpressionString(sx), Equals, "(in arg0 4 5 arg0)")
 }
 
 func (s *SimplifierSuite) Test_simplifyInclusionWithArgumentInRights(c *C) {
