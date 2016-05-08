@@ -2,17 +2,11 @@ package simplifier
 
 import "github.com/twtiger/gosecco/tree"
 
-// Simplifier is something that can simplify expression
-type Simplifier interface {
-	tree.Visitor
-	Simplify(tree.Expression) tree.Expression
-}
-
-func reduceSimplify(inp tree.Expression, ss ...Simplifier) tree.Expression {
+func reduceTransformers(inp tree.Expression, ss ...tree.Transformer) tree.Expression {
 	result := inp
 
 	for _, s := range ss {
-		result = s.Simplify(result)
+		result = s.Transform(result)
 	}
 
 	return result
@@ -20,7 +14,7 @@ func reduceSimplify(inp tree.Expression, ss ...Simplifier) tree.Expression {
 
 // Simplify will take an expression and reduce it as much as possible using state operations
 func Simplify(inp tree.Expression) tree.Expression {
-	return reduceSimplify(inp,
+	return reduceTransformers(inp,
 		// X in [P]  ==>  P == Q
 		// X in [P, Q, R]  where X and R can be determined to not be equal  ==>  X in [P, Q]
 		// X in [P, Q, R]  where X and one of the values can be determined to be equal  ==>  true
@@ -100,10 +94,6 @@ func Simplify(inp tree.Expression) tree.Expression {
 		createBooleanSimplifier(),
 		createBinaryNegationSimplifier(),
 	)
-}
-
-type simplifier struct {
-	result tree.Expression
 }
 
 func potentialExtractFullArgument(a tree.Expression) (int, bool) {

@@ -4,8 +4,8 @@ import "github.com/twtiger/gosecco/tree"
 
 // AcceptComparison implements Visitor
 func (s *fullArgumentSplitterSimplifier) AcceptComparison(a tree.Comparison) {
-	l := s.Simplify(a.Left)
-	r := s.Simplify(a.Right)
+	l := s.Transform(a.Left)
+	r := s.Transform(a.Right)
 
 	pral, okal := potentialExtractFullArgument(l)
 	prnlLow, prnlHi, oknl := potentialExtractValueParts(l)
@@ -16,17 +16,17 @@ func (s *fullArgumentSplitterSimplifier) AcceptComparison(a tree.Comparison) {
 	if okal && oknr {
 		switch a.Op {
 		case tree.EQL:
-			s.result = tree.And{
+			s.Result = tree.And{
 				Left:  tree.Comparison{Op: a.Op, Left: tree.Argument{Type: tree.Low, Index: pral}, Right: tree.NumericLiteral{prnrLow}},
 				Right: tree.Comparison{Op: a.Op, Left: tree.Argument{Type: tree.Hi, Index: pral}, Right: tree.NumericLiteral{prnrHi}},
 			}
 		case tree.NEQL:
-			s.result = tree.Or{
+			s.Result = tree.Or{
 				Left:  tree.Comparison{Op: a.Op, Left: tree.Argument{Type: tree.Low, Index: pral}, Right: tree.NumericLiteral{prnrLow}},
 				Right: tree.Comparison{Op: a.Op, Left: tree.Argument{Type: tree.Hi, Index: pral}, Right: tree.NumericLiteral{prnrHi}},
 			}
 		case tree.GT, tree.GTE:
-			s.result = tree.Or{
+			s.Result = tree.Or{
 				Left: tree.Comparison{Op: tree.GT, Left: tree.Argument{Type: tree.Hi, Index: pral}, Right: tree.NumericLiteral{prnrHi}},
 				Right: tree.And{
 					Left:  tree.Comparison{Op: tree.EQL, Left: tree.Argument{Type: tree.Hi, Index: pral}, Right: tree.NumericLiteral{prnrHi}},
@@ -39,17 +39,17 @@ func (s *fullArgumentSplitterSimplifier) AcceptComparison(a tree.Comparison) {
 	} else if okar && oknl {
 		switch a.Op {
 		case tree.EQL:
-			s.result = tree.And{
+			s.Result = tree.And{
 				Left:  tree.Comparison{Op: a.Op, Left: tree.NumericLiteral{prnlLow}, Right: tree.Argument{Type: tree.Low, Index: prar}},
 				Right: tree.Comparison{Op: a.Op, Left: tree.NumericLiteral{prnlHi}, Right: tree.Argument{Type: tree.Hi, Index: prar}},
 			}
 		case tree.NEQL:
-			s.result = tree.Or{
+			s.Result = tree.Or{
 				Left:  tree.Comparison{Op: a.Op, Left: tree.NumericLiteral{prnlLow}, Right: tree.Argument{Type: tree.Low, Index: prar}},
 				Right: tree.Comparison{Op: a.Op, Left: tree.NumericLiteral{prnlHi}, Right: tree.Argument{Type: tree.Hi, Index: prar}},
 			}
 		case tree.GT, tree.GTE:
-			s.result = tree.Or{
+			s.Result = tree.Or{
 				Left: tree.Comparison{Op: tree.GT, Left: tree.NumericLiteral{prnlHi}, Right: tree.Argument{Type: tree.Hi, Index: prar}},
 				Right: tree.And{
 					Left:  tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{prnlHi}, Right: tree.Argument{Type: tree.Hi, Index: prar}},
@@ -62,17 +62,17 @@ func (s *fullArgumentSplitterSimplifier) AcceptComparison(a tree.Comparison) {
 	} else if okal && okar {
 		switch a.Op {
 		case tree.EQL:
-			s.result = tree.And{
+			s.Result = tree.And{
 				Left:  tree.Comparison{Op: a.Op, Left: tree.Argument{Type: tree.Low, Index: pral}, Right: tree.Argument{Type: tree.Low, Index: prar}},
 				Right: tree.Comparison{Op: a.Op, Left: tree.Argument{Type: tree.Hi, Index: pral}, Right: tree.Argument{Type: tree.Hi, Index: prar}},
 			}
 		case tree.NEQL:
-			s.result = tree.Or{
+			s.Result = tree.Or{
 				Left:  tree.Comparison{Op: a.Op, Left: tree.Argument{Type: tree.Low, Index: pral}, Right: tree.Argument{Type: tree.Low, Index: prar}},
 				Right: tree.Comparison{Op: a.Op, Left: tree.Argument{Type: tree.Hi, Index: pral}, Right: tree.Argument{Type: tree.Hi, Index: prar}},
 			}
 		case tree.GT, tree.GTE:
-			s.result = tree.Or{
+			s.Result = tree.Or{
 				Left: tree.Comparison{Op: tree.GT, Left: tree.Argument{Type: tree.Hi, Index: pral}, Right: tree.Argument{Type: tree.Hi, Index: prar}},
 				Right: tree.And{
 					Left:  tree.Comparison{Op: tree.EQL, Left: tree.Argument{Type: tree.Hi, Index: pral}, Right: tree.Argument{Type: tree.Hi, Index: prar}},
@@ -83,7 +83,7 @@ func (s *fullArgumentSplitterSimplifier) AcceptComparison(a tree.Comparison) {
 			panic("shouldn't happen")
 		}
 	} else {
-		s.result = tree.Comparison{Op: a.Op, Left: l, Right: r}
+		s.Result = tree.Comparison{Op: a.Op, Left: l, Right: r}
 	}
 }
 
@@ -98,11 +98,11 @@ func (s *fullArgumentSplitterSimplifier) AcceptComparison(a tree.Comparison) {
 // all zeroes. Everything else is obvious.
 // It deals specifically with the cases for EQL, NEQL, GT and GTE
 type fullArgumentSplitterSimplifier struct {
-	nullSimplifier
+	tree.EmptyTransformer
 }
 
-func createFullArgumentSplitterSimplifier() Simplifier {
+func createFullArgumentSplitterSimplifier() tree.Transformer {
 	s := &fullArgumentSplitterSimplifier{}
-	s.realSelf = s
+	s.RealSelf = s
 	return s
 }

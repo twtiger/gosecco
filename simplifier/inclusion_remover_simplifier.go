@@ -20,7 +20,7 @@ func combineAsAnds(parts []tree.Expression) tree.Expression {
 
 // AcceptInclusion implements Visitor
 func (s *inclusionRemoverSimplifier) AcceptInclusion(a tree.Inclusion) {
-	l := s.Simplify(a.Left)
+	l := s.Transform(a.Left)
 	op := tree.EQL
 	combiner := combineAsOrs
 
@@ -31,19 +31,19 @@ func (s *inclusionRemoverSimplifier) AcceptInclusion(a tree.Inclusion) {
 
 	result := make([]tree.Expression, len(a.Rights))
 	for ix, v := range a.Rights {
-		result[ix] = tree.Comparison{Op: op, Left: l, Right: s.Simplify(v)}
+		result[ix] = tree.Comparison{Op: op, Left: l, Right: s.Transform(v)}
 	}
 
-	s.result = combiner(result)
+	s.Result = combiner(result)
 }
 
 // inclusionRemoverSimplifier removes inclusion statements and replaces them with the equivalent simpler version of comparisons composed with ORs/ANDs
 type inclusionRemoverSimplifier struct {
-	nullSimplifier
+	tree.EmptyTransformer
 }
 
-func createInclusionRemoverSimplifier() Simplifier {
+func createInclusionRemoverSimplifier() tree.Transformer {
 	s := &inclusionRemoverSimplifier{}
-	s.realSelf = s
+	s.RealSelf = s
 	return s
 }

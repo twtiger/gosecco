@@ -4,8 +4,8 @@ import "github.com/twtiger/gosecco/tree"
 
 // AcceptComparison implements Visitor
 func (s *ltExpressionsSimplifier) AcceptComparison(a tree.Comparison) {
-	l := s.Simplify(a.Left)
-	r := s.Simplify(a.Right)
+	l := s.Transform(a.Left)
+	r := s.Transform(a.Right)
 
 	newOp := a.Op
 
@@ -18,17 +18,17 @@ func (s *ltExpressionsSimplifier) AcceptComparison(a tree.Comparison) {
 		l, r = r, l
 	}
 
-	s.result = tree.Comparison{Op: newOp, Left: l, Right: r}
+	s.Result = tree.Comparison{Op: newOp, Left: l, Right: r}
 
 }
 
 // ltExpressionsSimplifier simplifies LT and LTE expressions by rewriting them to GT and GTE expressions
 type ltExpressionsSimplifier struct {
-	nullSimplifier
+	tree.EmptyTransformer
 }
 
-func createLtExpressionsSimplifier() Simplifier {
+func createLtExpressionsSimplifier() tree.Transformer {
 	s := &ltExpressionsSimplifier{}
-	s.realSelf = s
+	s.RealSelf = s
 	return s
 }

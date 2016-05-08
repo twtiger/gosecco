@@ -10,7 +10,7 @@ type FullArgumentSplitterSimplifierSuite struct{}
 var _ = Suite(&FullArgumentSplitterSimplifierSuite{})
 
 func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesEqualityWithArgAgainstNumber(c *C) {
-	sx := createFullArgumentSplitterSimplifier().Simplify(
+	sx := createFullArgumentSplitterSimplifier().Transform(
 		tree.Comparison{
 			Op:    tree.EQL,
 			Left:  tree.Argument{Type: tree.Full, Index: 2},
@@ -20,7 +20,7 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesEqualityWithArgAgai
 
 	c.Assert(tree.ExpressionString(sx), Equals, "(and (eq argL2 2596069104) (eq argH2 305419896))")
 
-	sx = createFullArgumentSplitterSimplifier().Simplify(
+	sx = createFullArgumentSplitterSimplifier().Transform(
 		tree.Comparison{
 			Op:    tree.EQL,
 			Left:  tree.NumericLiteral{0x123456789ABCDEF0},
@@ -32,7 +32,7 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesEqualityWithArgAgai
 }
 
 func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesEqualityWithArgAgainstArg(c *C) {
-	sx := createFullArgumentSplitterSimplifier().Simplify(
+	sx := createFullArgumentSplitterSimplifier().Transform(
 		tree.Comparison{
 			Op:    tree.EQL,
 			Left:  tree.Argument{Type: tree.Full, Index: 2},
@@ -44,7 +44,7 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesEqualityWithArgAgai
 }
 
 func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesNonequalityWithArgAgainstNumber(c *C) {
-	sx := createFullArgumentSplitterSimplifier().Simplify(
+	sx := createFullArgumentSplitterSimplifier().Transform(
 		tree.Comparison{
 			Op:    tree.NEQL,
 			Left:  tree.Argument{Type: tree.Full, Index: 2},
@@ -54,7 +54,7 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesNonequalityWithArgA
 
 	c.Assert(tree.ExpressionString(sx), Equals, "(or (neq argL2 2596069104) (neq argH2 305419896))")
 
-	sx = createFullArgumentSplitterSimplifier().Simplify(
+	sx = createFullArgumentSplitterSimplifier().Transform(
 		tree.Comparison{
 			Op:    tree.NEQL,
 			Left:  tree.NumericLiteral{0x123456789ABCDEF0},
@@ -66,7 +66,7 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesNonequalityWithArgA
 }
 
 func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesNonequalityWithArgAgainstArg(c *C) {
-	sx := createFullArgumentSplitterSimplifier().Simplify(
+	sx := createFullArgumentSplitterSimplifier().Transform(
 		tree.Comparison{
 			Op:    tree.NEQL,
 			Left:  tree.Argument{Type: tree.Full, Index: 2},
@@ -78,7 +78,7 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesNonequalityWithArgA
 }
 
 func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesGtWithArgAgainstNumber(c *C) {
-	sx := createFullArgumentSplitterSimplifier().Simplify(
+	sx := createFullArgumentSplitterSimplifier().Transform(
 		tree.Comparison{
 			Op:    tree.GT,
 			Left:  tree.Argument{Type: tree.Full, Index: 2},
@@ -88,7 +88,7 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesGtWithArgAgainstNum
 
 	c.Assert(tree.ExpressionString(sx), Equals, "(or (gt argH2 305419896) (and (eq argH2 305419896) (gt argL2 2596069104)))")
 
-	sx = createFullArgumentSplitterSimplifier().Simplify(
+	sx = createFullArgumentSplitterSimplifier().Transform(
 		tree.Comparison{
 			Op:    tree.GT,
 			Left:  tree.NumericLiteral{0x123456789ABCDEF0},
@@ -100,7 +100,7 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesGtWithArgAgainstNum
 }
 
 func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesGtWithArgAgainstArg(c *C) {
-	sx := createFullArgumentSplitterSimplifier().Simplify(
+	sx := createFullArgumentSplitterSimplifier().Transform(
 		tree.Comparison{
 			Op:    tree.GT,
 			Left:  tree.Argument{Type: tree.Full, Index: 3},
@@ -112,7 +112,7 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesGtWithArgAgainstArg
 }
 
 func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesGteWithArgAgainstNumber(c *C) {
-	sx := createFullArgumentSplitterSimplifier().Simplify(
+	sx := createFullArgumentSplitterSimplifier().Transform(
 		tree.Comparison{
 			Op:    tree.GTE,
 			Left:  tree.Argument{Type: tree.Full, Index: 2},
@@ -122,7 +122,7 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesGteWithArgAgainstNu
 
 	c.Assert(tree.ExpressionString(sx), Equals, "(or (gt argH2 305419896) (and (eq argH2 305419896) (gte argL2 2596069104)))")
 
-	sx = createFullArgumentSplitterSimplifier().Simplify(
+	sx = createFullArgumentSplitterSimplifier().Transform(
 		tree.Comparison{
 			Op:    tree.GTE,
 			Left:  tree.NumericLiteral{0x123456789ABCDEF0},
@@ -134,7 +134,7 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesGteWithArgAgainstNu
 }
 
 func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesGteWithArgAgainstArg(c *C) {
-	sx := createFullArgumentSplitterSimplifier().Simplify(
+	sx := createFullArgumentSplitterSimplifier().Transform(
 		tree.Comparison{
 			Op:    tree.GTE,
 			Left:  tree.Argument{Type: tree.Full, Index: 2},

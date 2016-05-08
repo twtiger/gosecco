@@ -10,7 +10,7 @@ type InclusionRemoverSimplifierSuite struct{}
 var _ = Suite(&InclusionRemoverSimplifierSuite{})
 
 func (s *InclusionRemoverSimplifierSuite) Test_removesInclusionStatementCorrectly(c *C) {
-	sx := createInclusionRemoverSimplifier().Simplify(
+	sx := createInclusionRemoverSimplifier().Transform(
 		tree.Inclusion{
 			Positive: true,
 			Left:     tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
@@ -27,7 +27,7 @@ func (s *InclusionRemoverSimplifierSuite) Test_removesInclusionStatementCorrectl
 }
 
 func (s *InclusionRemoverSimplifierSuite) Test_removesNotInclusionStatementCorrectly(c *C) {
-	sx := createInclusionRemoverSimplifier().Simplify(
+	sx := createInclusionRemoverSimplifier().Transform(
 		tree.Inclusion{
 			Positive: false,
 			Left:     tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},

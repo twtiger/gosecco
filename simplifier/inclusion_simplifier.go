@@ -4,14 +4,14 @@ import "github.com/twtiger/gosecco/tree"
 
 // AcceptInclusion implements Visitor
 func (s *inclusionSimplifier) AcceptInclusion(a tree.Inclusion) {
-	l := s.Simplify(a.Left)
+	l := s.Transform(a.Left)
 	pl, pok := potentialExtractValue(l)
 
 	result := make([]tree.Numeric, len(a.Rights))
 	resultVals := make([]uint64, len(a.Rights))
 	resultOks := make([]bool, len(a.Rights))
 	for ix, v := range a.Rights {
-		result[ix] = s.Simplify(v)
+		result[ix] = s.Transform(v)
 		resultVals[ix], resultOks[ix] = potentialExtractValue(result[ix])
 	}
 
@@ -20,7 +20,7 @@ func (s *inclusionSimplifier) AcceptInclusion(a tree.Inclusion) {
 		for ix, v := range result {
 			if resultOks[ix] {
 				if resultVals[ix] == pl {
-					s.result = tree.BooleanLiteral{a.Positive}
+					s.Result = tree.BooleanLiteral{a.Positive}
 					return
 				}
 			} else {
@@ -34,24 +34,24 @@ func (s *inclusionSimplifier) AcceptInclusion(a tree.Inclusion) {
 			}
 		}
 		if len(newResults) == 0 {
-			s.result = tree.BooleanLiteral{!a.Positive}
+			s.Result = tree.BooleanLiteral{!a.Positive}
 		} else if a.Positive == true && len(newResults) == 1 {
-			s.result = tree.Comparison{Op: tree.EQL, Left: l, Right: newResults[0]}
+			s.Result = tree.Comparison{Op: tree.EQL, Left: l, Right: newResults[0]}
 		} else {
-			s.result = tree.Inclusion{Positive: a.Positive, Left: l, Rights: newResults}
+			s.Result = tree.Inclusion{Positive: a.Positive, Left: l, Rights: newResults}
 		}
 	} else {
-		s.result = tree.Inclusion{Positive: a.Positive, Left: l, Rights: result}
+		s.Result = tree.Inclusion{Positive: a.Positive, Left: l, Rights: result}
 	}
 }
 
 // inclusionSimplifier simplifies inclusion expressions
 type inclusionSimplifier struct {
-	nullSimplifier
+	tree.EmptyTransformer
 }
 
-func createInclusionSimplifier() Simplifier {
+func createInclusionSimplifier() tree.Transformer {
 	s := &inclusionSimplifier{}
-	s.realSelf = s
+	s.RealSelf = s
 	return s
 }
