@@ -11,3 +11,11 @@ func (c *compilerContext) fixupJumps() {
 		}
 	}
 }
+
+// longJump will take the information necessary to make a long jump
+// from is the index of the instruction that the long jump was supposed to be from
+// positiveJump is whether we are talking jt or jf
+// to is the label to jump to
+// This function will shift everything necessary in things that keep track of other jumps
+func (c *compilerContext) longJump(from uint16, positiveJump bool, to label) {
+}

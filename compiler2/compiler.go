@@ -55,7 +55,7 @@ func createCompilerContext() *compilerContext {
 		jts:             make(map[label][]int),
 		jfs:             make(map[label][]int),
 		labels:          make(map[label]int),
-		maxJumpSize:     4,
+		maxJumpSize:     1,
 		currentlyLoaded: -1,
 	}
 }
@@ -160,19 +160,33 @@ func (c *compilerContext) registerJumps(index int, jt, jf label) {
 func (c *compilerContext) labelHere(l label) {
 	at := len(c.result)
 
-	// fmt.Printf("labelHere: %s at: %d\n", string(l), at)
+	jts, jfs := c.jts[l], c.jfs[l]
 
-	// for _, pos := range c.jts[l] {
-	// 	if (at-pos)-1 >= c.maxJumpSize {
-	// 		fmt.Println("Blarg")
-	// 	}
-	// }
+	resultLabel := make([]int, 0, len(jts))
+	for _, pos := range jts {
+		if (at-pos)-1 > c.maxJumpSize {
+			// insert a new JUMP, pointing at this label
+			// We need a new thing that can fix up for direct jumps
+			// everything after needs to be fixed up
+			// We need to check that both jt and jf point correctly afterwards
+			// specifically, jt should point to 0. But if jf is 0, it needs to be 1, etc.
+			// maybe the generic algorithm can take care of this
 
-	// for _, pos := range c.jfs[l] {
-	// 	if (at-pos)-1 >= c.maxJumpSize {
-	// 		fmt.Println("Blarg")
-	// 	}
-	// }
+			fmt.Printf("labelHere: %s at: %d\n", string(l), at)
+			fmt.Printf("Blarg: %d\n", pos)
+		}
+		resultLabel = append(resultLabel, pos)
+	}
+	//	fmt.Printf("One: %#v  Two: %#v\n", jts, resultLabel)
+	if jts != nil {
+		jts = resultLabel
+	}
+
+	for _, pos := range jfs {
+		if (at-pos)-1 >= c.maxJumpSize {
+			//			fmt.Println("Blarg")
+		}
+	}
 
 	// Check if this is a long jump
 	// Then immediately insert the long jump, and remove the jump points
