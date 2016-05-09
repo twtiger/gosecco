@@ -18,7 +18,7 @@ func Simplify(inp tree.Expression) tree.Expression {
 		// X in [P]  ==>  P == Q
 		// X in [P, Q, R]  where X and R can be determined to not be equal  ==>  X in [P, Q]
 		// X in [P, Q, R]  where X and one of the values can be determined to be equal  ==>  true
-		// X notIn [P]  ==>  P != Q
+		// X notIn [P]  ==>  X != P
 		// X notIn [P, Q, R]  where X and R can be determined to not be equal  ==>  X notIn [P, Q]
 		// X notIn [P, Q, R]  where X and one of the values can be determined to be equal  ==>  false
 		createInclusionSimplifier(),
@@ -43,7 +43,6 @@ func Simplify(inp tree.Expression) tree.Expression {
 		// X << Y  ==>  [X<<Y]
 		// X >> Y  ==>  [X<<Y]
 		// ~X      ==>  [~X]
-		// Note that these calculations will all be done on 64bit unsigned values
 		// - this could lead to different result than if they were evaluated by the BPF engine.
 		createArithmeticSimplifier(),
 
