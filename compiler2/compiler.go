@@ -3,6 +3,7 @@ package compiler2
 import (
 	"errors"
 	"fmt"
+	"syscall"
 
 	"github.com/twtiger/gosecco/constants"
 	"github.com/twtiger/gosecco/tree"
@@ -212,16 +213,19 @@ func (c *compilerContext) jumpOnEq(val uint32, jt, jf label) {
 }
 
 func (c *compilerContext) pushAToStack() error {
-	if c.stackTop >= 4294967295 {
-		return errors.New("Stack limit reached")
-	} else {
-		c.op(OP_STORE, c.stackTop)
-		c.stackTop++
-		return nil
+	if c.stackTop >= syscall.BPF_MEMWORDS {
+		return errors.New("the expression is too complicated to compile. Please refer to the language documentation.")
 	}
+
+	c.op(OP_STORE, c.stackTop)
+	c.stackTop++
+	return nil
 }
 
 func (c *compilerContext) popStackToX() error {
+	if c.stackTop == 0 {
+		return errors.New("popping from empty stack - this is likely a programmer error")
+	}
 	c.stackTop--
 	c.op(OP_LOAD_MEM_X, c.stackTop)
 	return nil

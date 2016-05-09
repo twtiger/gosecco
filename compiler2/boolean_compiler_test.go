@@ -1,6 +1,8 @@
 package compiler2
 
 import (
+	"syscall"
+
 	"github.com/twtiger/gosecco/asm"
 	"github.com/twtiger/gosecco/tree"
 	. "gopkg.in/check.v1"
@@ -187,4 +189,12 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleNegation(c *C) {
 		"pos": []int{4},
 	})
 	c.Assert(ctx.labels, DeepEquals, map[label]int{})
+}
+
+func (s *BooleanCompilerSuite) Test_thatAnErrorIsSetWhenWeCompileAfterReachingTheMaximumHeightOfTheStack(c *C) {
+	ctx := createCompilerContext()
+	ctx.stackTop = syscall.BPF_MEMWORDS
+	p := tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}}
+	err := compileBoolean(ctx, p, false, "pos", "neg")
+	c.Assert(err, ErrorMatches, "the expression is too complicated to compile. Please refer to the language documentation.")
 }

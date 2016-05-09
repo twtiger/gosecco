@@ -1,6 +1,7 @@
 package compiler2
 
 import (
+	"syscall"
 	"testing"
 
 	"github.com/twtiger/gosecco/asm"
@@ -95,26 +96,9 @@ func (s *NumericCompilerSuite) Test_moreComplicatedExpression(c *C) {
 	)
 }
 
-func (s *NumericCompilerSuite) Test_stackOverflowCreatesError(c *C) {
-	cx := compilerContext{
-		jts:             make(map[label][]int),
-		jfs:             make(map[label][]int),
-		labels:          make(map[label]int),
-		maxJumpSize:     1,
-		currentlyLoaded: -1,
-		stackTop:        4294967295,
-	}
-	c.Assert(cx.pushAToStack(), ErrorMatches, "Stack limit reached")
-}
-
-func (s *NumericCompilerSuite) Test_stackDoesNotOverflowRightBeforeItsLimit(c *C) {
-	cx := compilerContext{
-		jts:             make(map[label][]int),
-		jfs:             make(map[label][]int),
-		labels:          make(map[label]int),
-		maxJumpSize:     1,
-		currentlyLoaded: -1,
-		stackTop:        4294967294,
-	}
-	c.Assert(cx.pushAToStack(), IsNil)
+func (s *NumericCompilerSuite) Test_thatAnErrorIsSetWhenWeCompileInvalidExpression(c *C) {
+	ctx := createCompilerContext()
+	ctx.stackTop = syscall.BPF_MEMWORDS
+	err := compileNumeric(ctx, tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{3}, Right: tree.NumericLiteral{42}})
+	c.Assert(err, ErrorMatches, "the expression is too complicated to compile. Please refer to the language documentation.")
 }
