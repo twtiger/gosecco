@@ -65,6 +65,8 @@ func (c *compilerContext) compile(rules []tree.Rule) ([]unix.SockFilter, error) 
 		c.compileRule(r)
 	}
 
+	// at end of rules we should have a jump to the default action
+
 	c.negativeAction()
 	c.positiveAction()
 
