@@ -1,6 +1,7 @@
 package compiler2
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/twtiger/gosecco/constants"
@@ -21,7 +22,6 @@ import (
 // TODO: put together more than one rule
 // TODO: add the prefix and postfix
 // TODO: fix all potential errors
-// TODO: check that the stack doesn't overflow
 
 // Compile will take a parsed policy and generate an optimized sock filter for that policy
 // The policy is assumed to have been unified and simplified before compilation starts -
@@ -211,11 +211,14 @@ func (c *compilerContext) jumpOnEq(val uint32, jt, jf label) {
 	c.opWithJumps(OP_JEQ_K, val, jt, jf)
 }
 
-// TODO: check we are not outside limits here
 func (c *compilerContext) pushAToStack() error {
-	c.op(OP_STORE, c.stackTop)
-	c.stackTop++
-	return nil
+	if c.stackTop >= 4294967295 {
+		return errors.New("Stack limit reached")
+	} else {
+		c.op(OP_STORE, c.stackTop)
+		c.stackTop++
+		return nil
+	}
 }
 
 func (c *compilerContext) popStackToX() error {
