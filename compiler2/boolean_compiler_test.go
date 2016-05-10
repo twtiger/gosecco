@@ -196,5 +196,5 @@ func (s *BooleanCompilerSuite) Test_thatAnErrorIsSetWhenWeCompileAfterReachingTh
 	ctx.stackTop = syscall.BPF_MEMWORDS
 	p := tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}}
 	err := compileBoolean(ctx, p, false, "pos", "neg")
-	c.Assert(err, ErrorMatches, "the expression is too complicated to compile. Please refer to the language documentation.")
+	c.Assert(err, ErrorMatches, "the expression is too complicated to compile. Please refer to the language documentation")
 }

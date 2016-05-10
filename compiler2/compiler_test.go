@@ -56,7 +56,7 @@ func (s *CompilerSuite) Test_nextSimplestCompilation(c *C) {
 func (s *CompilerSuite) Test_stackOverflowCreatesError(c *C) {
 	cx := createCompilerContext()
 	cx.stackTop = syscall.BPF_MEMWORDS
-	c.Assert(cx.pushAToStack(), ErrorMatches, "the expression is too complicated to compile. Please refer to the language documentation.")
+	c.Assert(cx.pushAToStack(), ErrorMatches, "the expression is too complicated to compile. Please refer to the language documentation")
 }
 
 func (s *CompilerSuite) Test_stackDoesNotOverflowRightBeforeItsLimit(c *C) {

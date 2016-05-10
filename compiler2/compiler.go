@@ -214,7 +214,7 @@ func (c *compilerContext) jumpOnEq(val uint32, jt, jf label) {
 
 func (c *compilerContext) pushAToStack() error {
 	if c.stackTop >= syscall.BPF_MEMWORDS {
-		return errors.New("the expression is too complicated to compile. Please refer to the language documentation.")
+		return errors.New("the expression is too complicated to compile. Please refer to the language documentation")
 	}
 
 	c.op(OP_STORE, c.stackTop)

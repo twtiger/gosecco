@@ -100,5 +100,5 @@ func (s *NumericCompilerSuite) Test_thatAnErrorIsSetWhenWeCompileInvalidExpressi
 	ctx := createCompilerContext()
 	ctx.stackTop = syscall.BPF_MEMWORDS
 	err := compileNumeric(ctx, tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{3}, Right: tree.NumericLiteral{42}})
-	c.Assert(err, ErrorMatches, "the expression is too complicated to compile. Please refer to the language documentation.")
+	c.Assert(err, ErrorMatches, "the expression is too complicated to compile. Please refer to the language documentation")
 }
