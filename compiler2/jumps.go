@@ -1,11 +1,16 @@
 package compiler2
 
 import (
+	//	"fmt"
 	"golang.org/x/sys/unix"
 )
 
 func (c *compilerContext) fixupJumps() {
 
+	//	fmt.Println("jump trues", c.jts)
+	//	fmt.Println("jump false", c.jfs)
+	//	fmt.Println("unconditional jumps", c.uconds)
+	//	fmt.Println("labels", c.labels)
 	for l, at := range c.labels {
 		for _, pos := range c.jts[l] {
 			if !((at-pos)-1 > c.maxJumpSize) { // skip long jumps, we already fixed them up
@@ -19,24 +24,22 @@ func (c *compilerContext) fixupJumps() {
 			}
 		}
 
-		// TODO: go through c.uconds and set K to be the correct value
+		for _, pos := range c.uconds[l] {
+			c.result[pos].K = uint32((at - pos) - 1)
+		}
 	}
 }
 
 func (c *compilerContext) longJump(from int, positiveJump bool, to label) {
-
-	//c.uconds[label] = append(c.uconds[label], from+1)
-	// TODO to needs to be set in our unconditional jump list
-
 	c.result = c.insertUnconditionalJump(from) // k needs to be set : from, to
 	c.fixUpPreviousRule(from, positiveJump)
 	c.shiftJumps(from)
+	c.uconds[to] = append(c.uconds[to], from+1)
 }
 
 func (c *compilerContext) insertUnconditionalJump(from int) []unix.SockFilter {
 	rules := make([]unix.SockFilter, 0)
-	at := len(c.result)
-	k := uint32(at - from - 1)
+	k := uint32(0)
 	x := unix.SockFilter{Code: OP_JMP_K, K: k}
 
 	rules = append(rules, c.result[:from+1]...)

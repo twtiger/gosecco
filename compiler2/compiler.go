@@ -175,6 +175,11 @@ func (c *compilerContext) fixMaxJumps(l label, elems []int, isPos bool) {
 }
 
 func (c *compilerContext) labelHere(l label) {
+	//fmt.Println("jump trues", c.jts)
+	//fmt.Println("jump false", c.jfs)
+	//fmt.Println("unconditional jumps", c.uconds)
+	//fmt.Println("labels", c.labels)
+	//fmt.Println("+++++++++++++++++++++++++++++++++++")
 
 	jts, jfs := c.jts[l], c.jfs[l]
 

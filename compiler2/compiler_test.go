@@ -131,3 +131,41 @@ func (s *CompilerSuite) Test_maxSizeJumpSetsMulipleUnconditionalJumpPoint(c *C) 
 		"ret_k\t0\n"+
 		"ret_k\t7FFF0000\n")
 }
+
+func (s *CompilerSuite) Test_maxSizeJumpSetsWithTwoComparisons(c *C) {
+	c.Skip("pending")
+	ctx := createCompilerContext()
+	ctx.maxJumpSize = 2
+
+	p := []tree.Rule{
+		tree.Rule{
+			Name: "write",
+			Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+		},
+		tree.Rule{
+			Name: "read",
+			Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+		},
+	}
+
+	res, _ := ctx.compile(p)
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t0\n"+
+		"jeq_k\t01\t00\t1\n"+
+		"jmp\t6\n"+
+		"ld_imm\t1\n"+
+		"st\t0\n"+
+		"ld_imm\t2A\n"+
+		"ldx_mem\t0\n"+
+		"jeq_x\t00\t01\n"+
+		"jmp\t8\n"+
+		"jeq_k\t01\t00\t0\n"+
+		"jmp\t5\n"+
+		"ld_imm\t1\n"+
+		"st\t0\n"+
+		"ld_imm\t2A\n"+
+		"ldx_mem\t0\n"+
+		"jeq_x\t01\t00\n"+
+		"ret_k\t0\n"+
+		"ret_k\t7FFF0000\n")
+}
