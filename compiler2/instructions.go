@@ -35,4 +35,6 @@ const OP_JEQ_X = syscall.BPF_JMP | syscall.BPF_JEQ | syscall.BPF_X
 const OP_JGT_X = syscall.BPF_JMP | syscall.BPF_JGT | syscall.BPF_X
 const OP_JGE_X = syscall.BPF_JMP | syscall.BPF_JGE | syscall.BPF_X
 
+const OP_JMP_K = syscall.BPF_JMP | syscall.BPF_JA
+
 const OP_RET_K = syscall.BPF_RET | syscall.BPF_K

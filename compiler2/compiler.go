@@ -36,16 +36,21 @@ type label string
 
 var positive = label("positive")
 var negative = label("negative")
-var noLabel = label("")
+var noLabel = label("noLabel")
 
 type compilerContext struct {
-	result                       []unix.SockFilter
-	currentlyLoaded              int
-	stackTop                     uint32
-	jts                          map[label][]int
-	jfs                          map[label][]int
-	labels                       map[label]int
-	labelCounter                 int
+	result          []unix.SockFilter
+	currentlyLoaded int
+	stackTop        uint32
+	// TODO we will need an unconditional jumps map as well.
+	// these need to be fixed up if there is an unconditional jump inserted after.
+	// these need to be fixed up if there is an unconditional jump inserted after.
+	jts          map[label][]int
+	jfs          map[label][]int
+	uconds       map[label][]int
+	labels       map[label]int
+	labelCounter int
+	// this will always be 0xFF in production, but it is injectable for testing.
 	maxJumpSize                  int
 	currentlyCompilingSyscall    string
 	currentlyCompilingExpression tree.Expression
@@ -55,8 +60,9 @@ func createCompilerContext() *compilerContext {
 	return &compilerContext{
 		jts:             make(map[label][]int),
 		jfs:             make(map[label][]int),
+		uconds:          make(map[label][]int),
 		labels:          make(map[label]int),
-		maxJumpSize:     1,
+		maxJumpSize:     255,
 		currentlyLoaded: -1,
 	}
 }
@@ -66,7 +72,7 @@ func (c *compilerContext) compile(rules []tree.Rule) ([]unix.SockFilter, error) 
 		c.compileRule(r)
 	}
 
-	// at end of rules we should have a jump to the default action
+	// TODO at end of rules we should have a jump to the default action
 
 	c.negativeAction()
 	c.positiveAction()
@@ -144,7 +150,6 @@ func (c *compilerContext) op(code uint16, k uint32) {
 func (c *compilerContext) compileExpression(x tree.Expression) {
 	// Returns error
 	compileBoolean(c, x, true, positive, negative)
-	c.fixupJumps()
 }
 
 func (c *compilerContext) newLabel() label {
@@ -158,43 +163,25 @@ func (c *compilerContext) registerJumps(index int, jt, jf label) {
 	c.jfs[jf] = append(c.jfs[jf], index)
 }
 
-func (c *compilerContext) labelHere(l label) {
+func (c *compilerContext) fixMaxJumps(l label, elems []int, isPos bool) {
 	at := len(c.result)
+	for _, pos := range elems {
+		if (at-pos)-1 > c.maxJumpSize {
+
+			c.uconds[l] = append(c.uconds[l], pos)
+			c.longJump(pos, isPos, l)
+		}
+	}
+}
+
+func (c *compilerContext) labelHere(l label) {
 
 	jts, jfs := c.jts[l], c.jfs[l]
 
-	resultLabel := make([]int, 0, len(jts))
-	for _, pos := range jts {
-		if (at-pos)-1 > c.maxJumpSize {
-			// insert a new JUMP, pointing at this label
-			// We need a new thing that can fix up for direct jumps
-			// everything after needs to be fixed up
-			// We need to check that both jt and jf point correctly afterwards
-			// specifically, jt should point to 0. But if jf is 0, it needs to be 1, etc.
-			// maybe the generic algorithm can take care of this
+	c.fixMaxJumps(l, jts, true)
+	c.fixMaxJumps(l, jfs, false)
 
-			fmt.Printf("labelHere: %s at: %d\n", string(l), at)
-			fmt.Printf("Blarg: %d\n", pos)
-		}
-		resultLabel = append(resultLabel, pos)
-	}
-	//	fmt.Printf("One: %#v  Two: %#v\n", jts, resultLabel)
-	if jts != nil {
-		jts = resultLabel
-	}
-
-	for _, pos := range jfs {
-		if (at-pos)-1 >= c.maxJumpSize {
-			//			fmt.Println("Blarg")
-		}
-	}
-
-	// Check if this is a long jump
-	// Then immediately insert the long jump, and remove the jump points
-	// and then fix up everything.
-	// We have to fixup all the other jump points directly afterwards
-
-	c.labels[l] = at
+	c.labels[l] = len(c.result)
 }
 
 func (c *compilerContext) opWithJumps(code uint16, k uint32, jt, jf label) {
