@@ -54,7 +54,7 @@ func shift(from int, elems map[label][]int) map[label][]int {
 	for k, v := range elems {
 		for _, pos := range v {
 			if pos >= from {
-				pos += 1
+				pos++
 			}
 			jumps[k] = append(jumps[k], pos)
 		}
@@ -66,7 +66,7 @@ func shiftLabels(from int, elems map[label]int) map[label]int {
 	labels := make(map[label]int, 0)
 	for k, v := range elems {
 		if v >= from {
-			v += 1
+			v++
 		}
 		labels[k] = v
 	}
