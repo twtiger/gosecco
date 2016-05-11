@@ -43,6 +43,7 @@ func Simplify(inp tree.Expression) tree.Expression {
 		// X << Y  ==>  [X<<Y]
 		// X >> Y  ==>  [X<<Y]
 		// ~X      ==>  [~X]
+		// Note that these calculations will all be done on 64bit unsigned values
 		// - this could lead to different result than if they were evaluated by the BPF engine.
 		createArithmeticSimplifier(),
 
