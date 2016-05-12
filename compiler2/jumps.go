@@ -1,25 +1,24 @@
 package compiler2
 
 import (
-	//	"fmt"
 	"golang.org/x/sys/unix"
 )
 
+func (c *compilerContext) isLongJump(at, pos int) bool {
+	return (at-pos)-1 > c.maxJumpSize
+}
+
 func (c *compilerContext) fixupJumps() {
 
-	//	fmt.Println("jump trues", c.jts)
-	//	fmt.Println("jump false", c.jfs)
-	//	fmt.Println("unconditional jumps", c.uconds)
-	//	fmt.Println("labels", c.labels)
 	for l, at := range c.labels {
 		for _, pos := range c.jts[l] {
-			if !((at-pos)-1 > c.maxJumpSize) { // skip long jumps, we already fixed them up
+			if !c.isLongJump(at, pos) { // skip long jumps, we already fixed them up
 				c.result[pos].Jt = uint8((at - pos) - 1)
 			}
 		}
 
 		for _, pos := range c.jfs[l] {
-			if !((at-pos)-1 > c.maxJumpSize) { // skip long jumps, we already fixed them up
+			if !c.isLongJump(at, pos) { // skip long jumps, we already fixed them up
 				c.result[pos].Jf = uint8((at - pos) - 1)
 			}
 		}
@@ -31,7 +30,7 @@ func (c *compilerContext) fixupJumps() {
 }
 
 func (c *compilerContext) longJump(from int, positiveJump bool, to label) {
-	c.result = c.insertUnconditionalJump(from) // k needs to be set : from, to
+	c.result = c.insertUnconditionalJump(from)
 	c.fixUpPreviousRule(from, positiveJump)
 	c.shiftJumps(from)
 	c.uconds[to] = append(c.uconds[to], from+1)
@@ -65,7 +64,7 @@ func shift(from int, elems map[label][]int) map[label][]int {
 func shiftLabels(from int, elems map[label]int) map[label]int {
 	labels := make(map[label]int, 0)
 	for k, v := range elems {
-		if v >= from {
+		if v > from {
 			v++
 		}
 		labels[k] = v
