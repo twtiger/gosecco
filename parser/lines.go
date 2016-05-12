@@ -30,7 +30,10 @@ func isDefaultAssignment(s string) bool {
 	result := strings.SplitN(s, "=", 2)
 	if len(result) == 2 {
 		c := strings.TrimSpace(result[0])
-		return c == "DEFAULT_POSITIVE" || c == "DEFAULT_NEGATIVE"
+		switch c {
+		case "DEFAULT_POSITIVE", "DEFAULT_NEGATIVE", "DEFAULT_POLICY":
+			return true
+		}
 	}
 	return false
 }

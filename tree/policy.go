@@ -9,6 +9,7 @@ type RawPolicy struct {
 type Policy struct {
 	DefaultPositiveAction string
 	DefaultNegativeAction string
+	DefaultPolicyAction   string
 	Macros                map[string]Macro
 	Rules                 []Rule
 }

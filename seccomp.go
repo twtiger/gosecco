@@ -34,6 +34,7 @@ type SeccompSettings struct {
 	extraDefinitions      []string
 	defaultPositiveAction string
 	defaultNegativeAction string
+	defaultPolicyAction   string
 }
 
 // Prepare will take the given path and settings, parse and compile the given
@@ -56,6 +57,7 @@ func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
 // However, the modern interface is through the Prepare function
 func Compile(path string, enforce bool) ([]unix.SockFilter, error) {
 	// TODO: test when compiler is done
+	// TODO: set all three default actions correctly
 
 	settings := SeccompSettings{}
 	settings.defaultPositiveAction = "allow"
@@ -73,6 +75,7 @@ func Compile(path string, enforce bool) ([]unix.SockFilter, error) {
 // However, the modern interface is through the Prepare function
 func CompileBlacklist(path string, enforce bool) ([]unix.SockFilter, error) {
 	// TODO: test when compiler is done
+	// TODO: set all three default actions correctly
 
 	settings := SeccompSettings{}
 	settings.defaultNegativeAction = "allow"

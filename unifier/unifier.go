@@ -38,7 +38,7 @@ func combineMacroMaps(ms []map[string]tree.Macro) map[string]tree.Macro {
 // the names in the earlier maps. The default positive and negative actions can be overridden in the files by providing DEFAULT_POSITIVE
 // and DEFAULT_NEGATIVE variables anywhere in the files. The default actions can only be defined once in a file, and will be in effect
 // for all rules in that file, unless a specific rule overrides the default actions.
-func Unify(r tree.RawPolicy, additionalMacros []map[string]tree.Macro, defaultPositive, defaultNegative string) (tree.Policy, error) {
+func Unify(r tree.RawPolicy, additionalMacros []map[string]tree.Macro, defaultPositive, defaultNegative, defaultPolicy string) (tree.Policy, error) {
 	var rules []tree.Rule
 	macros := combineMacroMaps(additionalMacros)
 	collectedMacros := make(map[string]tree.Macro)
@@ -56,13 +56,15 @@ func Unify(r tree.RawPolicy, additionalMacros []map[string]tree.Macro, defaultPo
 				defaultPositive = getDefaultAction(v)
 			case "DEFAULT_NEGATIVE":
 				defaultNegative = getDefaultAction(v)
+			case "DEFAULT_POLICY":
+				defaultPolicy = getDefaultAction(v)
 			default:
 				macros[v.Name] = v
 				collectedMacros[v.Name] = v
 			}
 		}
 	}
-	return tree.Policy{DefaultPositiveAction: defaultPositive, DefaultNegativeAction: defaultNegative, Macros: collectedMacros, Rules: rules}, nil
+	return tree.Policy{DefaultPositiveAction: defaultPositive, DefaultNegativeAction: defaultNegative, DefaultPolicyAction: defaultPolicy, Macros: collectedMacros, Rules: rules}, nil
 }
 
 func replaceFreeNames(r tree.Rule, macros map[string]tree.Macro) (tree.Rule, error) {

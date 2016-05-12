@@ -16,6 +16,7 @@ func (s *LinesSuite) Test_lineType_recognizesLineTypes(c *C) {
 	c.Check(lineType("DEFAULT_POSITIVE = trace"), Equals, defaultAssignmentLine)
 	c.Check(lineType("DEFAULT_POSITIVE=42"), Equals, defaultAssignmentLine)
 	c.Check(lineType("DEFAULT_NEGATIVE=kill"), Equals, defaultAssignmentLine)
+	c.Check(lineType("DEFAULT_POLICY=kill"), Equals, defaultAssignmentLine)
 
 	c.Check(lineType("foo=42*42"), Equals, assignmentLine)
 	c.Check(lineType("bar = 42"), Equals, assignmentLine)

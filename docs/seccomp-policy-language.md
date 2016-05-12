@@ -20,7 +20,9 @@ Each rule can generate a positive or a negative action, depending on whether the
     DEFAULT_POSITIVE = trace
     DEFAULT_NEGATIVE = 42
 
-It is suggested to define these at the top of the file to minimize confusion. It is theoretically possible to change the default actions through the file, but that is discouraged.
+It is suggested to define these at the top of the file to minimize confusion. It is theoretically possible to change the default actions through the file, but that is discouraged, and the result is undefined.
+
+DEFAULT_POSITIVE and DEFAULT_NEGATIVE act on a per-line level - they only trigger if the syscall is matched. So if you have a policy file where no actions match, you might want to customize this behavior as well. That is done with a third special variable named DEFAULT_POLICY - and it acts the same way as the other two.
 
 ## Assignments
   
