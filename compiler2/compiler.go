@@ -117,6 +117,7 @@ func (c *compilerContext) checkCorrectSyscall(name string, setPosFlags bool, nex
 func (c *compilerContext) compileRule(r tree.Rule) {
 	next := c.newLabel()
 	neg := c.newLabel()
+
 	_, isBoolLit := r.Body.(tree.BooleanLiteral)
 	c.checkCorrectSyscall(r.Name, isBoolLit, next) // set JT flag to final ret_allow only if the rule is a boolean literal
 
