@@ -49,8 +49,7 @@ func (s *booleanCompilerVisitor) AcceptBinaryNegation(v tree.BinaryNegation) {
 // AcceptBooleanLiteral implements Visitor
 func (s *booleanCompilerVisitor) AcceptBooleanLiteral(v tree.BooleanLiteral) {
 	if s.topLevel {
-		// This should probably just jump to success
-		// TODO: compile here
+		s.ctx.unconditionalJumpTo(s.jt)
 	} else {
 		panic("XXX: generate error here")
 	}

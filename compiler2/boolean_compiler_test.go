@@ -105,7 +105,6 @@ func (s *BooleanCompilerSuite) Test_compilationOfInvalidComparison(c *C) {
 }
 
 func (s *CompilerSuite) Test_topLevelBoolean(c *C) {
-	c.Skip("pending")
 	p := tree.BooleanLiteral{true}
 	ctx := createCompilerContext()
 	compileBoolean(ctx, p, true, "pos", "neg")

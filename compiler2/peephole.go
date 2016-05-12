@@ -11,6 +11,8 @@ package compiler2
 // We might also see [LD_IMM v, ST n, LDX n]
 // This should be rewritten into [LDX_IMM v]
 
+// We should optimize [J* 0 1 *, JMP 1, JMP 1] to [J* 0 1]
+
 // We will see a lot of things like [LD_IMM v, ST n, ... LDX n, <op>]
 // These, both arithmetic and comparison ones should be rewritten to use the _K
 // variants. However, these is easier done in the actual compiler at the moment

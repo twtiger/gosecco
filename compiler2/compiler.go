@@ -3,6 +3,7 @@ package compiler2
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"syscall"
 
 	"github.com/twtiger/gosecco/constants"
@@ -16,13 +17,14 @@ import (
 // - do peephole optimization
 // - resolve all labels and jumps
 
-// TODO: handle boolean literal at top level
+// TODO: handle boolean literal at top level (check todo in visitor)
 // TODO: Fixup peephole optimization
 // TODO: Fixup jumps
 // TODO: handle full compile of rules, not just the expression
 // TODO: put together more than one rule
 // TODO: add the prefix and postfix
-// TODO: fix all potential errors
+// TODO: fix all potential errors (no panics, we should check for errors)
+// TODO: compare go-seccomp and gosecco policy evaluation
 
 // Compile will take a parsed policy and generate an optimized sock filter for that policy
 // The policy is assumed to have been unified and simplified before compilation starts -
@@ -34,8 +36,6 @@ func Compile(policy tree.Policy) ([]unix.SockFilter, error) {
 
 type label string
 
-var positive = label("positive")
-var negative = label("negative")
 var noLabel = label("noLabel")
 
 type compilerContext struct {
@@ -51,6 +51,7 @@ type compilerContext struct {
 	labels       map[label]int
 	labelCounter int
 	// this will always be 0xFF in production, but it is injectable for testing.
+	actions                      map[string]label
 	maxJumpSize                  int
 	currentlyCompilingSyscall    string
 	currentlyCompilingExpression tree.Expression
@@ -62,6 +63,7 @@ func createCompilerContext() *compilerContext {
 		jfs:             make(map[label][]int),
 		uconds:          make(map[label][]int),
 		labels:          make(map[label]int),
+		actions:         make(map[string]label),
 		maxJumpSize:     255,
 		currentlyLoaded: -1,
 	}
@@ -72,10 +74,26 @@ func (c *compilerContext) compile(rules []tree.Rule) ([]unix.SockFilter, error) 
 		c.compileRule(r)
 	}
 
-	// TODO at end of rules we should have a jump to the default action
+	// TODO: use default policy here instead of kill
+	c.unconditionalJumpTo(c.actions["kill"])
 
-	c.negativeAction()
-	c.positiveAction()
+	actionOrder := []string{}
+	for k := range c.actions {
+		actionOrder = append(actionOrder, k)
+	}
+	sort.Strings(actionOrder)
+
+	for _, k := range actionOrder {
+		c.labelHere(c.actions[k])
+		switch k {
+		case "allow":
+			c.op(OP_RET_K, SECCOMP_RET_ALLOW)
+		case "kill":
+			c.op(OP_RET_K, SECCOMP_RET_KILL)
+		case "trace":
+			c.op(OP_RET_K, SECCOMP_RET_TRACE)
+		}
+	}
 
 	c.fixupJumps()
 
@@ -100,45 +118,57 @@ func (c *compilerContext) loadCurrentSyscall() {
 	c.loadAt(syscallNameIndex)
 }
 
-func (c *compilerContext) checkCorrectSyscall(name string, setPosFlags bool, next label) {
+func (c *compilerContext) checkCorrectSyscall(name string, next label) {
 	sys, ok := constants.GetSyscall(name)
 	if !ok {
 		panic("This shouldn't happen - analyzer should have caught it before compiler tries to compile it")
 	}
 
 	c.loadCurrentSyscall()
-	if setPosFlags {
-		c.opWithJumps(OP_JEQ_K, sys, positive, next)
-	} else {
-		c.opWithJumps(OP_JEQ_K, sys, noLabel, next)
-	}
+	goesNowhere := c.newLabel()
+	c.opWithJumps(OP_JEQ_K, sys, goesNowhere, next)
+	c.labelHere(goesNowhere)
 }
 
 func (c *compilerContext) compileRule(r tree.Rule) {
 	next := c.newLabel()
-	neg := c.newLabel()
 
-	_, isBoolLit := r.Body.(tree.BooleanLiteral)
-	c.checkCorrectSyscall(r.Name, isBoolLit, next) // set JT flag to final ret_allow only if the rule is a boolean literal
+	pos, neg := c.compileActions(r.PositiveAction, r.NegativeAction)
+
+	c.checkCorrectSyscall(r.Name, next) // set JT flag to final ret_allow only if the rule is a boolean literal
 
 	// These are useful for debugging and helpful error messages
 	c.currentlyCompilingSyscall = r.Name
 	c.currentlyCompilingExpression = r.Body
 
-	c.compileExpression(r.Body, neg)
+	c.compileExpression(r.Body, pos, neg)
 
 	c.labelHere(next)
-	c.labelHere(neg)
 }
 
-func (c *compilerContext) positiveAction() {
-	c.labelHere(positive)
-	c.op(OP_RET_K, SECCOMP_RET_ALLOW)
-}
+func (c *compilerContext) compileActions(positiveAction string, negativeAction string) (label, label) {
+	if positiveAction == "" {
+		positiveAction = "allow"
+	}
 
-func (c *compilerContext) negativeAction() {
-	c.labelHere(negative)
-	c.op(OP_RET_K, SECCOMP_RET_KILL)
+	if negativeAction == "" {
+		negativeAction = "kill"
+	}
+
+	posActionLabel, positiveActionExists := c.actions[positiveAction]
+	negActionLabel, negativeActionExists := c.actions[negativeAction]
+
+	if !positiveActionExists {
+		posActionLabel = c.newLabel()
+		c.actions[positiveAction] = posActionLabel
+	}
+
+	if !negativeActionExists {
+		negActionLabel = c.newLabel()
+		c.actions[negativeAction] = negActionLabel
+	}
+
+	return posActionLabel, negActionLabel
 }
 
 func (c *compilerContext) op(code uint16, k uint32) {
@@ -150,10 +180,10 @@ func (c *compilerContext) op(code uint16, k uint32) {
 	})
 }
 
-func (c *compilerContext) compileExpression(x tree.Expression, neg label) {
+func (c *compilerContext) compileExpression(x tree.Expression, pos, neg label) {
 	// Returns error
 	isTopLevel := true
-	compileBoolean(c, x, isTopLevel, positive, neg)
+	compileBoolean(c, x, isTopLevel, pos, neg)
 }
 
 func (c *compilerContext) newLabel() label {
@@ -182,6 +212,17 @@ func (c *compilerContext) labelHere(l label) {
 	c.fixMaxJumps(l, jts, true)
 	c.fixMaxJumps(l, jfs, false)
 	c.labels[l] = len(c.result)
+}
+
+func (c *compilerContext) unconditionalJumpTo(to label) {
+	index := len(c.result)
+	c.result = append(c.result, unix.SockFilter{
+		Code: OP_JMP_K,
+		Jt:   0,
+		Jf:   0,
+		K:    0,
+	})
+	c.uconds[to] = append(c.uconds[to], index)
 }
 
 func (c *compilerContext) opWithJumps(code uint16, k uint32, jt, jf label) {

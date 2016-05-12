@@ -1,24 +1,21 @@
 package compiler2
 
-import (
-	"golang.org/x/sys/unix"
-)
+import "golang.org/x/sys/unix"
 
-func (c *compilerContext) isLongJump(at, pos int) bool {
-	return (at-pos)-1 > c.maxJumpSize
+func (c *compilerContext) isNotLongJump(at, pos int) bool {
+	return !((at-pos)-1 > c.maxJumpSize)
 }
 
 func (c *compilerContext) fixupJumps() {
-
 	for l, at := range c.labels {
 		for _, pos := range c.jts[l] {
-			if !c.isLongJump(at, pos) { // skip long jumps, we already fixed them up
+			if c.isNotLongJump(at, pos) { // skip long jumps, we already fixed them up
 				c.result[pos].Jt = uint8((at - pos) - 1)
 			}
 		}
 
 		for _, pos := range c.jfs[l] {
-			if !c.isLongJump(at, pos) { // skip long jumps, we already fixed them up
+			if c.isNotLongJump(at, pos) { // skip long jumps, we already fixed them up
 				c.result[pos].Jf = uint8((at - pos) - 1)
 			}
 		}
@@ -37,9 +34,8 @@ func (c *compilerContext) longJump(from int, positiveJump bool, to label) {
 }
 
 func (c *compilerContext) insertUnconditionalJump(from int) []unix.SockFilter {
-	rules := make([]unix.SockFilter, 0)
-	k := uint32(0)
-	x := unix.SockFilter{Code: OP_JMP_K, K: k}
+	var rules []unix.SockFilter
+	x := unix.SockFilter{Code: OP_JMP_K, K: uint32(0)}
 
 	rules = append(rules, c.result[:from+1]...)
 	rules = append(rules, x)
