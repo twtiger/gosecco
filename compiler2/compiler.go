@@ -116,6 +116,7 @@ func (c *compilerContext) checkCorrectSyscall(name string, setPosFlags bool, nex
 
 func (c *compilerContext) compileRule(r tree.Rule) {
 	next := c.newLabel()
+	neg := c.newLabel()
 	_, isBoolLit := r.Body.(tree.BooleanLiteral)
 	c.checkCorrectSyscall(r.Name, isBoolLit, next) // set JT flag to final ret_allow only if the rule is a boolean literal
 
@@ -123,9 +124,10 @@ func (c *compilerContext) compileRule(r tree.Rule) {
 	c.currentlyCompilingSyscall = r.Name
 	c.currentlyCompilingExpression = r.Body
 
-	c.compileExpression(r.Body)
+	c.compileExpression(r.Body, neg)
 
 	c.labelHere(next)
+	c.labelHere(neg)
 }
 
 func (c *compilerContext) positiveAction() {
@@ -147,9 +149,9 @@ func (c *compilerContext) op(code uint16, k uint32) {
 	})
 }
 
-func (c *compilerContext) compileExpression(x tree.Expression) {
+func (c *compilerContext) compileExpression(x tree.Expression, neg label) {
 	// Returns error
-	compileBoolean(c, x, true, positive, negative)
+	compileBoolean(c, x, true, positive, neg)
 }
 
 func (c *compilerContext) newLabel() label {
@@ -164,12 +166,10 @@ func (c *compilerContext) registerJumps(index int, jt, jf label) {
 }
 
 func (c *compilerContext) fixMaxJumps(l label, elems []int, isPos bool) {
-	at := len(c.result)
-	for _, pos := range elems {
-		if (at-pos)-1 > c.maxJumpSize {
-
-			c.uconds[l] = append(c.uconds[l], pos)
-			c.longJump(pos, isPos, l)
+	to := len(c.result)
+	for _, from := range elems {
+		if (to-from)-1 > c.maxJumpSize {
+			c.longJump(from, isPos, l)
 		}
 	}
 }
@@ -185,7 +185,6 @@ func (c *compilerContext) labelHere(l label) {
 
 	c.fixMaxJumps(l, jts, true)
 	c.fixMaxJumps(l, jfs, false)
-
 	c.labels[l] = len(c.result)
 }
 
