@@ -72,7 +72,6 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsMulipleUnconditionalJumpPoint(c *C) {
 }
 
 func (s *JumpsSuite) Test_maxSizeJumpSetsWithTwoComparisons(c *C) {
-	c.Skip("pending")
 	ctx := createCompilerContext()
 	ctx.maxJumpSize = 2
 
