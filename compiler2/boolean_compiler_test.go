@@ -104,6 +104,17 @@ func (s *BooleanCompilerSuite) Test_compilationOfInvalidComparison(c *C) {
 	c.Assert(res, ErrorMatches, "this comparison type is not allowed - this is probably a programmer error: \\(lt 42 1\\)")
 }
 
+func (s *CompilerSuite) Test_topLevelBoolean(c *C) {
+	c.Skip("pending")
+	p := tree.BooleanLiteral{true}
+	ctx := createCompilerContext()
+	compileBoolean(ctx, p, true, "pos", "neg")
+
+	c.Assert(asm.Dump(ctx.result), Equals, ""+
+		"jmp\t0\n",
+	)
+}
+
 func (s *BooleanCompilerSuite) Test_compilationOfSimpleAnd(c *C) {
 	p := tree.And{
 		Left:  tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},

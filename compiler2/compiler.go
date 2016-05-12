@@ -152,7 +152,8 @@ func (c *compilerContext) op(code uint16, k uint32) {
 
 func (c *compilerContext) compileExpression(x tree.Expression, neg label) {
 	// Returns error
-	compileBoolean(c, x, true, positive, neg)
+	isTopLevel := true
+	compileBoolean(c, x, isTopLevel, positive, neg)
 }
 
 func (c *compilerContext) newLabel() label {
