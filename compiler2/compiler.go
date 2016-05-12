@@ -36,8 +36,6 @@ func Compile(policy tree.Policy) ([]unix.SockFilter, error) {
 
 type label string
 
-var noLabel = label("noLabel")
-
 type compilerContext struct {
 	result          []unix.SockFilter
 	currentlyLoaded int
