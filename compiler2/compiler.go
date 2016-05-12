@@ -37,20 +37,16 @@ func Compile(policy tree.Policy) ([]unix.SockFilter, error) {
 type label string
 
 type compilerContext struct {
-	result          []unix.SockFilter
-	currentlyLoaded int
-	stackTop        uint32
-	// TODO we will need an unconditional jumps map as well.
-	// these need to be fixed up if there is an unconditional jump inserted after.
-	// these need to be fixed up if there is an unconditional jump inserted after.
-	jts          map[label][]int
-	jfs          map[label][]int
-	uconds       map[label][]int
-	labels       map[label]int
-	labelCounter int
-	// this will always be 0xFF in production, but it is injectable for testing.
+	result                       []unix.SockFilter
+	currentlyLoaded              int
+	stackTop                     uint32
+	jts                          map[label][]int
+	jfs                          map[label][]int
+	uconds                       map[label][]int
+	labels                       map[label]int
+	labelCounter                 int
 	actions                      map[string]label
-	maxJumpSize                  int
+	maxJumpSize                  int // this is always be 0xFF in production, but can be injected for testing.
 	currentlyCompilingSyscall    string
 	currentlyCompilingExpression tree.Expression
 }
