@@ -77,7 +77,6 @@ func (s *CompilerSuite) Test_stackDoesNotPopAfterReachingTheLowestIndex(c *C) {
 }
 
 func (s *CompilerSuite) Test_compilationOfRuleWithDefinedNegativeAction(c *C) {
-	c.Skip("Extra unconditional jump inserted")
 	p := tree.Policy{
 		Rules: []tree.Rule{
 			tree.Rule{
@@ -96,13 +95,14 @@ func (s *CompilerSuite) Test_compilationOfRuleWithDefinedNegativeAction(c *C) {
 		"st	0\n"+
 		"ld_imm	2A\n"+
 		"ldx_mem\t0\n"+
-		"jeq_x\t02\t00\n"+
+		"jeq_x\t01\t03\n"+
+		"jmp\t1\n"+
 		"ret_k	7FFF0000\n"+
+		"ret_k\t0\n"+
 		"ret_k	7FF00000\n")
 }
 
 func (s *CompilerSuite) Test_policyWithDefaultAction(c *C) {
-	// TODO verify these tests
 	p := tree.Policy{
 		DefaultPolicyAction: "allow",
 		Rules: []tree.Rule{
@@ -117,14 +117,13 @@ func (s *CompilerSuite) Test_policyWithDefaultAction(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs	0\n"+
 		"jeq_k	00	01	1\n"+
-		"jmp	0\n"+
+		"jmp	1\n"+
 		"jmp	0\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
 }
 
 func (s *CompilerSuite) Test_policyWithAnotherDefaultAction(c *C) {
-	// TODO verify these tests
 	p := tree.Policy{
 		DefaultPolicyAction: "trace",
 		Rules: []tree.Rule{
@@ -144,4 +143,51 @@ func (s *CompilerSuite) Test_policyWithAnotherDefaultAction(c *C) {
 		"ret_k\t7FFF0000\n"+
 		"ret_k	0\n"+
 		"ret_k	7FF00000\n")
+}
+
+func (s *CompilerSuite) Test_policyWithDefaultPositiveAction(c *C) {
+	p := tree.Policy{
+		DefaultPositiveAction: "trace",
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.BooleanLiteral{true},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	01	1\n"+
+		"jmp	2\n"+
+		"jmp	0\n"+
+		"ret_k	0\n"+
+		"ret_k	7FF00000\n")
+}
+
+func (s *CompilerSuite) Test_policyWithNegativeDefaultAction(c *C) {
+	p := tree.Policy{
+		DefaultNegativeAction: "trace",
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t05\t1\n"+
+		"ld_imm\t1\n"+
+		"st\t0\n"+
+		"ld_imm\t2A\n"+
+		"ldx_mem\t0\n"+
+		"jeq_x\t01\t03\n"+
+		"jmp\t1\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n"+
+		"ret_k\t7FF00000\n")
 }

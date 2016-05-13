@@ -12,7 +12,6 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// TODO: handle full compile of rules, not just the expression
 // TODO: add the prefix and postfix
 // TODO: compare go-seccomp and gosecco policy evaluation
 
@@ -35,6 +34,8 @@ type compilerContext struct {
 	uconds                       *jumpMap
 	labels                       map[label]int
 	labelCounter                 int
+	defaultPositive              string
+	defaultNegative              string
 	actions                      map[string]label
 	maxJumpSize                  int // this will always be 0xFF in production, but can be injected for testing.
 	currentlyCompilingSyscall    string
@@ -53,44 +54,67 @@ func createCompilerContext() *compilerContext {
 	}
 }
 
+func (c *compilerContext) setDefaults(positive, negative string) {
+	if positive != "" {
+		c.defaultPositive = positive
+	} else {
+		c.defaultPositive = defaultPositive
+	}
+
+	if negative != "" {
+		c.defaultNegative = negative
+	} else {
+		c.defaultNegative = defaultNegative
+	}
+}
+
 func (c *compilerContext) getOrCreateAction(action string) label {
-	actionLabel := c.newLabel()
-	c.actions[action] = actionLabel
-	return actionLabel
+	l, lExists := c.actions[action]
+
+	if lExists {
+		return l
+	} else {
+		actionLabel := c.newLabel()
+		c.actions[action] = actionLabel
+		return actionLabel
+	}
+}
+
+func sortActions(s map[string]label) []string {
+	actionOrder := []string{}
+
+	for k := range s {
+		actionOrder = append(actionOrder, k)
+	}
+
+	sort.Strings(actionOrder)
+	return actionOrder
 }
 
 func (c *compilerContext) compile(policy tree.Policy) ([]unix.SockFilter, error) {
+	c.setDefaults(policy.DefaultPositiveAction, policy.DefaultNegativeAction)
 
-	// TODO rules should also follow default positive and negative actions for a policy
 	for _, r := range policy.Rules {
 		c.compileRule(r)
 	}
 
-	l := c.getOrCreateAction(policy.DefaultPolicyAction)
+	var defAction string
 
-	if policy.DefaultPolicyAction != "" {
-		c.unconditionalJumpTo(l)
+	if policy.DefaultPolicyAction == "" {
+		defAction = defaultNegative
 	} else {
-		// TODO document this
-		c.unconditionalJumpTo(c.actions["kill"]) // Default action if we don't set this in the policy
+		defAction = policy.DefaultPolicyAction
 	}
 
-	actionOrder := []string{}
-	for k := range c.actions {
-		actionOrder = append(actionOrder, k)
-	}
-	sort.Strings(actionOrder)
+	l := c.getOrCreateAction(defAction)
+	c.unconditionalJumpTo(l) // Default action if we don't set this in the policy
+
+	actionOrder := sortActions(c.actions)
 
 	for _, k := range actionOrder {
 		c.labelHere(c.actions[k])
-		switch k {
-		case "allow":
-			c.op(OP_RET_K, SECCOMP_RET_ALLOW)
-		case "kill":
-			c.op(OP_RET_K, SECCOMP_RET_KILL)
-		case "trace":
-			c.op(OP_RET_K, SECCOMP_RET_TRACE)
-		}
+		r := actionInstructions[k]
+		c.op(OP_RET_K, r)
 	}
 
 	c.fixupJumps()
@@ -146,23 +170,15 @@ func (c *compilerContext) compileRule(r tree.Rule) {
 
 func (c *compilerContext) compileActions(positiveAction string, negativeAction string) (label, label) {
 	if positiveAction == "" {
-		positiveAction = "allow"
+		positiveAction = c.defaultPositive
 	}
 
 	if negativeAction == "" {
-		negativeAction = "kill"
+		negativeAction = c.defaultNegative
 	}
 
-	posActionLabel, positiveActionExists := c.actions[positiveAction]
-	negActionLabel, negativeActionExists := c.actions[negativeAction]
-
-	if !positiveActionExists {
-		posActionLabel = c.getOrCreateAction(positiveAction)
-	}
-
-	if !negativeActionExists {
-		negActionLabel = c.getOrCreateAction(negativeAction)
-	}
+	posActionLabel := c.getOrCreateAction(positiveAction)
+	negActionLabel := c.getOrCreateAction(negativeAction)
 
 	return posActionLabel, negActionLabel
 }
