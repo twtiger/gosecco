@@ -33,7 +33,7 @@ func (c *compilerContext) hasPreviousUnconditionalJump(from int) bool {
 	multJumps := false
 	for _, v := range c.uconds {
 		for _, pos := range v {
-			if pos+1 == from+1 {
+			if pos == from {
 				multJumps = true
 			}
 		}
@@ -60,9 +60,12 @@ func (c *compilerContext) insertUnconditionalJump(from int) []unix.SockFilter {
 	var rules []unix.SockFilter
 	x := unix.SockFilter{Code: OP_JMP_K, K: uint32(0)}
 
-	rules = append(rules, c.result[:from]...)
-	rules = append(rules, x)
-	rules = append(rules, c.result[from:]...)
+	for i, e := range c.result {
+		if i == from {
+			rules = append(rules, x)
+		}
+		rules = append(rules, e)
+	}
 	return rules
 }
 
