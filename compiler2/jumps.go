@@ -40,24 +40,22 @@ func (c *compilerContext) longJump(from int, positiveJump bool, to label) {
 		nextJ = from + 2
 	}
 
-	c.result = c.insertUnconditionalJump(nextJ)
+	c.insertUnconditionalJump(nextJ)
 	c.fixUpPreviousRule(from, positiveJump)
 	c.shiftJumps(from, hasPrev)
 
 	c.uconds.registerJump(to, nextJ)
 }
 
-func (c *compilerContext) insertUnconditionalJump(from int) []unix.SockFilter {
-	var rules []unix.SockFilter
-	x := unix.SockFilter{Code: OP_JMP_K, K: uint32(0)}
+func insertSockFilter(sfs []unix.SockFilter, ix int, x unix.SockFilter) []unix.SockFilter {
+	return append(
+		append(
+			append([]unix.SockFilter{}, sfs[:ix]...), x), sfs[ix:]...)
+}
 
-	for i, e := range c.result {
-		if i == from {
-			rules = append(rules, x)
-		}
-		rules = append(rules, e)
-	}
-	return rules
+func (c *compilerContext) insertUnconditionalJump(from int) {
+	x := unix.SockFilter{Code: OP_JMP_K, K: uint32(0)}
+	c.result = insertSockFilter(c.result, from, x)
 }
 
 func shiftLabels(from int, incr int, elems map[label]int) map[label]int {
