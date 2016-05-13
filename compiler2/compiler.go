@@ -17,11 +17,8 @@ import (
 // - do peephole optimization
 // - resolve all labels and jumps
 
-// TODO: handle boolean literal at top level (check todo in visitor)
 // TODO: Fixup peephole optimization
-// TODO: Fixup jumps
 // TODO: handle full compile of rules, not just the expression
-// TODO: put together more than one rule
 // TODO: add the prefix and postfix
 // TODO: fix all potential errors (no panics, we should check for errors)
 // TODO: compare go-seccomp and gosecco policy evaluation
