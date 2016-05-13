@@ -4,7 +4,7 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/twtiger/gosecco/compiler"
+	"github.com/twtiger/gosecco/compiler2"
 
 	"golang.org/x/sys/unix"
 
@@ -71,12 +71,12 @@ func (s *DumperSuite) Test_simpleDump(c *C) {
 
 		unix.SockFilter{
 			Code: syscall.BPF_RET | syscall.BPF_K,
-			K:    compiler.SECCOMP_RET_ALLOW,
+			K:    compiler2.SECCOMP_RET_ALLOW,
 		},
 
 		unix.SockFilter{
 			Code: syscall.BPF_RET | syscall.BPF_K,
-			K:    compiler.SECCOMP_RET_KILL,
+			K:    compiler2.SECCOMP_RET_KILL,
 		},
 	}
 
