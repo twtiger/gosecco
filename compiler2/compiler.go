@@ -12,12 +12,6 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// This compiler runs in three stages
-// - generate base code
-// - do peephole optimization
-// - resolve all labels and jumps
-
-// TODO: Fixup peephole optimization
 // TODO: handle full compile of rules, not just the expression
 // TODO: add the prefix and postfix
 // TODO: fix all potential errors (no panics, we should check for errors)
@@ -85,8 +79,6 @@ func (c *compilerContext) compile(rules []tree.Rule) ([]unix.SockFilter, error) 
 			c.op(OP_RET_K, SECCOMP_RET_TRACE)
 		}
 	}
-
-	c.optimizeCode()
 
 	c.fixupJumps()
 
