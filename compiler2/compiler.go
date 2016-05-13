@@ -36,7 +36,7 @@ type compilerContext struct {
 	labels                       map[label]int
 	labelCounter                 int
 	actions                      map[string]label
-	maxJumpSize                  int // this is always be 0xFF in production, but can be injected for testing.
+	maxJumpSize                  int // this will always be 0xFF in production, but can be injected for testing.
 	currentlyCompilingSyscall    string
 	currentlyCompilingExpression tree.Expression
 }

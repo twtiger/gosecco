@@ -25,7 +25,7 @@ func actionDescriptionToK(v string) uint32 {
 	}
 
 	if res, ok := constants.GetError(v); ok {
-		return res
+		return SECCOMP_RET_ERRNO | res
 	}
 
 	return 0
