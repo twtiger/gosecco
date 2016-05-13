@@ -40,9 +40,9 @@ type compilerContext struct {
 	result                       []unix.SockFilter
 	currentlyLoaded              int
 	stackTop                     uint32
-	jts                          map[label][]int
-	jfs                          map[label][]int
-	uconds                       map[label][]int
+	jts                          *jumpMap
+	jfs                          *jumpMap
+	uconds                       *jumpMap
 	labels                       map[label]int
 	labelCounter                 int
 	actions                      map[string]label
@@ -53,9 +53,9 @@ type compilerContext struct {
 
 func createCompilerContext() *compilerContext {
 	return &compilerContext{
-		jts:             make(map[label][]int),
-		jfs:             make(map[label][]int),
-		uconds:          make(map[label][]int),
+		jts:             createJumpMap(),
+		jfs:             createJumpMap(),
+		uconds:          createJumpMap(),
 		labels:          make(map[label]int),
 		actions:         make(map[string]label),
 		maxJumpSize:     255,
@@ -88,6 +88,8 @@ func (c *compilerContext) compile(rules []tree.Rule) ([]unix.SockFilter, error) 
 			c.op(OP_RET_K, SECCOMP_RET_TRACE)
 		}
 	}
+
+	c.optimizeCode()
 
 	c.fixupJumps()
 
@@ -187,13 +189,13 @@ func (c *compilerContext) newLabel() label {
 }
 
 func (c *compilerContext) registerJumps(index int, jt, jf label) {
-	c.jts[jt] = append(c.jts[jt], index)
-	c.jfs[jf] = append(c.jfs[jf], index)
+	c.jts.registerJump(jt, index)
+	c.jfs.registerJump(jf, index)
 }
 
-func (c *compilerContext) fixMaxJumps(l label, elems []int, isPos bool) {
+func (c *compilerContext) fixMaxJumps(l label, j *jumpMap, isPos bool) {
 	to := len(c.result)
-	for _, from := range elems {
+	for _, from := range j.allJumpsTo(l) {
 		if (to-from)-1 > c.maxJumpSize {
 			c.longJump(from, isPos, l)
 		}
@@ -201,10 +203,8 @@ func (c *compilerContext) fixMaxJumps(l label, elems []int, isPos bool) {
 }
 
 func (c *compilerContext) labelHere(l label) {
-	jts, jfs := c.jts[l], c.jfs[l]
-
-	c.fixMaxJumps(l, jts, true)
-	c.fixMaxJumps(l, jfs, false)
+	c.fixMaxJumps(l, c.jts, true)
+	c.fixMaxJumps(l, c.jfs, false)
 	c.labels[l] = len(c.result)
 }
 
@@ -216,7 +216,7 @@ func (c *compilerContext) unconditionalJumpTo(to label) {
 		Jf:   0,
 		K:    0,
 	})
-	c.uconds[to] = append(c.uconds[to], index)
+	c.uconds.registerJump(to, index)
 }
 
 func (c *compilerContext) opWithJumps(code uint16, k uint32, jt, jf label) {

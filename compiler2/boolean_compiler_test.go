@@ -24,12 +24,12 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison(c *C) {
 		"ldx_mem	0\n"+
 		"jeq_x	00	00\n",
 	)
-	c.Assert(ctx.jts, DeepEquals, map[label][]int{
+	c.Assert(ctx.jts, DeepEquals, jumpMapFrom(map[label][]int{
 		"pos": []int{4},
-	})
-	c.Assert(ctx.jfs, DeepEquals, map[label][]int{
+	}))
+	c.Assert(ctx.jfs, DeepEquals, jumpMapFrom(map[label][]int{
 		"neg": []int{4},
-	})
+	}))
 }
 
 func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison2(c *C) {
@@ -48,12 +48,12 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison2(c *C) {
 		"ldx_mem	0\n"+
 		"jeq_x	00	00\n",
 	)
-	c.Assert(ctx.jts, DeepEquals, map[label][]int{
+	c.Assert(ctx.jts, DeepEquals, jumpMapFrom(map[label][]int{
 		"negx": []int{8},
-	})
-	c.Assert(ctx.jfs, DeepEquals, map[label][]int{
+	}))
+	c.Assert(ctx.jfs, DeepEquals, jumpMapFrom(map[label][]int{
 		"posx": []int{8},
-	})
+	}))
 }
 
 func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison3(c *C) {
@@ -68,12 +68,12 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison3(c *C) {
 		"ldx_mem	0\n"+
 		"jgt_x	00	00\n",
 	)
-	c.Assert(ctx.jts, DeepEquals, map[label][]int{
+	c.Assert(ctx.jts, DeepEquals, jumpMapFrom(map[label][]int{
 		"pos": []int{4},
-	})
-	c.Assert(ctx.jfs, DeepEquals, map[label][]int{
+	}))
+	c.Assert(ctx.jfs, DeepEquals, jumpMapFrom(map[label][]int{
 		"neg": []int{4},
-	})
+	}))
 }
 
 func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison4(c *C) {
@@ -88,12 +88,12 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison4(c *C) {
 		"ldx_mem	0\n"+
 		"jge_x	00	00\n",
 	)
-	c.Assert(ctx.jts, DeepEquals, map[label][]int{
+	c.Assert(ctx.jts, DeepEquals, jumpMapFrom(map[label][]int{
 		"pos": []int{4},
-	})
-	c.Assert(ctx.jfs, DeepEquals, map[label][]int{
+	}))
+	c.Assert(ctx.jfs, DeepEquals, jumpMapFrom(map[label][]int{
 		"neg": []int{4},
-	})
+	}))
 }
 
 func (s *BooleanCompilerSuite) Test_compilationOfInvalidComparison(c *C) {
@@ -134,13 +134,13 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleAnd(c *C) {
 		"ldx_mem	0\n"+
 		"jeq_x	00	00\n",
 	)
-	c.Assert(ctx.jts, DeepEquals, map[label][]int{
+	c.Assert(ctx.jts, DeepEquals, jumpMapFrom(map[label][]int{
 		"pos":               []int{9},
 		"generatedLabel000": []int{4},
-	})
-	c.Assert(ctx.jfs, DeepEquals, map[label][]int{
+	}))
+	c.Assert(ctx.jfs, DeepEquals, jumpMapFrom(map[label][]int{
 		"neg": []int{4, 9},
-	})
+	}))
 	c.Assert(ctx.labels, DeepEquals, map[label]int{
 		"generatedLabel000": 5,
 	})
@@ -166,13 +166,13 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleOr(c *C) {
 		"ldx_mem	0\n"+
 		"jeq_x	00	00\n",
 	)
-	c.Assert(ctx.jts, DeepEquals, map[label][]int{
+	c.Assert(ctx.jts, DeepEquals, jumpMapFrom(map[label][]int{
 		"pos": []int{4, 9},
-	})
-	c.Assert(ctx.jfs, DeepEquals, map[label][]int{
+	}))
+	c.Assert(ctx.jfs, DeepEquals, jumpMapFrom(map[label][]int{
 		"generatedLabel000": []int{4},
 		"neg":               []int{9},
-	})
+	}))
 	c.Assert(ctx.labels, DeepEquals, map[label]int{
 		"generatedLabel000": 5,
 	})
@@ -192,12 +192,12 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleNegation(c *C) {
 		"ldx_mem	0\n"+
 		"jeq_x	00	00\n",
 	)
-	c.Assert(ctx.jts, DeepEquals, map[label][]int{
+	c.Assert(ctx.jts, DeepEquals, jumpMapFrom(map[label][]int{
 		"neg": []int{4},
-	})
-	c.Assert(ctx.jfs, DeepEquals, map[label][]int{
+	}))
+	c.Assert(ctx.jfs, DeepEquals, jumpMapFrom(map[label][]int{
 		"pos": []int{4},
-	})
+	}))
 	c.Assert(ctx.labels, DeepEquals, map[label]int{})
 }
 
