@@ -13,10 +13,12 @@ var _ = Suite(&ComparisonCompilerSuite{})
 func (s *ComparisonCompilerSuite) Test_SingleComparisons(c *C) {
 	ctx := createCompilerContext()
 
-	p := []tree.Rule{
-		tree.Rule{
-			Name: "write",
-			Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+			},
 		},
 	}
 

@@ -100,3 +100,48 @@ func (s *CompilerSuite) Test_compilationOfRuleWithDefinedNegativeAction(c *C) {
 		"ret_k	7FFF0000\n"+
 		"ret_k	7FF00000\n")
 }
+
+func (s *CompilerSuite) Test_policyWithDefaultAction(c *C) {
+	// TODO verify these tests
+	p := tree.Policy{
+		DefaultPolicyAction: "allow",
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.BooleanLiteral{true},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	01	1\n"+
+		"jmp	0\n"+
+		"jmp	0\n"+
+		"ret_k	7FFF0000\n"+
+		"ret_k	0\n")
+}
+
+func (s *CompilerSuite) Test_policyWithAnotherDefaultAction(c *C) {
+	// TODO verify these tests
+	p := tree.Policy{
+		DefaultPolicyAction: "trace",
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.BooleanLiteral{true},
+			},
+		},
+	}
+
+	res, _ := Compile(p)
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs	0\n"+
+		"jeq_k	00	01	1\n"+
+		"jmp	1\n"+
+		"jmp	2\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k	0\n"+
+		"ret_k	7FF00000\n")
+}

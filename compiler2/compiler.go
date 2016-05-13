@@ -22,7 +22,7 @@ import (
 // no unresolved variables or calls should exist in the policy.
 func Compile(policy tree.Policy) ([]unix.SockFilter, error) {
 	c := createCompilerContext()
-	return c.compile(policy.Rules)
+	return c.compile(policy)
 }
 
 type label string
@@ -54,13 +54,27 @@ func createCompilerContext() *compilerContext {
 	}
 }
 
-func (c *compilerContext) compile(rules []tree.Rule) ([]unix.SockFilter, error) {
-	for _, r := range rules {
+func (c *compilerContext) getOrCreateAction(action string) label {
+	actionLabel := c.newLabel()
+	c.actions[action] = actionLabel
+	return actionLabel
+}
+
+func (c *compilerContext) compile(policy tree.Policy) ([]unix.SockFilter, error) {
+
+	// TODO rules should also follow default positive and negative actions for a policy
+	for _, r := range policy.Rules {
 		c.compileRule(r)
 	}
 
-	// TODO: use default policy here instead of kill
-	c.unconditionalJumpTo(c.actions["kill"])
+	l := c.getOrCreateAction(policy.DefaultPolicyAction)
+
+	if policy.DefaultPolicyAction != "" {
+		c.unconditionalJumpTo(l)
+	} else {
+		// TODO document this
+		c.unconditionalJumpTo(c.actions["kill"]) // Default action if we don't set this in the policy
+	}
 
 	actionOrder := []string{}
 	for k := range c.actions {
@@ -144,13 +158,11 @@ func (c *compilerContext) compileActions(positiveAction string, negativeAction s
 	negActionLabel, negativeActionExists := c.actions[negativeAction]
 
 	if !positiveActionExists {
-		posActionLabel = c.newLabel()
-		c.actions[positiveAction] = posActionLabel
+		posActionLabel = c.getOrCreateAction(positiveAction)
 	}
 
 	if !negativeActionExists {
-		negActionLabel = c.newLabel()
-		c.actions[negativeAction] = negActionLabel
+		negActionLabel = c.getOrCreateAction(negativeAction)
 	}
 
 	return posActionLabel, negActionLabel

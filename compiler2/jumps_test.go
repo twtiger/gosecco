@@ -14,18 +14,20 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsUnconditionalJumpPoint(c *C) {
 	ctx := createCompilerContext()
 	ctx.maxJumpSize = 2
 
-	p := []tree.Rule{
-		tree.Rule{
-			Name: "write",
-			Body: tree.BooleanLiteral{true},
-		},
-		tree.Rule{
-			Name: "vhangup",
-			Body: tree.BooleanLiteral{true},
-		},
-		tree.Rule{
-			Name: "read",
-			Body: tree.BooleanLiteral{true},
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.BooleanLiteral{true},
+			},
+			tree.Rule{
+				Name: "vhangup",
+				Body: tree.BooleanLiteral{true},
+			},
+			tree.Rule{
+				Name: "read",
+				Body: tree.BooleanLiteral{true},
+			},
 		},
 	}
 
@@ -47,14 +49,16 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsMulipleUnconditionalJumpPoint(c *C) {
 	ctx := createCompilerContext()
 	ctx.maxJumpSize = 2
 
-	p := []tree.Rule{
-		tree.Rule{
-			Name: "write",
-			Body: tree.BooleanLiteral{true},
-		},
-		tree.Rule{
-			Name: "read",
-			Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.BooleanLiteral{true},
+			},
+			tree.Rule{
+				Name: "read",
+				Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+			},
 		},
 	}
 
@@ -79,14 +83,16 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithTwoComparisons(c *C) {
 	ctx := createCompilerContext()
 	ctx.maxJumpSize = 2
 
-	p := []tree.Rule{
-		tree.Rule{
-			Name: "write",
-			Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
-		},
-		tree.Rule{
-			Name: "read",
-			Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+			},
+			tree.Rule{
+				Name: "read",
+				Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+			},
 		},
 	}
 
@@ -118,10 +124,12 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithNotEqual(c *C) {
 	ctx := createCompilerContext()
 	ctx.maxJumpSize = 2
 
-	p := []tree.Rule{
-		tree.Rule{
-			Name: "write",
-			Body: tree.Comparison{Op: tree.NEQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{Op: tree.NEQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+			},
 		},
 	}
 
@@ -144,14 +152,16 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithNotEqualWithMoreThanOneRule(c *C) {
 	ctx := createCompilerContext()
 	ctx.maxJumpSize = 2
 
-	p := []tree.Rule{
-		tree.Rule{
-			Name: "write",
-			Body: tree.Comparison{Op: tree.NEQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
-		},
-		tree.Rule{
-			Name: "read",
-			Body: tree.Comparison{Op: tree.NEQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+	p := tree.Policy{
+		Rules: []tree.Rule{
+			tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{Op: tree.NEQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+			},
+			tree.Rule{
+				Name: "read",
+				Body: tree.Comparison{Op: tree.NEQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+			},
 		},
 	}
 
