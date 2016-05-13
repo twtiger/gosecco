@@ -208,3 +208,70 @@ func (s *BooleanCompilerSuite) Test_thatAnErrorIsSetWhenWeCompileAfterReachingTh
 	err := compileBoolean(ctx, p, false, "pos", "neg")
 	c.Assert(err, ErrorMatches, "the expression is too complicated to compile. Please refer to the language documentation")
 }
+
+func (s *BooleanCompilerSuite) Test_thatErrorsInLeftHandSidePropagatesfromAnd(c *C) {
+	p := tree.And{
+		Left:  tree.BooleanLiteral{false},
+		Right: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+	}
+
+	ctx := createCompilerContext()
+	err := compileBoolean(ctx, p, false, "pos", "neg")
+	c.Assert(err, ErrorMatches, "a boolean literal was found in an expression - this is likely a programmer error")
+}
+
+func (s *BooleanCompilerSuite) Test_thatErrorsInRightHandSidePropagatesfromAnd(c *C) {
+	p := tree.And{
+		Right: tree.BooleanLiteral{false},
+		Left:  tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+	}
+
+	ctx := createCompilerContext()
+	err := compileBoolean(ctx, p, false, "pos", "neg")
+	c.Assert(err, ErrorMatches, "a boolean literal was found in an expression - this is likely a programmer error")
+}
+
+func (s *BooleanCompilerSuite) Test_thatErrorsInLeftHandSidePropagatesfromOr(c *C) {
+	p := tree.Or{
+		Left:  tree.BooleanLiteral{false},
+		Right: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+	}
+
+	ctx := createCompilerContext()
+	err := compileBoolean(ctx, p, false, "pos", "neg")
+	c.Assert(err, ErrorMatches, "a boolean literal was found in an expression - this is likely a programmer error")
+}
+
+func (s *BooleanCompilerSuite) Test_thatErrorsInRightHandSidePropagatesfromOr(c *C) {
+	p := tree.Or{
+		Right: tree.BooleanLiteral{false},
+		Left:  tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
+	}
+
+	ctx := createCompilerContext()
+	err := compileBoolean(ctx, p, false, "pos", "neg")
+	c.Assert(err, ErrorMatches, "a boolean literal was found in an expression - this is likely a programmer error")
+}
+
+func (s *BooleanCompilerSuite) Test_thatCompilingInvalidBooleanTypesGeneratesErrors(c *C) {
+	err := compileBoolean(createCompilerContext(), tree.Variable{"foo"}, false, "pos", "neg")
+	c.Assert(err, ErrorMatches, "a variable was found in an expression - this is likely a programmer error")
+
+	err = compileBoolean(createCompilerContext(), tree.NumericLiteral{42}, false, "pos", "neg")
+	c.Assert(err, ErrorMatches, "a numeric literal was found in a boolean expression - this is likely a programmer error")
+
+	err = compileBoolean(createCompilerContext(), tree.Argument{Index: 0}, false, "pos", "neg")
+	c.Assert(err, ErrorMatches, "an argument variable was found in a boolean expression - this is likely a programmer error")
+
+	err = compileBoolean(createCompilerContext(), tree.Call{}, false, "pos", "neg")
+	c.Assert(err, ErrorMatches, "a call was found in an expression - this is likely a programmer error")
+
+	err = compileBoolean(createCompilerContext(), tree.Inclusion{}, false, "pos", "neg")
+	c.Assert(err, ErrorMatches, "an in-statement was found in an expression - this is likely a programmer error")
+
+	err = compileBoolean(createCompilerContext(), tree.BinaryNegation{}, false, "pos", "neg")
+	c.Assert(err, ErrorMatches, "a binary negation was found in a boolean expression - this is likely a programmer error")
+
+	err = compileBoolean(createCompilerContext(), tree.Arithmetic{}, false, "pos", "neg")
+	c.Assert(err, ErrorMatches, "arithmetic was found in a boolean expression - this is likely a programmer error")
+}

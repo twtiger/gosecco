@@ -28,7 +28,7 @@ func compileNumeric(ctx *compilerContext, inp tree.Expression) error {
 }
 
 func (s *numericCompilerVisitor) AcceptAnd(v tree.And) {
-	panic("XXX: generate error here")
+	s.err = errors.New("an and was found in a numeric expression - this is likely a programmer error")
 }
 
 const argumentsStartIndex = uint32(0x10)
@@ -80,7 +80,7 @@ func (s *numericCompilerVisitor) AcceptArithmetic(v tree.Arithmetic) {
 
 	arithOp, ok := arithOps[v.Op]
 	if !ok {
-		s.err = errors.New("BLA")
+		s.err = errors.New("an invalid arithmetic operator was found - this is likely a programmer error")
 		return
 	}
 	s.ctx.op(arithOp, 0)
@@ -88,32 +88,32 @@ func (s *numericCompilerVisitor) AcceptArithmetic(v tree.Arithmetic) {
 
 // AcceptBinaryNegation implements Visitor
 func (s *numericCompilerVisitor) AcceptBinaryNegation(v tree.BinaryNegation) {
-	panic("XXX: generate error here")
+	s.err = errors.New("a binary negation was found in an expression - this is likely a programmer error")
 }
 
 // AcceptBooleanLiteral implements Visitor
 func (s *numericCompilerVisitor) AcceptBooleanLiteral(v tree.BooleanLiteral) {
-	panic("XXX: generate error here")
+	s.err = errors.New("a boolean literal was found in a numeric expression - this is likely a programmer error")
 }
 
 // AcceptCall implements Visitor
 func (s *numericCompilerVisitor) AcceptCall(v tree.Call) {
-	panic("XXX: generate error here")
+	s.err = errors.New("a call was found in an expression - this is likely a programmer error")
 }
 
 // AcceptComparison implements Visitor
 func (s *numericCompilerVisitor) AcceptComparison(v tree.Comparison) {
-	panic("XXX: generate error here")
+	s.err = errors.New("a comparison was found in a numeric expression - this is likely a programmer error")
 }
 
 // AcceptInclusion implements Visitor
 func (s *numericCompilerVisitor) AcceptInclusion(v tree.Inclusion) {
-	panic("XXX: generate error here")
+	s.err = errors.New("an in-statement was found in an expression - this is likely a programmer error")
 }
 
 // AcceptNegation implements Visitor
 func (s *numericCompilerVisitor) AcceptNegation(v tree.Negation) {
-	panic("XXX: generate error here")
+	s.err = errors.New("a boolean negation was found in a numeric expression - this is likely a programmer error")
 }
 
 // AcceptNumericLiteral implements Visitor
@@ -123,10 +123,10 @@ func (s *numericCompilerVisitor) AcceptNumericLiteral(v tree.NumericLiteral) {
 
 // AcceptOr implements Visitor
 func (s *numericCompilerVisitor) AcceptOr(v tree.Or) {
-	panic("XXX: generate error here")
+	s.err = errors.New("an or was found in a numeric expression - this is likely a programmer error")
 }
 
 // AcceptVariable implements Visitor
 func (s *numericCompilerVisitor) AcceptVariable(v tree.Variable) {
-	panic("XXX: generate error here")
+	s.err = errors.New("a variable was found in an expression - this is likely a programmer error")
 }

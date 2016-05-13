@@ -102,3 +102,74 @@ func (s *NumericCompilerSuite) Test_thatAnErrorIsSetWhenWeCompileInvalidExpressi
 	err := compileNumeric(ctx, tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{3}, Right: tree.NumericLiteral{42}})
 	c.Assert(err, ErrorMatches, "the expression is too complicated to compile. Please refer to the language documentation")
 }
+
+func (s *NumericCompilerSuite) Test_thatAnErrorIsSetWhenWeCompileInvalidTypes(c *C) {
+	err := compileNumeric(createCompilerContext(), tree.BinaryNegation{})
+	c.Assert(err, ErrorMatches, "a binary negation was found in an expression - this is likely a programmer error")
+
+	err = compileNumeric(createCompilerContext(), tree.And{})
+	c.Assert(err, ErrorMatches, "an and was found in a numeric expression - this is likely a programmer error")
+
+	err = compileNumeric(createCompilerContext(), tree.BooleanLiteral{})
+	c.Assert(err, ErrorMatches, "a boolean literal was found in a numeric expression - this is likely a programmer error")
+
+	err = compileNumeric(createCompilerContext(), tree.Call{})
+	c.Assert(err, ErrorMatches, "a call was found in an expression - this is likely a programmer error")
+
+	err = compileNumeric(createCompilerContext(), tree.Comparison{})
+	c.Assert(err, ErrorMatches, "a comparison was found in a numeric expression - this is likely a programmer error")
+
+	err = compileNumeric(createCompilerContext(), tree.Inclusion{})
+	c.Assert(err, ErrorMatches, "an in-statement was found in an expression - this is likely a programmer error")
+
+	err = compileNumeric(createCompilerContext(), tree.Negation{})
+	c.Assert(err, ErrorMatches, "a boolean negation was found in a numeric expression - this is likely a programmer error")
+
+	err = compileNumeric(createCompilerContext(), tree.Or{})
+	c.Assert(err, ErrorMatches, "an or was found in a numeric expression - this is likely a programmer error")
+
+	err = compileNumeric(createCompilerContext(), tree.Variable{})
+	c.Assert(err, ErrorMatches, "a variable was found in an expression - this is likely a programmer error")
+}
+
+func (s *NumericCompilerSuite) Test_arithmeticShouldPassAlongErrorsOnTheRightSide(c *C) {
+	err := compileNumeric(createCompilerContext(), tree.Arithmetic{Right: tree.BooleanLiteral{false}, Left: tree.NumericLiteral{42}, Op: tree.PLUS})
+	c.Assert(err, ErrorMatches, "a boolean literal was found in a numeric expression - this is likely a programmer error")
+}
+
+func (s *NumericCompilerSuite) Test_arithmeticShouldPassAlongErrorsOnTheLeftSide(c *C) {
+	err := compileNumeric(createCompilerContext(), tree.Arithmetic{Left: tree.BooleanLiteral{false}, Right: tree.NumericLiteral{42}, Op: tree.PLUS})
+	c.Assert(err, ErrorMatches, "a boolean literal was found in a numeric expression - this is likely a programmer error")
+}
+
+func (s *NumericCompilerSuite) Test_arithmeticShouldPassAlongErrorsIfWeGetIncorrectOperator(c *C) {
+	err := compileNumeric(createCompilerContext(), tree.Arithmetic{Left: tree.NumericLiteral{1}, Right: tree.NumericLiteral{42}, Op: tree.ArithmeticType(42)})
+	c.Assert(err, ErrorMatches, "an invalid arithmetic operator was found - this is likely a programmer error")
+}
+
+func (s *NumericCompilerSuite) Test_arithmeticShouldPassAlongStackTooLargeError(c *C) {
+	ctx := createCompilerContext()
+	ctx.stackTop = syscall.BPF_MEMWORDS
+	err := compileNumeric(ctx, tree.Arithmetic{Left: tree.NumericLiteral{1}, Right: tree.NumericLiteral{42}, Op: tree.ArithmeticType(42)})
+	c.Assert(err, ErrorMatches, "the expression is too complicated to compile. Please refer to the language documentation")
+}
+
+func (s *NumericCompilerSuite) Test_arithmeticShouldPassAlongStackTooSmallError(c *C) {
+	ctx := createCompilerContext()
+	err := compileNumeric(ctx,
+		tree.Arithmetic{
+			Left: &stackMesser{func() {
+				ctx.stackTop = 0
+			}},
+			Right: tree.NumericLiteral{42},
+			Op:    tree.PLUS})
+	c.Assert(err, ErrorMatches, "popping from empty stack - this is likely a programmer error")
+}
+
+type stackMesser struct {
+	f func()
+}
+
+func (x *stackMesser) Accept(v tree.Visitor) {
+	x.f()
+}

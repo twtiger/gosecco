@@ -14,7 +14,6 @@ import (
 
 // TODO: handle full compile of rules, not just the expression
 // TODO: add the prefix and postfix
-// TODO: fix all potential errors (no panics, we should check for errors)
 // TODO: compare go-seccomp and gosecco policy evaluation
 
 // Compile will take a parsed policy and generate an optimized sock filter for that policy
