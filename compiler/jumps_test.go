@@ -15,6 +15,7 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsUnconditionalJumpPoint(c *C) {
 	ctx.maxJumpSize = 2
 
 	p := tree.Policy{
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
@@ -50,6 +51,7 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsMulipleUnconditionalJumpPoint(c *C) {
 	ctx.maxJumpSize = 2
 
 	p := tree.Policy{
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
@@ -84,6 +86,7 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithTwoComparisons(c *C) {
 	ctx.maxJumpSize = 2
 
 	p := tree.Policy{
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
@@ -125,6 +128,7 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithNotEqual(c *C) {
 	ctx.maxJumpSize = 2
 
 	p := tree.Policy{
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
@@ -153,6 +157,7 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithNotEqualWithMoreThanOneRule(c *C) {
 	ctx.maxJumpSize = 2
 
 	p := tree.Policy{
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",

@@ -26,20 +26,19 @@ func Compile(policy tree.Policy) ([]unix.SockFilter, error) {
 type label string
 
 type compilerContext struct {
-	result                       []unix.SockFilter
-	currentlyLoaded              int
-	stackTop                     uint32
-	jts                          *jumpMap
-	jfs                          *jumpMap
-	uconds                       *jumpMap
-	labels                       map[label]int
-	labelCounter                 int
-	defaultPositive              string
-	defaultNegative              string
-	actions                      map[string]label
-	maxJumpSize                  int // this will always be 0xFF in production, but can be injected for testing.
-	currentlyCompilingSyscall    string
-	currentlyCompilingExpression tree.Expression
+	result                                          []unix.SockFilter
+	currentlyLoaded                                 int
+	stackTop                                        uint32
+	jts                                             *jumpMap
+	jfs                                             *jumpMap
+	uconds                                          *jumpMap
+	labels                                          map[label]int
+	labelCounter                                    int
+	defaultPositive, defaultNegative, defaultPolicy string
+	actions                                         map[string]label
+	maxJumpSize                                     int // this will always be 0xFF in production, but can be injected for testing.
+	currentlyCompilingSyscall                       string
+	currentlyCompilingExpression                    tree.Expression
 }
 
 func createCompilerContext() *compilerContext {
@@ -54,18 +53,15 @@ func createCompilerContext() *compilerContext {
 	}
 }
 
-func (c *compilerContext) setDefaults(positive, negative string) {
-	if positive != "" {
-		c.defaultPositive = positive
-	} else {
-		c.defaultPositive = defaultPositive
+// setDefaults sets the defaults for the compiler - it should always be called before compiling anything
+func (c *compilerContext) setDefaults(positive, negative, policy string) {
+	if positive == "" || negative == "" || policy == "" {
+		panic("The defaults should never be empty. This is a programmer error.")
 	}
 
-	if negative != "" {
-		c.defaultNegative = negative
-	} else {
-		c.defaultNegative = defaultNegative
-	}
+	c.defaultPositive = positive
+	c.defaultNegative = negative
+	c.defaultPolicy = policy
 }
 
 func (c *compilerContext) getOrCreateAction(action string) label {
@@ -73,48 +69,39 @@ func (c *compilerContext) getOrCreateAction(action string) label {
 
 	if lExists {
 		return l
-	} else {
-		actionLabel := c.newLabel()
-		c.actions[action] = actionLabel
-		return actionLabel
 	}
+
+	actionLabel := c.newLabel()
+	c.actions[action] = actionLabel
+	return actionLabel
 }
 
-func sortActions(s map[string]label) []string {
+func (c *compilerContext) sortedActions() []string {
 	actionOrder := []string{}
 
-	for k := range s {
+	for k := range c.actions {
 		actionOrder = append(actionOrder, k)
 	}
 
 	sort.Strings(actionOrder)
+
 	return actionOrder
 }
 
 func (c *compilerContext) compile(policy tree.Policy) ([]unix.SockFilter, error) {
-	c.setDefaults(policy.DefaultPositiveAction, policy.DefaultNegativeAction)
+	c.setDefaults(policy.DefaultPositiveAction, policy.DefaultNegativeAction, policy.DefaultPolicyAction)
 
 	for _, r := range policy.Rules {
-		c.compileRule(r)
+		if err := c.compileRule(r); err != nil {
+			return nil, err
+		}
 	}
 
-	var defAction string
+	c.unconditionalJumpTo(c.getOrCreateAction(c.defaultPolicy))
 
-	if policy.DefaultPolicyAction == "" {
-		defAction = defaultNegative
-	} else {
-		defAction = policy.DefaultPolicyAction
-	}
-
-	l := c.getOrCreateAction(defAction)
-	c.unconditionalJumpTo(l) // Default action if we don't set this in the policy
-
-	actionOrder := sortActions(c.actions)
-
-	for _, k := range actionOrder {
+	for _, k := range c.sortedActions() {
 		c.labelHere(c.actions[k])
-		r := actionInstructions[k]
-		c.op(OP_RET_K, r)
+		c.op(OP_RET_K, actionDescriptionToK(k))
 	}
 
 	c.fixupJumps()
@@ -152,32 +139,35 @@ func (c *compilerContext) checkCorrectSyscall(name string, next label) {
 	c.labelHere(goesNowhere)
 }
 
-func (c *compilerContext) compileRule(r tree.Rule) {
+func (c *compilerContext) compileRule(r tree.Rule) error {
 	next := c.newLabel()
 
 	pos, neg := c.compileActions(r.PositiveAction, r.NegativeAction)
 
-	c.checkCorrectSyscall(r.Name, next) // set JT flag to final ret_allow only if the rule is a boolean literal
+	c.checkCorrectSyscall(r.Name, next)
 
 	// These are useful for debugging and helpful error messages
 	c.currentlyCompilingSyscall = r.Name
 	c.currentlyCompilingExpression = r.Body
 
-	c.compileExpression(r.Body, pos, neg)
+	if err := c.compileExpression(r.Body, pos, neg); err != nil {
+		return err
+	}
 
 	c.labelHere(next)
+
+	return nil
 }
 
 func (c *compilerContext) compileActions(positiveAction string, negativeAction string) (label, label) {
 	if positiveAction == "" {
 		positiveAction = c.defaultPositive
 	}
+	posActionLabel := c.getOrCreateAction(positiveAction)
 
 	if negativeAction == "" {
 		negativeAction = c.defaultNegative
 	}
-
-	posActionLabel := c.getOrCreateAction(positiveAction)
 	negActionLabel := c.getOrCreateAction(negativeAction)
 
 	return posActionLabel, negActionLabel
@@ -192,10 +182,8 @@ func (c *compilerContext) op(code uint16, k uint32) {
 	})
 }
 
-func (c *compilerContext) compileExpression(x tree.Expression, pos, neg label) {
-	// Returns error
-	isTopLevel := true
-	compileBoolean(c, x, isTopLevel, pos, neg)
+func (c *compilerContext) compileExpression(x tree.Expression, pos, neg label) error {
+	return compileBoolean(c, x, true, pos, neg)
 }
 
 func (c *compilerContext) newLabel() label {

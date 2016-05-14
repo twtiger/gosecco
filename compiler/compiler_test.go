@@ -14,6 +14,7 @@ var _ = Suite(&CompilerSuite{})
 
 func (s *CompilerSuite) Test_simplestCompilation(c *C) {
 	p := tree.Policy{
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
@@ -34,6 +35,7 @@ func (s *CompilerSuite) Test_simplestCompilation(c *C) {
 
 func (s *CompilerSuite) Test_nextSimplestCompilation(c *C) {
 	p := tree.Policy{
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
@@ -78,6 +80,7 @@ func (s *CompilerSuite) Test_stackDoesNotPopAfterReachingTheLowestIndex(c *C) {
 
 func (s *CompilerSuite) Test_compilationOfRuleWithDefinedNegativeAction(c *C) {
 	p := tree.Policy{
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name:           "write",
@@ -104,7 +107,7 @@ func (s *CompilerSuite) Test_compilationOfRuleWithDefinedNegativeAction(c *C) {
 
 func (s *CompilerSuite) Test_policyWithDefaultAction(c *C) {
 	p := tree.Policy{
-		DefaultPolicyAction: "allow",
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "allow",
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
@@ -125,7 +128,7 @@ func (s *CompilerSuite) Test_policyWithDefaultAction(c *C) {
 
 func (s *CompilerSuite) Test_policyWithAnotherDefaultAction(c *C) {
 	p := tree.Policy{
-		DefaultPolicyAction: "trace",
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "trace",
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
@@ -147,7 +150,7 @@ func (s *CompilerSuite) Test_policyWithAnotherDefaultAction(c *C) {
 
 func (s *CompilerSuite) Test_policyWithDefaultPositiveAction(c *C) {
 	p := tree.Policy{
-		DefaultPositiveAction: "trace",
+		DefaultPositiveAction: "trace", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
@@ -168,7 +171,7 @@ func (s *CompilerSuite) Test_policyWithDefaultPositiveAction(c *C) {
 
 func (s *CompilerSuite) Test_policyWithNegativeDefaultAction(c *C) {
 	p := tree.Policy{
-		DefaultNegativeAction: "trace",
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "trace", DefaultPolicyAction: "kill",
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",

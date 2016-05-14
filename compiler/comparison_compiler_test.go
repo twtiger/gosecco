@@ -16,6 +16,7 @@ func (s *ComparisonCompilerSuite) Test_SingleComparisons(c *C) {
 	ctx := createCompilerContext()
 
 	p := tree.Policy{
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
 		Rules: []tree.Rule{
 			tree.Rule{
 				Name: "write",
