@@ -11,6 +11,7 @@ import (
 	"github.com/twtiger/gosecco/native"
 	"github.com/twtiger/gosecco/parser"
 	"github.com/twtiger/gosecco/precompilation"
+	"github.com/twtiger/gosecco/simplifier"
 	"github.com/twtiger/gosecco/tree"
 	"github.com/twtiger/gosecco/unifier"
 
@@ -92,7 +93,7 @@ func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
 	}
 
 	// Simplification
-	// TODO: when we have the toplevel call
+	simplifier.SimplifyPolicy(pol)
 
 	// Pre-compilation
 	errors = precompilation.EnsureValid(pol)
