@@ -5,8 +5,14 @@ import (
 	"runtime"
 	"syscall"
 
+	"github.com/twtiger/gosecco/checker"
+	"github.com/twtiger/gosecco/compiler"
 	"github.com/twtiger/gosecco/data"
 	"github.com/twtiger/gosecco/native"
+	"github.com/twtiger/gosecco/parser"
+	"github.com/twtiger/gosecco/precompilation"
+	"github.com/twtiger/gosecco/tree"
+	"github.com/twtiger/gosecco/unifier"
 
 	"golang.org/x/sys/unix"
 )
@@ -31,10 +37,13 @@ func CheckSupport() error {
 // SeccompSettings contains the extra settings necessary to tweak the
 // behavior of the compilation process
 type SeccompSettings struct {
-	extraDefinitions      []string
-	defaultPositiveAction string
-	defaultNegativeAction string
-	defaultPolicyAction   string
+	// ExtraDefinitions contains paths to files with extra definitions to parse
+	ExtraDefinitions      []string
+	DefaultPositiveAction string
+	DefaultNegativeAction string
+	DefaultPolicyAction   string
+	ActionOnX32           string
+	ActionOnAuditFailure  string
 }
 
 // Prepare will take the given path and settings, parse and compile the given
@@ -49,7 +58,50 @@ func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
 	// - test that simplifier errors come through
 	// - test that the compiler works and returns the expected results
 	// - test that compiler errors come through
-	return nil, nil
+
+	// Parsing of extra files with definitions
+	extras := make([]map[string]tree.Macro, len(s.ExtraDefinitions))
+	for ix, ed := range s.ExtraDefinitions {
+		rp, e := parser.ParseFile(ed)
+		if e != nil {
+			return nil, e
+		}
+		p, e2 := unifier.Unify(rp, nil, "", "", "")
+		if e2 != nil {
+			return nil, e2
+		}
+		extras[ix] = p.Macros
+	}
+
+	// Parsing
+	rp, err := parser.ParseFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unifying
+	pol, err := unifier.Unify(rp, extras, s.DefaultPositiveAction, s.DefaultNegativeAction, s.DefaultPolicyAction)
+	if err != nil {
+		return nil, err
+	}
+
+	// Type checking
+	errors := checker.EnsureValid(pol)
+	if len(errors) > 0 {
+		return nil, errors[0]
+	}
+
+	// Simplification
+	// TODO: when we have the toplevel call
+
+	// Pre-compilation
+	errors = precompilation.EnsureValid(pol)
+	if len(errors) > 0 {
+		return nil, errors[0]
+	}
+
+	// Compilation
+	return compiler.Compile(pol)
 }
 
 // Compile provides the compatibility interface for gosecco - it has the same signature as
@@ -60,11 +112,14 @@ func Compile(path string, enforce bool) ([]unix.SockFilter, error) {
 	// TODO: set all three default actions correctly
 
 	settings := SeccompSettings{}
-	settings.defaultPositiveAction = "allow"
+	settings.DefaultPositiveAction = "allow"
+	settings.ActionOnAuditFailure = "kill"
 	if enforce {
-		settings.defaultNegativeAction = "kill"
+		settings.DefaultNegativeAction = "kill"
+		settings.DefaultPolicyAction = "kill"
 	} else {
-		settings.defaultNegativeAction = "trace"
+		settings.DefaultNegativeAction = "trace"
+		settings.DefaultPolicyAction = "trace"
 	}
 
 	return Prepare(path, settings)
@@ -78,11 +133,14 @@ func CompileBlacklist(path string, enforce bool) ([]unix.SockFilter, error) {
 	// TODO: set all three default actions correctly
 
 	settings := SeccompSettings{}
-	settings.defaultNegativeAction = "allow"
+	settings.DefaultNegativeAction = "allow"
+	settings.DefaultPolicyAction = "allow"
+	settings.ActionOnX32 = "kill"
+	settings.ActionOnAuditFailure = "kill"
 	if enforce {
-		settings.defaultPositiveAction = "kill"
+		settings.DefaultPositiveAction = "kill"
 	} else {
-		settings.defaultPositiveAction = "trace"
+		settings.DefaultPositiveAction = "trace"
 	}
 
 	return Prepare(path, settings)

@@ -12,7 +12,6 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// TODO: add the prefix
 // TODO: compare go-seccomp and gosecco policy evaluation
 
 // Compile will take a parsed policy and generate an optimized sock filter for that policy
