@@ -3,7 +3,7 @@ package asm
 import (
 	"syscall"
 
-	"github.com/twtiger/gosecco/compiler2"
+	"github.com/twtiger/gosecco/compiler"
 
 	"golang.org/x/sys/unix"
 
@@ -68,12 +68,12 @@ func (s *LoaderSuite) Test_simpleLoad(c *C) {
 
 		unix.SockFilter{
 			Code: syscall.BPF_RET | syscall.BPF_K,
-			K:    compiler2.SECCOMP_RET_ALLOW,
+			K:    compiler.SECCOMP_RET_ALLOW,
 		},
 
 		unix.SockFilter{
 			Code: syscall.BPF_RET | syscall.BPF_K,
-			K:    compiler2.SECCOMP_RET_KILL,
+			K:    compiler.SECCOMP_RET_KILL,
 		},
 	}
 

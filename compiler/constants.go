@@ -1,4 +1,4 @@
-package compiler2
+package compiler
 
 const (
 	SECCOMP_RET_KILL  = uint32(0x00000000) /* kill the task immediately */

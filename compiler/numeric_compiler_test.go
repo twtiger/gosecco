@@ -1,4 +1,4 @@
-package compiler2
+package compiler
 
 import (
 	"syscall"

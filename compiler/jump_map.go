@@ -1,4 +1,4 @@
-package compiler2
+package compiler
 
 type jumpMap struct {
 	labelToPosition map[label][]int

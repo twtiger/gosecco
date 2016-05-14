@@ -44,7 +44,7 @@ run-cover: clean-cover
 	go test -coverprofile=.coverprofiles/precompilation.coverprofile     ./precompilation
 	go test -coverprofile=.coverprofiles/simplifier.coverprofile ./simplifier
 	go test -coverprofile=.coverprofiles/unifier.coverprofile ./unifier
-	go test -coverprofile=.coverprofiles/compiler2.coverprofile ./compiler2
+	go test -coverprofile=.coverprofiles/compiler.coverprofile ./compiler
 	go test -coverprofile=.coverprofiles/main.coverprofile
 	gover .coverprofiles .coverprofiles/gover.coverprofile
 

@@ -1,4 +1,4 @@
-package compiler2
+package compiler
 
 func (c *compilerContext) compileAuditArchCheck(on label) {
 	// do(bpfLoadArch())
