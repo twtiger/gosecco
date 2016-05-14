@@ -12,7 +12,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// TODO: add the prefix and postfix
+// TODO: add the prefix
 // TODO: compare go-seccomp and gosecco policy evaluation
 
 // Compile will take a parsed policy and generate an optimized sock filter for that policy
@@ -90,6 +90,8 @@ func (c *compilerContext) sortedActions() []string {
 
 func (c *compilerContext) compile(policy tree.Policy) ([]unix.SockFilter, error) {
 	c.setDefaults(policy.DefaultPositiveAction, policy.DefaultNegativeAction, policy.DefaultPolicyAction)
+	c.compileAuditArchCheck(policy.ActionOnAuditFailure)
+	c.compileX32ABICheck(policy.ActionOnX32)
 
 	for _, r := range policy.Rules {
 		if err := c.compileRule(r); err != nil {
@@ -236,6 +238,10 @@ func (c *compilerContext) opWithJumps(code uint16, k uint32, jt, jf label) {
 
 func (c *compilerContext) jumpOnEq(val uint32, jt, jf label) {
 	c.opWithJumps(OP_JEQ_K, val, jt, jf)
+}
+
+func (c *compilerContext) jumpIfBitSet(val uint32, jt, jf label) {
+	c.opWithJumps(OP_JSET_K, val, jt, jf)
 }
 
 func (c *compilerContext) pushAToStack() error {

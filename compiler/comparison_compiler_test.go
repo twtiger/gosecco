@@ -27,6 +27,8 @@ func (s *ComparisonCompilerSuite) Test_SingleComparisons(c *C) {
 
 	res, _ := ctx.compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t00\t09\tC000003E\n"+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t05\t1\n"+
 		"ld_imm\t1\n"+

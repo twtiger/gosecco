@@ -30,6 +30,7 @@ const OP_LSH_X = syscall.BPF_ALU | syscall.BPF_LSH | syscall.BPF_X
 const OP_RSH_X = syscall.BPF_ALU | syscall.BPF_RSH | syscall.BPF_X
 
 const OP_JEQ_K = syscall.BPF_JMP | syscall.BPF_JEQ | syscall.BPF_K
+const OP_JSET_K = syscall.BPF_JMP | syscall.BPF_JSET | syscall.BPF_K
 
 const OP_JEQ_X = syscall.BPF_JMP | syscall.BPF_JEQ | syscall.BPF_X
 const OP_JGT_X = syscall.BPF_JMP | syscall.BPF_JGT | syscall.BPF_X

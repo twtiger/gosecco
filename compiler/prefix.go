@@ -1,23 +1,31 @@
 package compiler
 
-func (c *compilerContext) compileAuditArchCheck(on label) {
-	// do(bpfLoadArch())
-	// do(bpfJeq(auditArch, 1, 0))
-	// do(bpfRet(retKill()))
+import "github.com/twtiger/gosecco/native"
+
+const archIndex = 4
+
+func (c *compilerContext) compileAuditArchCheck(on string) {
+	if on == "" {
+		on = "kill"
+	}
+
+	failure := c.getOrCreateAction(on)
+	correct := c.newLabel()
+
+	c.loadAt(archIndex)
+	c.jumpOnEq(native.AuditArch, correct, failure)
+	c.labelHere(correct)
 }
 
-func (c *compilerContext) compileX32ABICheck(on label) {
-	//  that triggers if the X32_SYSCALL_BIT is set. load NR
+func (c *compilerContext) compileX32ABICheck(on string) {
+	if on == "" {
+		return
+	}
 
-	// var X32_SYSCALL_BIT = uint32(C.__X32_SYSCALL_BIT)
+	failure := c.getOrCreateAction(on)
+	correct := c.newLabel()
 
-	// do(bpfLoadArch())
-	// do(bpfJeq(auditArch, 0, 2))
-
-	// do(bpfLoadNR())
-
-	// // Kill if NR > X32_SYSCALL_BIT-1
-
-	// do(bpfJgt(X32_SYSCALL_BIT-1, 0, 1))
-	// do(bpfRet(retKill()))
+	c.loadAt(syscallNameIndex)
+	c.jumpIfBitSet(native.X32SyscallBit, correct, failure)
+	c.labelHere(correct)
 }

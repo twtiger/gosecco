@@ -10,6 +10,8 @@ type Policy struct {
 	DefaultPositiveAction string
 	DefaultNegativeAction string
 	DefaultPolicyAction   string
+	ActionOnX32           string
+	ActionOnAuditFailure  string
 	Macros                map[string]Macro
 	Rules                 []Rule
 }

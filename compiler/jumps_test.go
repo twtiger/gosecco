@@ -34,6 +34,9 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsUnconditionalJumpPoint(c *C) {
 
 	res, _ := ctx.compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t01\t00\tC000003E\n"+
+		"jmp\t9\n"+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t01\t1\n"+
 		"jmp\t5\n"+
@@ -66,6 +69,9 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsMulipleUnconditionalJumpPoint(c *C) {
 
 	res, _ := ctx.compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t01\t00\tC000003E\n"+
+		"jmp\tC\n"+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t01\t1\n"+
 		"jmp\t8\n"+
@@ -101,6 +107,9 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithTwoComparisons(c *C) {
 
 	res, _ := ctx.compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t01\t00\tC000003E\n"+
+		"jmp\t13\n"+
 		"ld_abs\t0\n"+
 		"jeq_k\t01\t00\t1\n"+
 		"jmp\t7\n"+
@@ -108,8 +117,8 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithTwoComparisons(c *C) {
 		"st\t0\n"+
 		"ld_imm\t2A\n"+
 		"ldx_mem\t0\n"+
-		"jeq_x\t01\t00\n"+
-		"jmp\tA\n"+
+		"jmp\tB\n"+
+		"jeq_x\t00\t01\n"+
 		"jmp\t8\n"+
 		"jeq_k\t01\t00\t0\n"+
 		"jmp\t5\n"+
@@ -139,6 +148,9 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithNotEqual(c *C) {
 
 	res, _ := ctx.compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t01\t00\tC000003E\n"+
+		"jmp\tA\n"+
 		"ld_abs\t0\n"+
 		"jeq_k\t01\t00\t1\n"+
 		"jmp\t5\n"+
@@ -172,6 +184,9 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithNotEqualWithMoreThanOneRule(c *C) {
 
 	res, _ := ctx.compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t01\t00\tC000003E\n"+
+		"jmp\t13\n"+
 		"ld_abs\t0\n"+
 		"jeq_k\t01\t00\t1\n"+
 		"jmp\t7\n"+
