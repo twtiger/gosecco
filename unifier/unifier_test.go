@@ -361,8 +361,6 @@ func (s *UnifierSuite) Test_Unify_withNoVariableDefinedRaisesNoVariableDefinedEr
 	}
 
 	_, error := Unify(input, nil, "", "", "")
-	// TODO handle being able to return nil?
-	//c.Assert(output, IsNil)
 	c.Assert(error, ErrorMatches, "Variable not defined")
 }
 
