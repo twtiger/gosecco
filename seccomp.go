@@ -51,12 +51,11 @@ type SeccompSettings struct {
 // data, combined with the settings - and returns the bytecode
 func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
 	// TODO: test when compiler is ready:
-	// - test that parser errors come through
-	// - test that unification works and that errors come through
 	// - test that default pos and neg actions come through
 	// - test that the type checker errors come through
 	// - test that the simplifier is invoked and simplifies stuff
 	// - test that simplifier errors come through
+	// - test panic when default settings are not set
 	// - test that the compiler works and returns the expected results
 	// - test that compiler errors come through
 
