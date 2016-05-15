@@ -45,10 +45,7 @@ func (t *precompilationTypeChecker) AcceptArithmetic(v tree.Arithmetic) {
 
 // AcceptBinaryNegation implements Visitor
 func (t *precompilationTypeChecker) AcceptBinaryNegation(v tree.BinaryNegation) {
-	// TODO: this is not allowed - the simplifier should have removed it.
-	if res := checkPrecompilationRules(v.Operand); res != nil {
-		t.result = res
-	}
+	t.result = fmt.Errorf("no binary negation expressions allowed - this is probably a programmer error: %s", tree.ExpressionString(v))
 }
 
 // AcceptBooleanLiteral implements Visitor

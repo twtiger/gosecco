@@ -90,6 +90,17 @@ func (s *PrecompilationCheckerSuite) Test_noVariables(c *C) {
 	c.Assert(val[0], ErrorMatches, "\\[read\\] no variables allowed - this is probably a programmer error: blah2")
 }
 
+func (s *PrecompilationCheckerSuite) Test_noBinaryNegation(c *C) {
+	toCheck := tree.Policy{Rules: []tree.Rule{
+		tree.Rule{Name: "read", Body: tree.BinaryNegation{tree.NumericLiteral{42}}},
+	}}
+
+	val := EnsureValid(toCheck)
+
+	c.Assert(len(val), Equals, 1)
+	c.Assert(val[0], ErrorMatches, "\\[read\\] no binary negation expressions allowed - this is probably a programmer error: \\(binNeg 42\\)")
+}
+
 func (s *PrecompilationCheckerSuite) Test_noCalls(c *C) {
 	toCheck := tree.Policy{Rules: []tree.Rule{
 		tree.Rule{Name: "read", Body: tree.Comparison{Op: tree.EQL, Left: tree.Call{Name: "blah"}, Right: tree.NumericLiteral{42}}},
