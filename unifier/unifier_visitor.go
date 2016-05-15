@@ -123,7 +123,6 @@ func (r *replacer) AcceptOr(b tree.Or) {
 }
 
 func (r *replacer) AcceptVariable(b tree.Variable) {
-	// TODO handle case where a macro is called that should take a variable but is not given one
 	expr, ok := r.macros[b.Name]
 	if ok {
 		r.expression = expr.Body
