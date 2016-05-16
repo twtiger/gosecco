@@ -17,8 +17,8 @@ func (s *ComparisonCompilerSuite) Test_SingleComparisons(c *C) {
 
 	p := tree.Policy{
 		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
-		Rules: []tree.Rule{
-			tree.Rule{
+		Rules: []*tree.Rule{
+			&tree.Rule{
 				Name: "write",
 				Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
 			},

@@ -29,7 +29,7 @@ func EnsureValid(p tree.Policy) []error {
 }
 
 type validityChecker struct {
-	rules []tree.Rule
+	rules []*tree.Rule
 	seen  map[string]bool
 }
 
@@ -42,8 +42,7 @@ func (e *ruleError) Error() string {
 	return fmt.Sprintf("[%s] %s", e.syscallName, e.err)
 }
 
-func checkValidSyscall(r tree.Rule) error {
-
+func checkValidSyscall(r *tree.Rule) error {
 	if _, ok := constants.GetSyscall(r.Name); !ok {
 		return errors.New("invalid syscall")
 	}
@@ -80,7 +79,7 @@ func either(e1, e2 error) error {
 	return e2
 }
 
-func (v *validityChecker) checkRule(r tree.Rule) error {
+func (v *validityChecker) checkRule(r *tree.Rule) error {
 	return either(
 		typeCheckExpectingBoolean(r.Body),
 		checkRestrictedArgumentUsage(r.Body))

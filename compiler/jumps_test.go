@@ -16,16 +16,16 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsUnconditionalJumpPoint(c *C) {
 
 	p := tree.Policy{
 		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
-		Rules: []tree.Rule{
-			tree.Rule{
+		Rules: []*tree.Rule{
+			&tree.Rule{
 				Name: "write",
 				Body: tree.BooleanLiteral{true},
 			},
-			tree.Rule{
+			&tree.Rule{
 				Name: "vhangup",
 				Body: tree.BooleanLiteral{true},
 			},
-			tree.Rule{
+			&tree.Rule{
 				Name: "read",
 				Body: tree.BooleanLiteral{true},
 			},
@@ -55,12 +55,12 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsMulipleUnconditionalJumpPoint(c *C) {
 
 	p := tree.Policy{
 		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
-		Rules: []tree.Rule{
-			tree.Rule{
+		Rules: []*tree.Rule{
+			&tree.Rule{
 				Name: "write",
 				Body: tree.BooleanLiteral{true},
 			},
-			tree.Rule{
+			&tree.Rule{
 				Name: "read",
 				Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
 			},
@@ -93,12 +93,12 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithTwoComparisons(c *C) {
 
 	p := tree.Policy{
 		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
-		Rules: []tree.Rule{
-			tree.Rule{
+		Rules: []*tree.Rule{
+			&tree.Rule{
 				Name: "write",
 				Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
 			},
-			tree.Rule{
+			&tree.Rule{
 				Name: "read",
 				Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
 			},
@@ -138,8 +138,8 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithNotEqual(c *C) {
 
 	p := tree.Policy{
 		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
-		Rules: []tree.Rule{
-			tree.Rule{
+		Rules: []*tree.Rule{
+			&tree.Rule{
 				Name: "write",
 				Body: tree.Comparison{Op: tree.NEQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
 			},
@@ -170,12 +170,12 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithNotEqualWithMoreThanOneRule(c *C) {
 
 	p := tree.Policy{
 		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
-		Rules: []tree.Rule{
-			tree.Rule{
+		Rules: []*tree.Rule{
+			&tree.Rule{
 				Name: "write",
 				Body: tree.Comparison{Op: tree.NEQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
 			},
-			tree.Rule{
+			&tree.Rule{
 				Name: "read",
 				Body: tree.Comparison{Op: tree.NEQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
 			},

@@ -15,8 +15,8 @@ var _ = Suite(&CompilerSuite{})
 func (s *CompilerSuite) Test_simplestCompilation(c *C) {
 	p := tree.Policy{
 		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
-		Rules: []tree.Rule{
-			tree.Rule{
+		Rules: []*tree.Rule{
+			&tree.Rule{
 				Name: "write",
 				Body: tree.BooleanLiteral{true},
 			},
@@ -38,12 +38,12 @@ func (s *CompilerSuite) Test_simplestCompilation(c *C) {
 func (s *CompilerSuite) Test_nextSimplestCompilation(c *C) {
 	p := tree.Policy{
 		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
-		Rules: []tree.Rule{
-			tree.Rule{
+		Rules: []*tree.Rule{
+			&tree.Rule{
 				Name: "write",
 				Body: tree.BooleanLiteral{true},
 			},
-			tree.Rule{
+			&tree.Rule{
 				Name: "vhangup",
 				Body: tree.BooleanLiteral{true},
 			},
@@ -85,8 +85,8 @@ func (s *CompilerSuite) Test_stackDoesNotPopAfterReachingTheLowestIndex(c *C) {
 func (s *CompilerSuite) Test_compilationOfRuleWithDefinedNegativeAction(c *C) {
 	p := tree.Policy{
 		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
-		Rules: []tree.Rule{
-			tree.Rule{
+		Rules: []*tree.Rule{
+			&tree.Rule{
 				Name:           "write",
 				NegativeAction: "trace",
 				Body:           tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
@@ -114,8 +114,8 @@ func (s *CompilerSuite) Test_compilationOfRuleWithDefinedNegativeAction(c *C) {
 func (s *CompilerSuite) Test_policyWithDefaultAction(c *C) {
 	p := tree.Policy{
 		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "allow",
-		Rules: []tree.Rule{
-			tree.Rule{
+		Rules: []*tree.Rule{
+			&tree.Rule{
 				Name: "write",
 				Body: tree.BooleanLiteral{true},
 			},
@@ -137,8 +137,8 @@ func (s *CompilerSuite) Test_policyWithDefaultAction(c *C) {
 func (s *CompilerSuite) Test_policyWithAnotherDefaultAction(c *C) {
 	p := tree.Policy{
 		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "trace",
-		Rules: []tree.Rule{
-			tree.Rule{
+		Rules: []*tree.Rule{
+			&tree.Rule{
 				Name: "write",
 				Body: tree.BooleanLiteral{true},
 			},
@@ -161,8 +161,8 @@ func (s *CompilerSuite) Test_policyWithAnotherDefaultAction(c *C) {
 func (s *CompilerSuite) Test_policyWithDefaultPositiveAction(c *C) {
 	p := tree.Policy{
 		DefaultPositiveAction: "trace", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
-		Rules: []tree.Rule{
-			tree.Rule{
+		Rules: []*tree.Rule{
+			&tree.Rule{
 				Name: "write",
 				Body: tree.BooleanLiteral{true},
 			},
@@ -184,8 +184,8 @@ func (s *CompilerSuite) Test_policyWithDefaultPositiveAction(c *C) {
 func (s *CompilerSuite) Test_policyWithNegativeDefaultAction(c *C) {
 	p := tree.Policy{
 		DefaultPositiveAction: "allow", DefaultNegativeAction: "trace", DefaultPolicyAction: "kill",
-		Rules: []tree.Rule{
-			tree.Rule{
+		Rules: []*tree.Rule{
+			&tree.Rule{
 				Name: "write",
 				Body: tree.Comparison{Op: tree.EQL, Left: tree.NumericLiteral{42}, Right: tree.NumericLiteral{1}},
 			},

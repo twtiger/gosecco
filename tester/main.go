@@ -43,7 +43,7 @@ func main() {
 	}
 
 	if e != nil {
-		fmt.Printf("Had error when compiling: %#v\n", e)
+		fmt.Printf("Had error when compiling: %#v - %s\n", e, e.Error())
 	} else {
 		fmt.Print(asm.Dump(filters))
 	}

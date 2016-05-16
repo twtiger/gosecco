@@ -140,7 +140,7 @@ func (c *compilerContext) checkCorrectSyscall(name string, next label) {
 	c.labelHere(goesNowhere)
 }
 
-func (c *compilerContext) compileRule(r tree.Rule) error {
+func (c *compilerContext) compileRule(r *tree.Rule) error {
 	next := c.newLabel()
 
 	pos, neg := c.compileActions(r.PositiveAction, r.NegativeAction)

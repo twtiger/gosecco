@@ -41,7 +41,7 @@ func (s *UnifierSuite) Test_Unify_withRuleToUnify(c *C) {
 
 	c.Assert(len(output.Macros), Equals, 0)
 	c.Assert(len(output.Rules), Equals, 1)
-	c.Assert(output.Rules[0], Equals, rule)
+	c.Assert(*(output.Rules[0]), Equals, rule)
 }
 
 func (s *UnifierSuite) Test_Unify_withRuleAndMacroThatDoesntUnify(c *C) {
@@ -67,7 +67,7 @@ func (s *UnifierSuite) Test_Unify_withRuleAndMacroThatDoesntUnify(c *C) {
 	c.Assert(len(output.Macros), Equals, 1)
 	c.Assert(output.Macros["var1"], DeepEquals, macro)
 	c.Assert(len(output.Rules), Equals, 1)
-	c.Assert(output.Rules[0], DeepEquals, rule)
+	c.Assert(*(output.Rules[0]), DeepEquals, rule)
 }
 
 func (s *UnifierSuite) Test_Unify_withRuleAndMacroToActuallyUnify(c *C) {
@@ -424,7 +424,7 @@ func (s *UnifierSuite) Test_Unify_withDefaultPositiveNumericActionSetsPositiveAc
 	c.Assert(output.DefaultPolicyAction, Equals, "EACCESS")
 	c.Assert(len(output.Macros), Equals, 0)
 	c.Assert(len(output.Rules), Equals, 1)
-	c.Assert(output.Rules[0], DeepEquals, rule)
+	c.Assert(*(output.Rules[0]), DeepEquals, rule)
 }
 
 func (s *UnifierSuite) Test_Unify_withDefaultPositiveVariableActionSetsPositiveAction(c *C) {
@@ -451,7 +451,7 @@ func (s *UnifierSuite) Test_Unify_withDefaultPositiveVariableActionSetsPositiveA
 	c.Assert(output.DefaultNegativeAction, Equals, "kill")
 	c.Assert(len(output.Macros), Equals, 0)
 	c.Assert(len(output.Rules), Equals, 1)
-	c.Assert(output.Rules[0], DeepEquals, rule)
+	c.Assert(*(output.Rules[0]), DeepEquals, rule)
 }
 
 func (s *UnifierSuite) Test_Unify_withDefaultNegativeNumericActionSetsNegativeAction(c *C) {
@@ -478,7 +478,7 @@ func (s *UnifierSuite) Test_Unify_withDefaultNegativeNumericActionSetsNegativeAc
 	c.Assert(output.DefaultNegativeAction, Equals, "0")
 	c.Assert(len(output.Macros), Equals, 0)
 	c.Assert(len(output.Rules), Equals, 1)
-	c.Assert(output.Rules[0], DeepEquals, rule)
+	c.Assert(*(output.Rules[0]), DeepEquals, rule)
 }
 
 func (s *UnifierSuite) Test_Unify_withDefaultNegativeVariableActionSetsNegativeAction(c *C) {
@@ -505,7 +505,7 @@ func (s *UnifierSuite) Test_Unify_withDefaultNegativeVariableActionSetsNegativeA
 	c.Assert(output.DefaultNegativeAction, Equals, "kill")
 	c.Assert(len(output.Macros), Equals, 0)
 	c.Assert(len(output.Rules), Equals, 1)
-	c.Assert(output.Rules[0], DeepEquals, rule)
+	c.Assert(*(output.Rules[0]), DeepEquals, rule)
 }
 
 func (s *UnifierSuite) Test_Unify_withDefaultNegativeNumericActionSetsNegativeActionAndOtherMacros(c *C) {

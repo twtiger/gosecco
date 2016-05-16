@@ -13,7 +13,7 @@ func reduceTransformers(inp tree.Expression, ss ...tree.Transformer) tree.Expres
 }
 
 // SimplifyPolicy will take a policy and simplify all expressions in it
-func SimplifyPolicy(pol tree.Policy) {
+func SimplifyPolicy(pol *tree.Policy) {
 	for _, r := range pol.Rules {
 		r.Body = Simplify(r.Body)
 	}

@@ -13,5 +13,5 @@ type Policy struct {
 	ActionOnX32           string
 	ActionOnAuditFailure  string
 	Macros                map[string]Macro
-	Rules                 []Rule
+	Rules                 []*Rule
 }

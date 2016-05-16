@@ -39,7 +39,7 @@ func combineMacroMaps(ms []map[string]tree.Macro) map[string]tree.Macro {
 // and DEFAULT_NEGATIVE variables anywhere in the files. The default actions can only be defined once in a file, and will be in effect
 // for all rules in that file, unless a specific rule overrides the default actions.
 func Unify(r tree.RawPolicy, additionalMacros []map[string]tree.Macro, defaultPositive, defaultNegative, defaultPolicy string) (tree.Policy, error) {
-	var rules []tree.Rule
+	var rules []*tree.Rule
 	macros := combineMacroMaps(additionalMacros)
 	collectedMacros := make(map[string]tree.Macro)
 	for _, e := range r.RuleOrMacros {
@@ -49,7 +49,7 @@ func Unify(r tree.RawPolicy, additionalMacros []map[string]tree.Macro, defaultPo
 			if err != nil {
 				return tree.Policy{}, err
 			}
-			rules = append(rules, r)
+			rules = append(rules, &r)
 		case tree.Macro:
 			switch v.Name {
 			case "DEFAULT_POSITIVE":

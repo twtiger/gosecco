@@ -92,7 +92,7 @@ func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
 	}
 
 	// Simplification
-	simplifier.SimplifyPolicy(pol)
+	simplifier.SimplifyPolicy(&pol)
 
 	// Pre-compilation
 	errors = precompilation.EnsureValid(pol)

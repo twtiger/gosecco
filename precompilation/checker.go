@@ -20,7 +20,7 @@ import (
 // - No LTE
 
 type precompilationChecker struct {
-	rules []tree.Rule
+	rules []*tree.Rule
 }
 
 // EnsureValid takes a policy and returns all the errors encounterered that is a mismatch for the compiler
@@ -52,7 +52,7 @@ func (v *precompilationChecker) check() []error {
 	return result
 }
 
-func (v *precompilationChecker) checkRule(r tree.Rule) error {
+func (v *precompilationChecker) checkRule(r *tree.Rule) error {
 	return checkPrecompilationRules(r.Body)
 }
 
