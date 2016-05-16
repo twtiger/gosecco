@@ -41,6 +41,37 @@ func (s *ComparisonCompilerSuite) Test_SingleComparisons(c *C) {
 		"ret_k\t0\n")
 }
 
+func (s *ComparisonCompilerSuite) Test_SingleComparisonsArgumentToNumeric(c *C) {
+	ctx := createCompilerContext()
+
+	p := tree.Policy{
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
+		Rules: []*tree.Rule{
+			&tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{Op: tree.EQL,
+					Left:  tree.Argument{Index: 0, Type: tree.Low},
+					Right: tree.NumericLiteral{1}},
+			},
+		},
+	}
+
+	res, _ := ctx.compile(p)
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t00\t09\tC000003E\n"+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t05\t1\n"+
+		"ld_imm\t1\n"+
+		"st\t0\n"+
+		"ld_abs\t14\n"+
+		"ldx_mem\t0\n"+
+		"jeq_x\t01\t02\n"+
+		"jmp\t1\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
+}
+
 func (s *ComparisonCompilerSuite) Test_comparisonShouldPassAlongErrorsOnTheRightSide(c *C) {
 	p := tree.Comparison{
 		Right: tree.BooleanLiteral{false},
