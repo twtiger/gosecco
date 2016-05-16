@@ -100,8 +100,6 @@ func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
 // Compile from the go-seccomp package and should provide the same behavior.
 // However, the modern interface is through the Prepare function
 func Compile(path string, enforce bool) ([]unix.SockFilter, error) {
-	// TODO: test when compiler is done
-	// TODO: set all three default actions correctly
 
 	settings := SeccompSettings{}
 	settings.DefaultPositiveAction = "allow"
@@ -121,8 +119,6 @@ func Compile(path string, enforce bool) ([]unix.SockFilter, error) {
 // It has the same signature as CompileBlacklist from Subgraphs go-seccomp and should provide the same behavior.
 // However, the modern interface is through the Prepare function
 func CompileBlacklist(path string, enforce bool) ([]unix.SockFilter, error) {
-	// TODO: test when compiler is done
-	// TODO: set all three default actions correctly
 
 	settings := SeccompSettings{}
 	settings.DefaultNegativeAction = "allow"

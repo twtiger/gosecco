@@ -115,3 +115,73 @@ func (s *SeccompSuite) Test_parseSetsDefaultActions(c *C) {
 		"ret_k\t0\n"+
 		"ret_k\t7FF00000\n")
 }
+
+func (s *SeccompSuite) Test_compileWithEnforce(c *C) {
+	f := getActualTestFolder() + "/valid_test_policy"
+	res, ee := Compile(f, true)
+
+	c.Assert(ee, Equals, nil)
+
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t00\t05\tC000003E\n"+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t01\t1\n"+
+		"jmp\t1\n"+
+		"jmp\t1\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
+}
+
+func (s *SeccompSuite) Test_compileWithoutEnforce(c *C) {
+	f := getActualTestFolder() + "/valid_test_policy"
+	res, ee := Compile(f, false)
+
+	c.Assert(ee, Equals, nil)
+
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t00\t05\tC000003E\n"+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t01\t1\n"+
+		"jmp\t1\n"+
+		"jmp\t2\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n"+
+		"ret_k\t7FF00000\n")
+}
+
+func (s *SeccompSuite) Test_compileBlacklistWithEnforce(c *C) {
+	f := getActualTestFolder() + "/valid_test_policy"
+	res, ee := CompileBlacklist(f, true)
+
+	c.Assert(ee, Equals, nil)
+
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t00\t05\tC000003E\n"+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t01\t1\n"+
+		"jmp\t2\n"+
+		"jmp\t0\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
+}
+
+func (s *SeccompSuite) Test_compileBlacklistWithoutEnforce(c *C) {
+	f := getActualTestFolder() + "/valid_test_policy"
+	res, ee := CompileBlacklist(f, false)
+
+	c.Assert(ee, Equals, nil)
+
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t00\t05\tC000003E\n"+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t01\t1\n"+
+		"jmp\t3\n"+
+		"jmp\t0\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n"+
+		"ret_k\t7FF00000\n")
+}
