@@ -28,23 +28,26 @@ import (
 // operators and try to put the constant to the right, where K can be used.
 
 func (c *compilerContext) optimizeCode() {
-	// We run through the optimization twice in the hope
-	// that some of the optimizations will build on each
-	// other with a second lap
-	c.optimizeCycle()
-	c.optimizeCycle()
+	// We run optimizations over and over until we can't apply anymore
+	for c.optimizeCycle() {
+	}
 }
 
-func (c *compilerContext) optimizeCycle() {
+func (c *compilerContext) optimizeCycle() bool {
+	optimized := false
 	index := 0
 
 	// Do not pull out the length calculation here, since the length
 	// can change during optimization
 	for index < len(c.result) {
-		if !c.optimizeAt(index) {
+		res := c.optimizeAt(index)
+		if res {
+			optimized = true
+		} else {
 			index++
 		}
 	}
+	return optimized
 }
 
 type optimizer func(*compilerContext, int) bool
