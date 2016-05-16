@@ -102,7 +102,11 @@ func (c *compilerContext) compile(policy tree.Policy) ([]unix.SockFilter, error)
 
 	for _, k := range c.sortedActions() {
 		c.labelHere(c.actions[k])
-		c.op(OP_RET_K, actionDescriptionToK(k))
+		action, err := actionDescriptionToK(k)
+		if err != nil {
+			return nil, err
+		}
+		c.op(OP_RET_K, action)
 	}
 
 	c.optimizeCode()

@@ -10,30 +10,42 @@ type ReturnActionsSuite struct{}
 
 var _ = Suite(&ReturnActionsSuite{})
 
+func assertWithError(c *C, actionName string, expAction uint32, expErr string) {
+	action, err := actionDescriptionToK(actionName)
+
+	c.Assert(action, Equals, expAction)
+
+	if expErr == "" {
+		c.Assert(err, IsNil)
+	} else {
+		c.Assert(err, ErrorMatches, expErr)
+	}
+}
+
 func (s *ReturnActionsSuite) Test_returnTrap(c *C) {
-	c.Assert(actionDescriptionToK("Trap"), Equals, SECCOMP_RET_TRAP)
+	assertWithError(c, "Trap", SECCOMP_RET_TRAP, "")
 }
 
 func (s *ReturnActionsSuite) Test_returnKill(c *C) {
-	c.Assert(actionDescriptionToK("KILL"), Equals, SECCOMP_RET_KILL)
+	assertWithError(c, "KILL", SECCOMP_RET_KILL, "")
 }
 
 func (s *ReturnActionsSuite) Test_returnTrace(c *C) {
-	c.Assert(actionDescriptionToK("trace"), Equals, SECCOMP_RET_TRACE)
+	assertWithError(c, "trace", SECCOMP_RET_TRACE, "")
 }
 
 func (s *ReturnActionsSuite) Test_returnAllow(c *C) {
-	c.Assert(actionDescriptionToK("AlloW"), Equals, SECCOMP_RET_ALLOW)
+	assertWithError(c, "AlloW", SECCOMP_RET_ALLOW, "")
 }
 
 func (s *ReturnActionsSuite) Test_returnNumericValue(c *C) {
-	c.Assert(actionDescriptionToK("42"), Equals, uint32(0x5002a))
+	assertWithError(c, "42", uint32(0x5002a), "")
 }
 
 func (s *ReturnActionsSuite) Test_returnErrName(c *C) {
-	c.Assert(actionDescriptionToK("EPFNOSUPPORT"), Equals, uint32(0x50000|syscall.EPFNOSUPPORT))
+	assertWithError(c, "EPFNOSUPPORT", uint32(0x50000|syscall.EPFNOSUPPORT), "")
 }
 
 func (s *ReturnActionsSuite) Test_returnUnknown(c *C) {
-	c.Assert(actionDescriptionToK("Blarg"), Equals, uint32(0))
+	assertWithError(c, "Blarg", 0, "Invalid return action 'Blarg'")
 }

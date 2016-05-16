@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -16,25 +17,25 @@ const (
 )
 
 // actionDescriptionToK turns string specifications of return actions into compiled values acceptable for the compiler to insert
-func actionDescriptionToK(v string) uint32 {
+func actionDescriptionToK(v string) (action uint32, err error) {
 	switch strings.ToLower(v) {
 	case "trap":
-		return SECCOMP_RET_TRAP
+		return SECCOMP_RET_TRAP, nil
 	case "kill":
-		return SECCOMP_RET_KILL
+		return SECCOMP_RET_KILL, nil
 	case "allow":
-		return SECCOMP_RET_ALLOW
+		return SECCOMP_RET_ALLOW, nil
 	case "trace":
-		return SECCOMP_RET_TRACE
+		return SECCOMP_RET_TRACE, nil
 	}
 
 	if res, err := strconv.ParseUint(v, 0, 16); err == nil {
-		return SECCOMP_RET_ERRNO | uint32(res)
+		return SECCOMP_RET_ERRNO | uint32(res), nil
 	}
 
 	if res, ok := constants.GetError(v); ok {
-		return SECCOMP_RET_ERRNO | res
+		return SECCOMP_RET_ERRNO | res, nil
 	}
 
-	return 0
+	return 0, fmt.Errorf("Invalid return action '%s'", v)
 }
