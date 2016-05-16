@@ -28,6 +28,14 @@ import (
 // operators and try to put the constant to the right, where K can be used.
 
 func (c *compilerContext) optimizeCode() {
+	// We run through the optimization twice in the hope
+	// that some of the optimizations will build on each
+	// other with a second lap
+	c.optimizeCycle()
+	c.optimizeCycle()
+}
+
+func (c *compilerContext) optimizeCycle() {
 	index := 0
 
 	// Do not pull out the length calculation here, since the length
