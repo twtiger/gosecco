@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"fmt"
 	"syscall"
 
 	"golang.org/x/sys/unix"
@@ -32,8 +33,9 @@ func (c *compilerContext) optimizeCode() {
 	// Do not pull out the length calculation here, since the length
 	// can change during optimization
 	for index < len(c.result) {
-		c.optimizeAt(index)
-		index++
+		if !c.optimizeAt(index) {
+			index++
+		}
 	}
 }
 
@@ -43,10 +45,14 @@ var optimizers = []optimizer{
 	jumpAfterConditionalJumpOptimizer,
 }
 
-func (c *compilerContext) optimizeAt(i int) {
+func (c *compilerContext) optimizeAt(i int) bool {
+	optimized := false
 	for _, o := range optimizers {
-		o(c, i)
+		if o(c, i) {
+			optimized = true
+		}
 	}
+	return optimized
 }
 
 func isJump(s unix.SockFilter) bool {
@@ -89,10 +95,16 @@ func isNotOversizedJump(c *compilerContext, jumpPoint int) bool {
 func redirectJumpOf(c *compilerContext, ucond, cond int) {
 	newJumpTarget := c.uconds.jumpTargetOf(ucond)
 	c.uconds.removeJumpTarget(ucond)
-	sourceJm := c.jts
-	if c.jfs.countJumpsFrom(c, cond, ucond) == 1 {
+	var sourceJm *jumpMap
+
+	if c.jts.countJumpsFrom(c, ucond, cond) == 1 {
+		sourceJm = c.jts
+	} else if c.jfs.countJumpsFrom(c, ucond, cond) == 1 {
 		sourceJm = c.jfs
+	} else {
+		panic(fmt.Sprintf("No jumps to redirect (programmer error): ucond: %d cond: %d\n%#v\n%#v\n", ucond, cond, c.jts, c.labels))
 	}
+
 	oldLabel := c.labels.labelsAt(ucond)[0]
 	sourceJm.redirectJump(oldLabel, newJumpTarget)
 	c.labels.removeLabel(oldLabel)
@@ -112,184 +124,7 @@ func (c *compilerContext) removeInstructionAt(index int) {
 // This can be optimized to:
 //    jeq_k	13	00	3D
 func jumpAfterConditionalJumpOptimizer(c *compilerContext, ix int) bool {
-	// Found a good jump at: 3 for:
-	// ld_abs	4
-	// jeq_k	00	00	C000003E
-	// ld_abs	0
-	// jeq_k	00	00	1
-	// jmp	0
-	// jeq_k	00	00	0
-	// jmp	0
-	// jeq_k	00	00	10
-	// jmp	0
-	// jeq_k	00	00	13E
-	// jmp	0
-	// jmp	0
-	// ret_k	7FFF0000
-	// ret_k	0
-
-	// jts := &compiler.jumpMap{labelToPosition: map[compiler.label][]int{
-	// 	"generatedLabel001": []int{1},
-	// 	"generatedLabel004": []int{3},
-	// 	"generatedLabel006": []int{5},
-	// 	"generatedLabel008": []int{7},
-	// 	"generatedLabel010": []int{9},
-	// },
-	// 	positionToLabel: map[int]compiler.label{
-	// 		1: "generatedLabel001",
-	// 		3: "generatedLabel004",
-	// 		5: "generatedLabel006",
-	// 		7: "generatedLabel008",
-	// 		9: "generatedLabel010",
-	// 	}}
-
-	// jfs := &compiler.jumpMap{labelToPosition: map[compiler.label][]int{
-	// 	"generatedLabel000": []int{1},
-	// 	"generatedLabel002": []int{3},
-	// 	"generatedLabel005": []int{5},
-	// 	"generatedLabel007": []int{7},
-	// 	"generatedLabel009": []int{9},
-	// },
-	// 	positionToLabel: map[int]compiler.label{
-	// 		1: "generatedLabel000",
-	// 		3: "generatedLabel002",
-	// 		5: "generatedLabel005",
-	// 		7: "generatedLabel007",
-	// 		9: "generatedLabel009",
-	// 	}}
-
-	// uco := &compiler.jumpMap{labelToPosition: map[compiler.label][]int{
-	// 	"generatedLabel000": []int{11},
-	// 	"generatedLabel003": []int{4, 6, 8, 10},
-	// },
-	// 	positionToLabel: map[int]compiler.label{
-	// 		10: "generatedLabel003",
-	// 		11: "generatedLabel000",
-	// 		4:  "generatedLabel003",
-	// 		6:  "generatedLabel003",
-	// 		8:  "generatedLabel003",
-	// 	}}
-
-	// labels := &compiler.labelMap{labelToPosition: map[compiler.label]int{
-	// 	"generatedLabel000": 13,
-	// 	"generatedLabel001": 2,
-	// 	"generatedLabel002": 5,
-	// 	"generatedLabel003": 12,
-	// 	"generatedLabel004": 4,
-	// 	"generatedLabel005": 7,
-	// 	"generatedLabel006": 6,
-	// 	"generatedLabel007": 9,
-	// 	"generatedLabel008": 8,
-	// 	"generatedLabel009": 11,
-	// 	"generatedLabel010": 10,
-	// }, positionToLabel: map[int][]compiler.label{
-	// 	10: []compiler.label{"generatedLabel010"},
-	// 	11: []compiler.label{"generatedLabel009"},
-	// 	12: []compiler.label{"generatedLabel003"},
-	// 	13: []compiler.label{"generatedLabel000"},
-	// 	2:  []compiler.label{"generatedLabel001"},
-	// 	4:  []compiler.label{"generatedLabel004"},
-	// 	5:  []compiler.label{"generatedLabel002"},
-	// 	6:  []compiler.label{"generatedLabel006"},
-	// 	7:  []compiler.label{"generatedLabel005"},
-	// 	8:  []compiler.label{"generatedLabel008"},
-	// 	9:  []compiler.label{"generatedLabel007"},
-	// }}
-
-	// //    after:
-	// // ld_abs	4
-	// // jeq_k	00	00	C000003E
-	// // ld_abs	0
-	// // jeq_k	00	00	1
-	// // jeq_k	00	00	0
-	// // jmp	0
-	// // jeq_k	00	00	10
-	// // jmp	0
-	// // jeq_k	00	00	13E
-	// // jmp	0
-	// // jmp	0
-	// // ret_k	7FFF0000
-	// // ret_k	0
-
-	// jts := &compiler.jumpMap{labelToPosition: map[compiler.label][]int{
-	// 	"generatedLabel001": []int{1},
-	// 	"generatedLabel003": []int{3},
-	// 	"generatedLabel006": []int{4},
-	// 	"generatedLabel008": []int{6},
-	// 	"generatedLabel010": []int{8},
-	// }, positionToLabel: map[int]compiler.label{
-	// 	1: "generatedLabel001",
-	// 	3: "generatedLabel003",
-	// 	4: "generatedLabel006",
-	// 	6: "generatedLabel008",
-	// 	8: "generatedLabel010",
-	// }}
-
-	// jfs := &compiler.jumpMap{labelToPosition: map[compiler.label][]int{
-	// 	"generatedLabel000": []int{1},
-	// 	"generatedLabel002": []int{3},
-	// 	"generatedLabel005": []int{4},
-	// 	"generatedLabel007": []int{6},
-	// 	"generatedLabel009": []int{8},
-	// }, positionToLabel: map[int]compiler.label{
-	// 	1: "generatedLabel000",
-	// 	3: "generatedLabel002",
-	// 	4: "generatedLabel005",
-	// 	6: "generatedLabel007",
-	// 	8: "generatedLabel009",
-	// }}
-
-	// uco := &compiler.jumpMap{labelToPosition: map[compiler.label][]int{
-	// 	"generatedLabel000": []int{10},
-	// 	"generatedLabel003": []int{4, 5, 7, 9},
-	// },
-	// 	positionToLabel: map[int]compiler.label{
-	// 		10: "generatedLabel000",
-	// 		4:  "generatedLabel003",
-	// 		5:  "generatedLabel003",
-	// 		7:  "generatedLabel003",
-	// 		9:  "generatedLabel003",
-	// 	}}
-
-	// labels := &compiler.labelMap{labelToPosition: map[compiler.label]int{
-	// 	"generatedLabel000": 12,
-	// 	"generatedLabel001": 2,
-	// 	"generatedLabel002": 4,
-	// 	"generatedLabel003": 11,
-	// 	"generatedLabel005": 6,
-	// 	"generatedLabel006": 5,
-	// 	"generatedLabel007": 8,
-	// 	"generatedLabel008": 7,
-	// 	"generatedLabel009": 10,
-	// 	"generatedLabel010": 9,
-	// }, positionToLabel: map[int][]compiler.label{2: []compiler.label{"generatedLabel001"}, 12: []compiler.label{"generatedLabel000"}, 11: []compiler.label{"generatedLabel003"}, 10: []compiler.label{"generatedLabel009"}, 6: []compiler.label{"generatedLabel005"}, 9: []compiler.label{"generatedLabel010"}, 4: []compiler.label{"generatedLabel002"}, 5: []compiler.label{"generatedLabel006"}, 7: []compiler.label{"generatedLabel008"}, 8: []compiler.label{"generatedLabel007"}}}
-
-	// jts := &compiler.jumpMap{labelToPosition: map[compiler.label][]int{
-	// 	"generatedLabel001": []int{1},
-	// 	"generatedLabel003": []int{6},
-	// }, positionToLabel: map[int]compiler.label{1: "generatedLabel001", 6: "generatedLabel003"}}
-
-	// jfs := &compiler.jumpMap{labelToPosition: map[compiler.label][]int{
-	// 	"generatedLabel002": []int{3},
-	// 	"generatedLabel005": []int{4},
-	// 	"generatedLabel007": []int{5},
-	// 	"generatedLabel009": []int{6},
-	// 	"generatedLabel000": []int{1},
-	// }, positionToLabel: map[int]compiler.label{4: "generatedLabel005", 5: "generatedLabel007", 6: "generatedLabel009", 1: "generatedLabel000", 3: "generatedLabel002"}}
-
-	// uco := &compiler.jumpMap{labelToPosition: map[compiler.label][]int{
-	// 	"generatedLabel000": []int{7},
-	// }, positionToLabel: map[int]compiler.label{7: "generatedLabel000"}}
-
-	// labels := &compiler.labelMap{labelToPosition: map[compiler.label]int{
-	// 	"generatedLabel000": 9,
-	// 	"generatedLabel001": 2,
-	// 	"generatedLabel002": 4,
-	// 	"generatedLabel003": 8,
-	// 	"generatedLabel005": 5,
-	// 	"generatedLabel007": 6,
-	// 	"generatedLabel009": 7,
-	// }, positionToLabel: map[int][]compiler.label{9: []compiler.label{"generatedLabel000"}, 5: []compiler.label{"generatedLabel005"}, 2: []compiler.label{"generatedLabel001"}, 4: []compiler.label{"generatedLabel002"}, 6: []compiler.label{"generatedLabel007"}, 8: []compiler.label{"generatedLabel003"}, 7: []compiler.label{"generatedLabel009"}}}
+	optimized := false
 
 	if ix+1 < len(c.result) {
 		oneIndex, twoIndex := ix, ix+1
@@ -300,15 +135,13 @@ func jumpAfterConditionalJumpOptimizer(c *compilerContext, ix int) bool {
 			hasOnlyJumpFrom(c, twoIndex, oneIndex) &&
 			isNotOversizedJump(c, twoIndex) {
 
-			// fmt.Printf("Found a good jump at: %d for: \n%s\n\njts: %#v\n\njfs: %#v\n\nuco: %#v\n\nlabels: %#v\n\n", ix, asm.Dump(c.result), c.jts, c.jfs, c.uconds, c.labels)
-
 			redirectJumpOf(c, twoIndex, oneIndex)
 			c.shiftJumpsBy(oneIndex+1, -1)
 			c.removeInstructionAt(twoIndex)
 
-			// fmt.Printf("   after: \n%s\n\njts: %#v\n\njfs: %#v\n\nuco: %#v\n\nlabels: %#v\n\n", asm.Dump(c.result), c.jts, c.jfs, c.uconds, c.labels)
+			optimized = true
 		}
 	}
 
-	return false
+	return optimized
 }

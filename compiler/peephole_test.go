@@ -36,13 +36,12 @@ func (s *PeepholeSuite) Test_triggeringJumpPeephole(c *C) {
 	res, _ := Compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t07\tC000003E\n"+
+		"jeq_k\t00\t06\tC000003E\n"+
 		"ld_abs\t0\n"+
-		"jeq_k\t04\t00\t1\n"+
-		"jeq_k\t03\t00\t0\n"+
-		"jeq_k\t02\t00\t10\n"+
-		"jeq_k\t01\t00\t13E\n"+
-		"jmp\t1\n"+
+		"jeq_k\t03\t00\t1\n"+
+		"jeq_k\t02\t00\t0\n"+
+		"jeq_k\t01\t00\t10\n"+
+		"jeq_k\t00\t01\t13E\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
 }

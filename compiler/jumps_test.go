@@ -36,14 +36,13 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsUnconditionalJumpPoint(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs	4\n"+
 		"jeq_k	01	00	C000003E\n"+
-		"jmp	8\n"+
+		"jmp	7\n"+
 		"ld_abs	0\n"+
 		"jeq_k	00	01	1\n"+
-		"jmp	4\n"+
+		"jmp	3\n"+
 		"jeq_k	00	01	99\n"+
-		"jmp	2\n"+
-		"jeq_k	01	00	0\n"+
 		"jmp	1\n"+
+		"jeq_k	00	01	0\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
 }

@@ -55,10 +55,9 @@ func (s *SeccompSuite) Test_parseValidPolicyFile(c *C) {
 
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t04\tC000003E\n"+
+		"jeq_k\t00\t03\tC000003E\n"+
 		"ld_abs\t0\n"+
-		"jeq_k\t01\t00\t1\n"+
-		"jmp\t1\n"+
+		"jeq_k\t00\t01\t1\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
 }
@@ -106,10 +105,9 @@ func (s *SeccompSuite) Test_parseSetsDefaultActions(c *C) {
 
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t03\tC000003E\n"+
+		"jeq_k\t00\t02\tC000003E\n"+
 		"ld_abs\t0\n"+
-		"jeq_k\t01\t00\t1\n"+
-		"jmp\t1\n"+
+		"jeq_k\t00\t01\t1\n"+
 		"ret_k\t0\n"+
 		"ret_k\t7FF00000\n")
 }
@@ -122,10 +120,9 @@ func (s *SeccompSuite) Test_compileWithEnforce(c *C) {
 
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t04\tC000003E\n"+
+		"jeq_k\t00\t03\tC000003E\n"+
 		"ld_abs\t0\n"+
-		"jeq_k\t01\t00\t1\n"+
-		"jmp\t1\n"+
+		"jeq_k\t00\t01\t1\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
 }
@@ -138,10 +135,9 @@ func (s *SeccompSuite) Test_compileWithoutEnforce(c *C) {
 
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t04\tC000003E\n"+
+		"jeq_k\t00\t03\tC000003E\n"+
 		"ld_abs\t0\n"+
-		"jeq_k\t01\t00\t1\n"+
-		"jmp\t2\n"+
+		"jeq_k\t00\t02\t1\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n"+
 		"ret_k\t7FF00000\n")
@@ -155,10 +151,9 @@ func (s *SeccompSuite) Test_compileBlacklistWithEnforce(c *C) {
 
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t04\tC000003E\n"+
+		"jeq_k\t00\t03\tC000003E\n"+
 		"ld_abs\t0\n"+
-		"jeq_k\t02\t00\t1\n"+
-		"jmp\t0\n"+
+		"jeq_k\t01\t00\t1\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
 }
@@ -171,10 +166,9 @@ func (s *SeccompSuite) Test_compileBlacklistWithoutEnforce(c *C) {
 
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t04\tC000003E\n"+
+		"jeq_k\t00\t03\tC000003E\n"+
 		"ld_abs\t0\n"+
-		"jeq_k\t03\t00\t1\n"+
-		"jmp\t0\n"+
+		"jeq_k\t02\t00\t1\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n"+
 		"ret_k\t7FF00000\n")
