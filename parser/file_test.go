@@ -17,9 +17,9 @@ var _ = Suite(&FileSuite{})
 func getActualTestFolder() string {
 	wd, _ := os.Getwd()
 	if strings.HasSuffix(wd, "/parser") {
-		return wd
+		return wd + "/test_policies"
 	}
-	return path.Join(wd, "parser")
+	return path.Join(wd, "parser/test_policies/")
 }
 
 func (s *FileSuite) Test_ParseFile(c *C) {
@@ -49,5 +49,5 @@ func (s *FileSuite) Test_ParseFile(c *C) {
 func (s *FileSuite) Test_ParseFile_failing(c *C) {
 	rp, ee := ParseFile(getActualTestFolder() + "/failing_test_policy")
 	c.Assert(rp.RuleOrMacros, IsNil)
-	c.Assert(ee, ErrorMatches, ".*parser/failing_test_policy:1: unexpected end of line")
+	c.Assert(ee, ErrorMatches, ".*parser/test_policies/failing_test_policy:1: unexpected end of line")
 }

@@ -26,17 +26,17 @@ func (s *SeccompSuite) Test_loadingTooBigBpf(c *C) {
 
 func getActualTestFolder() string {
 	wd, _ := os.Getwd()
-	if strings.HasSuffix(wd, "/parser") {
+	if strings.HasSuffix(wd, "/parser/test_policies/") {
 		return wd
 	}
-	return path.Join(wd, "parser")
+	return path.Join(wd, "parser/test_policies/")
 }
 
 func (s *SeccompSuite) Test_parseInvalidFileReturnsErrors(c *C) {
 	set := SeccompSettings{}
 	f := getActualTestFolder() + "/failing_test_policy"
 	_, ee := Prepare(f, set)
-	c.Assert(ee, ErrorMatches, ".*parser/failing_test_policy:1: unexpected end of line")
+	c.Assert(ee, ErrorMatches, ".*parser/test_policies/failing_test_policy:1: unexpected end of line")
 }
 
 func (s *SeccompSuite) Test_parseUnificationErrorReturnsError(c *C) {
