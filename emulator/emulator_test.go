@@ -73,9 +73,19 @@ func (s *EmulatorSuite) Test_loadValues(c *C) {
 				Code: syscall.BPF_LD | syscall.BPF_IMM,
 				K:    uint32(23),
 			},
+			unix.SockFilter{
+				Code: syscall.BPF_LD | syscall.BPF_MEM,
+				K:    0,
+			},
+
+			unix.SockFilter{
+				Code: syscall.BPF_LD | syscall.BPF_MEM,
+				K:    2,
+			},
 		},
 		pointer: 0,
 		X:       uint32(2),
+		M:       [16]uint32{2, 3, 4},
 	}
 
 	e.next()
@@ -101,6 +111,14 @@ func (s *EmulatorSuite) Test_loadValues(c *C) {
 	e.next()
 
 	c.Assert(e.A, Equals, uint32(23))
+
+	e.next()
+
+	c.Assert(e.A, Equals, uint32(2))
+
+	e.next()
+
+	c.Assert(e.A, Equals, uint32(4))
 }
 
 func loadAbs(k uint32) unix.SockFilter {
@@ -210,8 +228,13 @@ func (s *EmulatorSuite) Test_loadValuesIntoX(c *C) {
 			unix.SockFilter{
 				Code: syscall.BPF_LDX | syscall.BPF_W | syscall.BPF_LEN,
 			},
+			unix.SockFilter{
+				Code: syscall.BPF_LDX | syscall.BPF_W | syscall.BPF_MEM,
+				K:    1,
+			},
 		},
 		pointer: 0,
+		M:       [16]uint32{2, 3, 4},
 	}
 
 	e.next()
@@ -221,6 +244,10 @@ func (s *EmulatorSuite) Test_loadValuesIntoX(c *C) {
 	e.next()
 
 	c.Assert(e.X, Equals, uint32(64))
+
+	e.next()
+
+	c.Assert(e.X, Equals, uint32(3))
 }
 
 func aluAndK(c *C, op uint16, a, k, expected uint32) {
@@ -535,4 +562,58 @@ func (s *EmulatorSuite) Test_simpleJsetX(c *C) {
 
 	e.next()
 	c.Assert(e.pointer, Equals, uint32(2))
+}
+
+func (s *EmulatorSuite) Test_storeAInScratchMemory(c *C) {
+	e := &emulator{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
+				Code: syscall.BPF_ST,
+				K:    0,
+			},
+			unix.SockFilter{
+				Code: syscall.BPF_ST,
+				K:    1,
+			},
+		},
+		pointer: 0,
+		A:       5,
+	}
+
+	e.next()
+
+	c.Assert(e.M[0], Equals, uint32(5))
+
+	e.A = 4
+	e.next()
+
+	c.Assert(e.M[1], Equals, uint32(4))
+}
+
+func (s *EmulatorSuite) Test_storeXInScratchMemory(c *C) {
+	e := &emulator{
+		data: data.SeccompWorkingMemory{},
+		filters: []unix.SockFilter{
+			unix.SockFilter{
+				Code: syscall.BPF_STX,
+				K:    0,
+			},
+			unix.SockFilter{
+				Code: syscall.BPF_STX,
+				K:    1,
+			},
+		},
+		pointer: 0,
+		X:       5,
+	}
+
+	e.next()
+
+	c.Assert(e.M[0], Equals, uint32(5))
+
+	e.X = 4
+	e.next()
+
+	c.Assert(e.M[1], Equals, uint32(4))
 }

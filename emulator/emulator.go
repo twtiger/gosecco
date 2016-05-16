@@ -32,6 +32,7 @@ type emulator struct {
 
 	X uint32
 	A uint32
+	M [16]uint32
 }
 
 func bpfClass(code uint16) uint16 {
@@ -128,12 +129,17 @@ func (e *emulator) execLd(current unix.SockFilter) (uint32, bool) {
 		e.A = uint32(64)
 	case syscall.BPF_IMM:
 		e.A = current.K
+	case syscall.BPF_MEM:
+		e.A = e.M[current.K] // TODO handle out of index error?
 	default:
 		panic(fmt.Sprintf("Invalid mode: %d", bpfMode(cd)))
 	}
 	return 0, false
 }
 
+// add support for working mem
+
+// load something into x
 func (e *emulator) execLdx(current unix.SockFilter) (uint32, bool) {
 	cd := current.Code
 
@@ -146,6 +152,8 @@ func (e *emulator) execLdx(current unix.SockFilter) (uint32, bool) {
 		e.X = uint32(64)
 	case syscall.BPF_IMM:
 		e.X = current.K
+	case syscall.BPF_MEM:
+		e.X = e.M[current.K]
 	default:
 		panic(fmt.Sprintf("Invalid mode: %d", bpfMode(cd)))
 	}
@@ -261,6 +269,20 @@ func (e *emulator) execJmp(current unix.SockFilter) (uint32, bool) {
 	return 0, false
 }
 
+func (e *emulator) execStore(current unix.SockFilter) (uint32, bool) {
+	switch bpfClass(current.Code) {
+	case syscall.BPF_ST:
+		e.M[current.K] = e.A
+		return 0, false
+	case syscall.BPF_STX:
+		e.M[current.K] = e.X
+		return 0, false
+	default:
+		panic(fmt.Sprintf("Invalid op: %d", bpfClass(current.Code)))
+	}
+	return 0, false // not sure what the error case should be here
+}
+
 func (e *emulator) next() (uint32, bool) {
 	if e.pointer >= uint32(len(e.filters)) {
 		return 0, true
@@ -281,6 +303,10 @@ func (e *emulator) next() (uint32, bool) {
 		return e.execMisc(current)
 	case syscall.BPF_JMP:
 		return e.execJmp(current)
+	case syscall.BPF_ST:
+		return e.execStore(current)
+	case syscall.BPF_STX:
+		return e.execStore(current)
 	}
 
 	return 0, true
