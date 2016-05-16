@@ -78,19 +78,13 @@ func (s *SeccompSuite) Test_parseSimplifiesValidExpression(c *C) {
 
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t0E\tC000003E\n"+
+		"jeq_k\t00\t08\tC000003E\n"+
 		"ld_abs\t0\n"+
-		"jeq_k\t00\t0A\t1\n"+
-		"ld_imm\t3\n"+
-		"st\t0\n"+
+		"jeq_k\t00\t04\t1\n"+
 		"ld_abs\t14\n"+
-		"ldx_mem\t0\n"+
-		"jeq_x\t00\t07\n"+
-		"ld_imm\t0\n"+
-		"st\t0\n"+
+		"jeq_k\t00\t04\t3\n"+
 		"ld_abs\t10\n"+
-		"ldx_mem\t0\n"+
-		"jeq_x\t01\t02\n"+
+		"jeq_k\t01\t02\t0\n"+
 		"jmp\t1\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")

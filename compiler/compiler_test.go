@@ -92,14 +92,11 @@ func (s *CompilerSuite) Test_compilationOfRuleWithDefinedNegativeAction(c *C) {
 	res, _ := Compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t09\tC000003E\n"+
+		"jeq_k\t00\t06\tC000003E\n"+
 		"ld_abs\t0\n"+
-		"jeq_k	00	05	1\n"+
-		"ld_imm	1\n"+
-		"st	0\n"+
+		"jeq_k	00	02	1\n"+
 		"ld_imm	2A\n"+
-		"ldx_mem\t0\n"+
-		"jeq_x\t01\t03\n"+
+		"jeq_k\t01\t03\t1\n"+
 		"jmp\t1\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k\t0\n"+
@@ -184,14 +181,11 @@ func (s *CompilerSuite) Test_policyWithNegativeDefaultAction(c *C) {
 	res, _ := Compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t09\tC000003E\n"+
+		"jeq_k\t00\t06\tC000003E\n"+
 		"ld_abs\t0\n"+
-		"jeq_k\t00\t05\t1\n"+
-		"ld_imm\t1\n"+
-		"st\t0\n"+
+		"jeq_k\t00\t02\t1\n"+
 		"ld_imm\t2A\n"+
-		"ldx_mem\t0\n"+
-		"jeq_x\t01\t03\n"+
+		"jeq_k\t01\t03\t1\n"+
 		"jmp\t1\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n"+

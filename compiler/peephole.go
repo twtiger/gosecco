@@ -54,6 +54,7 @@ type optimizer func(*compilerContext, int) bool
 
 var optimizers = []optimizer{
 	jumpAfterConditionalJumpOptimizer,
+	loadAndCompareWithImmediate,
 }
 
 func (c *compilerContext) optimizeAt(i int) bool {
@@ -151,6 +152,81 @@ func jumpAfterConditionalJumpOptimizer(c *compilerContext, ix int) bool {
 			c.removeInstructionAt(twoIndex)
 
 			optimized = true
+		}
+	}
+
+	return optimized
+}
+
+func isImmediateLoad(s unix.SockFilter) bool {
+	return bpfClass(s.Code) == syscall.BPF_LD &&
+		bpfMode(s.Code) == syscall.BPF_IMM
+}
+
+func isStore(s unix.SockFilter) bool {
+	return bpfClass(s.Code) == syscall.BPF_ST
+}
+
+func isMemoryLoadIntoX(s unix.SockFilter) bool {
+	return bpfClass(s.Code) == syscall.BPF_LDX &&
+		bpfMode(s.Code) == syscall.BPF_MEM
+}
+
+func hasX(s unix.SockFilter) bool {
+	return bpfSrc(s.Code) == syscall.BPF_X
+}
+
+func storeLocationOf(s unix.SockFilter) uint32 {
+	return s.K
+}
+
+func loadLocationOf(s unix.SockFilter) uint32 {
+	return s.K
+}
+
+// loadAndCompareWithImmediate will remove a pattern that is a side effect of our
+// stack based stupid compiler - it will always push stuff on the stack and then
+// pop it into X to compare. This is very ineffecient and this optimizer will fix
+// that.
+//
+// Example:
+//     ld_imm	0
+//     st	0
+//     ld_abs	18
+//     ldx_mem	0
+//     jeq_x	4A	4B
+// This is not great.
+// It can be reduced to:
+//     ld_abs  18
+//     jeq_k   4A   4B   0
+func loadAndCompareWithImmediate(c *compilerContext, ix int) bool {
+	optimized := false
+
+	if ix+4 < len(c.result) {
+		oneIndex, twoIndex, fourIndex, fiveIndex := ix, ix+1, ix+3, ix+4
+		one, two, four, five := c.result[oneIndex], c.result[twoIndex], c.result[fourIndex], c.result[fiveIndex]
+		if isImmediateLoad(one) &&
+			isStore(two) &&
+			isMemoryLoadIntoX(four) &&
+			isConditionalJump(five) &&
+			hasX(five) {
+
+			storeLocation := storeLocationOf(two)
+			if storeLocation == loadLocationOf(four) {
+				c.result[fiveIndex].K = one.K
+				c.result[fiveIndex].Code = (c.result[fiveIndex].Code & ^uint16(syscall.BPF_X)) | uint16(syscall.BPF_K)
+
+				c.shiftJumpsBy(oneIndex, -1)
+				c.removeInstructionAt(oneIndex)
+
+				c.shiftJumpsBy(oneIndex, -1)
+				c.removeInstructionAt(oneIndex)
+
+				c.shiftJumpsBy(oneIndex+1, -1)
+				c.removeInstructionAt(oneIndex + 1)
+
+				optimized = true
+			}
 		}
 	}
 

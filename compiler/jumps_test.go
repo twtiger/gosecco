@@ -67,17 +67,14 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsMulipleUnconditionalJumpPoint(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs	4\n"+
 		"jeq_k	01	00	C000003E\n"+
-		"jmp	C\n"+
+		"jmp	9\n"+
 		"ld_abs	0\n"+
 		"jeq_k	00	01	1\n"+
-		"jmp	8\n"+
-		"jeq_k	01	00	0\n"+
 		"jmp	5\n"+
-		"ld_imm	1\n"+
-		"st	0\n"+
+		"jeq_k	01	00	0\n"+
+		"jmp	2\n"+
 		"ld_imm	2A\n"+
-		"ldx_mem	0\n"+
-		"jeq_x	01	02\n"+
+		"jeq_k	01	02	1\n"+
 		"jmp	1\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -105,7 +102,7 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithTwoComparisons(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs	4\n"+
 		"jeq_k	01	00	C000003E\n"+
-		"jmp	13\n"+
+		"jmp	10\n"+
 		"ld_abs	0\n"+
 		"jeq_k	01	00	1\n"+
 		"jmp	7\n"+
@@ -113,16 +110,13 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithTwoComparisons(c *C) {
 		"st	0\n"+
 		"ld_imm	2A\n"+
 		"ldx_mem	0\n"+
-		"jmp	B\n"+
-		"jeq_x	00	01\n"+
 		"jmp	8\n"+
-		"jeq_k	01	00	0\n"+
+		"jeq_x	00	01\n"+
 		"jmp	5\n"+
-		"ld_imm	1\n"+
-		"st	0\n"+
+		"jeq_k	01	00	0\n"+
+		"jmp	2\n"+
 		"ld_imm	2A\n"+
-		"ldx_mem	0\n"+
-		"jeq_x	01	02\n"+
+		"jeq_k	01	02	1\n"+
 		"jmp	1\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -146,15 +140,12 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithNotEqual(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs	4\n"+
 		"jeq_k	01	00	C000003E\n"+
-		"jmp	A\n"+
+		"jmp	7\n"+
 		"ld_abs	0\n"+
 		"jeq_k	01	00	1\n"+
-		"jmp	5\n"+
-		"ld_imm	1\n"+
-		"st	0\n"+
+		"jmp	2\n"+
 		"ld_imm	2A\n"+
-		"ldx_mem	0\n"+
-		"jeq_x	02	01\n"+
+		"jeq_k	02	01	1\n"+
 		"jmp	1\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -182,24 +173,18 @@ func (s *JumpsSuite) Test_maxSizeJumpSetsWithNotEqualWithMoreThanOneRule(c *C) {
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs	4\n"+
 		"jeq_k	01	00	C000003E\n"+
-		"jmp	13\n"+
+		"jmp	D\n"+
 		"ld_abs	0\n"+
 		"jeq_k	01	00	1\n"+
+		"jmp	4\n"+
+		"ld_imm	2A\n"+
+		"jeq_k	00	01	1\n"+
 		"jmp	7\n"+
-		"ld_imm	1\n"+
-		"st	0\n"+
-		"ld_imm	2A\n"+
-		"ldx_mem	0\n"+
-		"jeq_x	00	01\n"+
-		"jmp	A\n"+
-		"jmp	8\n"+
-		"jeq_k	01	00	0\n"+
 		"jmp	5\n"+
-		"ld_imm	1\n"+
-		"st	0\n"+
+		"jeq_k	01	00	0\n"+
+		"jmp	2\n"+
 		"ld_imm	2A\n"+
-		"ldx_mem	0\n"+
-		"jeq_x	02	01\n"+
+		"jeq_k	02	01	1\n"+
 		"jmp	1\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
