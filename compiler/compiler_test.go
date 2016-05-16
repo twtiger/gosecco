@@ -26,10 +26,9 @@ func (s *CompilerSuite) Test_simplestCompilation(c *C) {
 	res, _ := Compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t05\tC000003E\n"+
+		"jeq_k\t00\t04\tC000003E\n"+
 		"ld_abs	0\n"+
-		"jeq_k	00	01	1\n"+
-		"jmp	1\n"+
+		"jeq_k	01	00	1\n"+
 		"jmp	1\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -53,12 +52,10 @@ func (s *CompilerSuite) Test_nextSimplestCompilation(c *C) {
 	res, _ := Compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t07\tC000003E\n"+
+		"jeq_k\t00\t05\tC000003E\n"+
 		"ld_abs	0\n"+
-		"jeq_k	00	01	1\n"+
-		"jmp	3\n"+
-		"jeq_k	00	01	99\n"+
-		"jmp	1\n"+
+		"jeq_k	02	00	1\n"+
+		"jeq_k	01	00	99\n"+
 		"jmp	1\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -125,10 +122,9 @@ func (s *CompilerSuite) Test_policyWithDefaultAction(c *C) {
 	res, _ := Compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t05\tC000003E\n"+
+		"jeq_k\t00\t04\tC000003E\n"+
 		"ld_abs	0\n"+
-		"jeq_k	00	01	1\n"+
-		"jmp	1\n"+
+		"jeq_k	01	00	1\n"+
 		"jmp	0\n"+
 		"ret_k	7FFF0000\n"+
 		"ret_k	0\n")
@@ -148,10 +144,9 @@ func (s *CompilerSuite) Test_policyWithAnotherDefaultAction(c *C) {
 	res, _ := Compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t05\tC000003E\n"+
+		"jeq_k\t00\t04\tC000003E\n"+
 		"ld_abs	0\n"+
-		"jeq_k	00	01	1\n"+
-		"jmp	1\n"+
+		"jeq_k	01	00	1\n"+
 		"jmp	2\n"+
 		"ret_k\t7FFF0000\n"+
 		"ret_k	0\n"+
@@ -172,10 +167,9 @@ func (s *CompilerSuite) Test_policyWithDefaultPositiveAction(c *C) {
 	res, _ := Compile(p)
 	c.Assert(asm.Dump(res), Equals, ""+
 		"ld_abs\t4\n"+
-		"jeq_k\t00\t04\tC000003E\n"+
+		"jeq_k\t00\t03\tC000003E\n"+
 		"ld_abs	0\n"+
-		"jeq_k	00	01	1\n"+
-		"jmp	2\n"+
+		"jeq_k	02	00	1\n"+
 		"jmp	0\n"+
 		"ret_k	0\n"+
 		"ret_k	7FF00000\n")

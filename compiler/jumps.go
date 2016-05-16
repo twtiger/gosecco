@@ -9,7 +9,7 @@ func (c *compilerContext) isNotLongJump(at, pos int) bool {
 }
 
 func (c *compilerContext) fixupJumps() {
-	for l, at := range c.labels {
+	for l, at := range c.labels.allLabels() {
 		for _, pos := range c.jts.allJumpsTo(l) {
 			if c.isNotLongJump(at, pos) { // skip long jumps, we already fixed them up
 				c.result[pos].Jt = uint8((at - pos) - 1)
@@ -58,28 +58,19 @@ func (c *compilerContext) insertUnconditionalJump(from int) {
 	c.result = insertSockFilter(c.result, from, x)
 }
 
-func shiftLabels(from int, incr int, elems map[label]int) map[label]int {
-	labels := make(map[label]int, 0)
-
-	for k, v := range elems {
-		if v > from {
-			v += incr
-		}
-		labels[k] = v
-	}
-	return labels
-}
-
 func (c *compilerContext) shiftJumps(from int, hasPrev bool) {
 	incr := 1
 	if hasPrev {
 		incr = 2
 	}
+	c.shiftJumpsBy(from, incr)
+}
 
+func (c *compilerContext) shiftJumpsBy(from, incr int) {
 	c.jts.shift(from, incr)
 	c.jfs.shift(from, incr)
 	c.uconds.shift(from, incr)
-	c.labels = shiftLabels(from, incr, c.labels)
+	c.labels.shiftLabels(from, incr)
 }
 
 func (c *compilerContext) fixUpPreviousRule(from int, positiveJump bool) {

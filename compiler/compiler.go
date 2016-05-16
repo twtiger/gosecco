@@ -31,7 +31,7 @@ type compilerContext struct {
 	jts                                             *jumpMap
 	jfs                                             *jumpMap
 	uconds                                          *jumpMap
-	labels                                          map[label]int
+	labels                                          *labelMap
 	labelCounter                                    int
 	defaultPositive, defaultNegative, defaultPolicy string
 	actions                                         map[string]label
@@ -45,7 +45,7 @@ func createCompilerContext() *compilerContext {
 		jts:             createJumpMap(),
 		jfs:             createJumpMap(),
 		uconds:          createJumpMap(),
-		labels:          make(map[label]int),
+		labels:          createLabelMap(),
 		actions:         make(map[string]label),
 		maxJumpSize:     255,
 		currentlyLoaded: -1,
@@ -104,6 +104,8 @@ func (c *compilerContext) compile(policy tree.Policy) ([]unix.SockFilter, error)
 		c.labelHere(c.actions[k])
 		c.op(OP_RET_K, actionDescriptionToK(k))
 	}
+
+	c.optimizeCode()
 
 	c.fixupJumps()
 
@@ -210,7 +212,7 @@ func (c *compilerContext) fixMaxJumps(l label, j *jumpMap, isPos bool) {
 func (c *compilerContext) labelHere(l label) {
 	c.fixMaxJumps(l, c.jts, true)
 	c.fixMaxJumps(l, c.jfs, false)
-	c.labels[l] = len(c.result)
+	c.labels.addLabelAt(l, len(c.result))
 }
 
 func (c *compilerContext) unconditionalJumpTo(to label) {

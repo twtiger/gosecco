@@ -141,9 +141,9 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleAnd(c *C) {
 	c.Assert(ctx.jfs, DeepEquals, jumpMapFrom(map[label][]int{
 		"neg": []int{4, 9},
 	}))
-	c.Assert(ctx.labels, DeepEquals, map[label]int{
+	c.Assert(ctx.labels, DeepEquals, labelMapFrom(map[label]int{
 		"generatedLabel000": 5,
-	})
+	}))
 }
 
 func (s *BooleanCompilerSuite) Test_compilationOfSimpleOr(c *C) {
@@ -173,9 +173,9 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleOr(c *C) {
 		"generatedLabel000": []int{4},
 		"neg":               []int{9},
 	}))
-	c.Assert(ctx.labels, DeepEquals, map[label]int{
+	c.Assert(ctx.labels, DeepEquals, labelMapFrom(map[label]int{
 		"generatedLabel000": 5,
-	})
+	}))
 }
 
 func (s *BooleanCompilerSuite) Test_compilationOfSimpleNegation(c *C) {
@@ -198,7 +198,7 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleNegation(c *C) {
 	c.Assert(ctx.jfs, DeepEquals, jumpMapFrom(map[label][]int{
 		"pos": []int{4},
 	}))
-	c.Assert(ctx.labels, DeepEquals, map[label]int{})
+	c.Assert(ctx.labels, DeepEquals, labelMapFrom(map[label]int{}))
 }
 
 func (s *BooleanCompilerSuite) Test_thatAnErrorIsSetWhenWeCompileAfterReachingTheMaximumHeightOfTheStack(c *C) {
