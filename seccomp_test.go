@@ -63,3 +63,55 @@ func (s *SeccompSuite) Test_parseValidPolicyFile(c *C) {
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
 }
+
+func (s *SeccompSuite) Test_parseInvalidTypeReturnsError(c *C) {
+	set := SeccompSettings{}
+	f := getActualTestFolder() + "/type_checker_error_policy"
+	_, ee := Prepare(f, set)
+	c.Assert(ee, ErrorMatches, ".*expected boolean expression but found: 42")
+}
+
+func (s *SeccompSuite) Test_parseSimplifiesValidExpression(c *C) {
+	set := SeccompSettings{DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill"}
+	f := getActualTestFolder() + "/valid_unsimplified_policy"
+	res, ee := Prepare(f, set)
+
+	c.Assert(ee, Equals, nil)
+
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t00\t0E\tC000003E\n"+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t0A\t1\n"+
+		"ld_imm\t3\n"+
+		"st\t0\n"+
+		"ld_abs\t14\n"+
+		"ldx_mem\t0\n"+
+		"jeq_x\t00\t07\n"+
+		"ld_imm\t0\n"+
+		"st\t0\n"+
+		"ld_abs\t10\n"+
+		"ldx_mem\t0\n"+
+		"jeq_x\t01\t02\n"+
+		"jmp\t1\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
+}
+
+func (s *SeccompSuite) Test_parseSetsDefaultActions(c *C) {
+	set := SeccompSettings{DefaultPositiveAction: "kill", DefaultNegativeAction: "trace", DefaultPolicyAction: "trace"}
+	f := getActualTestFolder() + "/valid_test_policy"
+	res, ee := Prepare(f, set)
+
+	c.Assert(ee, Equals, nil)
+
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t00\t04\tC000003E\n"+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t01\t1\n"+
+		"jmp\t1\n"+
+		"jmp\t1\n"+
+		"ret_k\t0\n"+
+		"ret_k\t7FF00000\n")
+}

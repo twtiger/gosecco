@@ -50,14 +50,6 @@ type SeccompSettings struct {
 // Prepare will take the given path and settings, parse and compile the given
 // data, combined with the settings - and returns the bytecode
 func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
-	// TODO: test when compiler is ready:
-	// - test that default pos and neg actions come through
-	// - test that the type checker errors come through
-	// - test that the simplifier is invoked and simplifies stuff
-	// - test that simplifier errors come through
-	// - test panic when default settings are not set
-	// - test that the compiler works and returns the expected results
-	// - test that compiler errors come through
 
 	// Parsing of extra files with definitions
 	extras := make([]map[string]tree.Macro, len(s.ExtraDefinitions))
