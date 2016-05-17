@@ -56,16 +56,32 @@ var arithOps = map[tree.ArithmeticType]uint16{
 	tree.MOD:    OP_MOD_X,
 }
 
+func specialCasedOp(code uint16) uint16 {
+	return replaceXWithKIn(code)
+}
+
+func specialCaseNumeric(x tree.Numeric) (bool, uint32) {
+	lit, isLiteral := x.(tree.NumericLiteral)
+	if isLiteral {
+		return true, uint32(lit.Value)
+	}
+	return false, uint32(0)
+}
+
 // AcceptArithmetic implements Visitor
 func (s *numericCompilerVisitor) AcceptArithmetic(v tree.Arithmetic) {
-	if err := compileNumeric(s.ctx, v.Right); err != nil {
-		s.err = err
-		return
-	}
+	do, val := specialCaseNumeric(v.Right)
 
-	if err := s.ctx.pushAToStack(); err != nil {
-		s.err = err
-		return
+	if !do {
+		if err := compileNumeric(s.ctx, v.Right); err != nil {
+			s.err = err
+			return
+		}
+
+		if err := s.ctx.pushAToStack(); err != nil {
+			s.err = err
+			return
+		}
 	}
 
 	if err := compileNumeric(s.ctx, v.Left); err != nil {
@@ -73,9 +89,11 @@ func (s *numericCompilerVisitor) AcceptArithmetic(v tree.Arithmetic) {
 		return
 	}
 
-	if err := s.ctx.popStackToX(); err != nil {
-		s.err = err
-		return
+	if !do {
+		if err := s.ctx.popStackToX(); err != nil {
+			s.err = err
+			return
+		}
 	}
 
 	arithOp, ok := arithOps[v.Op]
@@ -83,7 +101,12 @@ func (s *numericCompilerVisitor) AcceptArithmetic(v tree.Arithmetic) {
 		s.err = errors.New("an invalid arithmetic operator was found - this is likely a programmer error")
 		return
 	}
-	s.ctx.op(arithOp, 0)
+
+	if do {
+		arithOp = specialCasedOp(arithOp)
+	}
+
+	s.ctx.op(arithOp, val)
 }
 
 // AcceptBinaryNegation implements Visitor

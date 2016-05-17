@@ -55,6 +55,7 @@ type optimizer func(*compilerContext, int) bool
 var optimizers = []optimizer{
 	jumpAfterConditionalJumpOptimizer,
 	loadAndCompareWithImmediate,
+	loadAndPerformArithmeticWithImmediateOptimizer,
 }
 
 func (c *compilerContext) optimizeAt(i int) bool {
@@ -176,12 +177,24 @@ func hasX(s unix.SockFilter) bool {
 	return bpfSrc(s.Code) == syscall.BPF_X
 }
 
+func isArithmeticWithX(s unix.SockFilter) bool {
+	return bpfClass(s.Code) == syscall.BPF_ALU && hasX(s)
+}
+
+func isConditionalJumpWithX(s unix.SockFilter) bool {
+	return isConditionalJump(s) && hasX(s)
+}
+
 func storeLocationOf(s unix.SockFilter) uint32 {
 	return s.K
 }
 
 func loadLocationOf(s unix.SockFilter) uint32 {
 	return s.K
+}
+
+func sameStorageLocation(store, load unix.SockFilter) bool {
+	return storeLocationOf(store) == loadLocationOf(load)
 }
 
 // loadAndCompareWithImmediate will remove a pattern that is a side effect of our
@@ -200,6 +213,14 @@ func loadLocationOf(s unix.SockFilter) uint32 {
 //     ld_abs  18
 //     jeq_k   4A   4B   0
 func loadAndCompareWithImmediate(c *compilerContext, ix int) bool {
+	return loadStoreOptimizer(c, ix, isConditionalJumpWithX)
+}
+
+func loadAndPerformArithmeticWithImmediateOptimizer(c *compilerContext, ix int) bool {
+	return loadStoreOptimizer(c, ix, isArithmeticWithX)
+}
+
+func loadStoreOptimizer(c *compilerContext, ix int, f func(unix.SockFilter) bool) bool {
 	optimized := false
 
 	if ix+4 < len(c.result) {
@@ -208,27 +229,27 @@ func loadAndCompareWithImmediate(c *compilerContext, ix int) bool {
 		if isImmediateLoad(one) &&
 			isStore(two) &&
 			isMemoryLoadIntoX(four) &&
-			isConditionalJump(five) &&
-			hasX(five) {
+			f(five) &&
+			sameStorageLocation(two, four) {
+			c.result[fiveIndex].K = one.K
+			c.result[fiveIndex].Code = replaceXWithKIn(c.result[fiveIndex].Code)
 
-			storeLocation := storeLocationOf(two)
-			if storeLocation == loadLocationOf(four) {
-				c.result[fiveIndex].K = one.K
-				c.result[fiveIndex].Code = (c.result[fiveIndex].Code & ^uint16(syscall.BPF_X)) | uint16(syscall.BPF_K)
+			c.shiftJumpsBy(oneIndex, -1)
+			c.removeInstructionAt(oneIndex)
 
-				c.shiftJumpsBy(oneIndex, -1)
-				c.removeInstructionAt(oneIndex)
+			c.shiftJumpsBy(oneIndex, -1)
+			c.removeInstructionAt(oneIndex)
 
-				c.shiftJumpsBy(oneIndex, -1)
-				c.removeInstructionAt(oneIndex)
+			c.shiftJumpsBy(oneIndex+1, -1)
+			c.removeInstructionAt(oneIndex + 1)
 
-				c.shiftJumpsBy(oneIndex+1, -1)
-				c.removeInstructionAt(oneIndex + 1)
-
-				optimized = true
-			}
+			optimized = true
 		}
 	}
 
 	return optimized
+}
+
+func replaceXWithKIn(code uint16) uint16 {
+	return (code & ^uint16(syscall.BPF_X)) | uint16(syscall.BPF_K)
 }

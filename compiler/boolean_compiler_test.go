@@ -40,19 +40,16 @@ func (s *BooleanCompilerSuite) Test_compilationOfSimpleComparison2(c *C) {
 	c.Assert(asm.Dump(ctx.result), Equals, ""+
 		"ld_imm	1\n"+
 		"st	0\n"+
-		"ld_imm	19\n"+
-		"st	1\n"+
 		"ld_imm	2A\n"+
-		"ldx_mem	1\n"+
-		"add_x\n"+
+		"add_k	19\n"+
 		"ldx_mem	0\n"+
 		"jeq_x	00	00\n",
 	)
 	c.Assert(ctx.jts, DeepEquals, jumpMapFrom(map[label][]int{
-		"negx": []int{8},
+		"negx": []int{5},
 	}))
 	c.Assert(ctx.jfs, DeepEquals, jumpMapFrom(map[label][]int{
-		"posx": []int{8},
+		"posx": []int{5},
 	}))
 }
 

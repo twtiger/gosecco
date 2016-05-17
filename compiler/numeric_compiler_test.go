@@ -37,11 +37,8 @@ func (s *NumericCompilerSuite) Test_simpleAdditionOfNumbers(c *C) {
 	ctx := createCompilerContext()
 	compileNumeric(ctx, tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{3}, Right: tree.NumericLiteral{42}})
 	c.Assert(asm.Dump(ctx.result), Equals, ""+
-		"ld_imm	2A\n"+
-		"st	0\n"+
 		"ld_imm	3\n"+
-		"ldx_mem	0\n"+
-		"add_x\n",
+		"add_k	2A\n",
 	)
 }
 
@@ -72,25 +69,13 @@ func (s *NumericCompilerSuite) Test_moreComplicatedExpression(c *C) {
 		},
 	)
 	c.Assert(asm.Dump(ctx.result), Equals, ""+
-		"ld_imm	F\n"+
-		"st	0\n"+
 		"ld_abs	1C\n"+
-		"ldx_mem	0\n"+
-		"sub_x\n"+
+		"sub_k	F\n"+
 		"st	0\n"+
-		"ld_imm	2A\n"+
-		"st	1\n"+
-		"ld_imm	3\n"+
-		"st	2\n"+
-		"ld_imm	20\n"+
-		"st	3\n"+
 		"ld_abs	18\n"+
-		"ldx_mem	3\n"+
-		"add_x\n"+
-		"ldx_mem	2\n"+
-		"mul_x\n"+
-		"ldx_mem	1\n"+
-		"and_x\n"+
+		"add_k	20\n"+
+		"mul_k	3\n"+
+		"and_k	2A\n"+
 		"ldx_mem	0\n"+
 		"xor_x\n",
 	)
@@ -99,7 +84,7 @@ func (s *NumericCompilerSuite) Test_moreComplicatedExpression(c *C) {
 func (s *NumericCompilerSuite) Test_thatAnErrorIsSetWhenWeCompileInvalidExpression(c *C) {
 	ctx := createCompilerContext()
 	ctx.stackTop = syscall.BPF_MEMWORDS
-	err := compileNumeric(ctx, tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{3}, Right: tree.NumericLiteral{42}})
+	err := compileNumeric(ctx, tree.Arithmetic{Op: tree.PLUS, Left: tree.NumericLiteral{3}, Right: tree.Argument{Type: tree.Low, Index: 1}})
 	c.Assert(err, ErrorMatches, "the expression is too complicated to compile. Please refer to the language documentation")
 }
 
@@ -150,7 +135,7 @@ func (s *NumericCompilerSuite) Test_arithmeticShouldPassAlongErrorsIfWeGetIncorr
 func (s *NumericCompilerSuite) Test_arithmeticShouldPassAlongStackTooLargeError(c *C) {
 	ctx := createCompilerContext()
 	ctx.stackTop = syscall.BPF_MEMWORDS
-	err := compileNumeric(ctx, tree.Arithmetic{Left: tree.NumericLiteral{1}, Right: tree.NumericLiteral{42}, Op: tree.ArithmeticType(42)})
+	err := compileNumeric(ctx, tree.Arithmetic{Left: tree.NumericLiteral{1}, Right: tree.Argument{Type: tree.Low, Index: 1}, Op: tree.ArithmeticType(42)})
 	c.Assert(err, ErrorMatches, "the expression is too complicated to compile. Please refer to the language documentation")
 }
 
@@ -161,7 +146,7 @@ func (s *NumericCompilerSuite) Test_arithmeticShouldPassAlongStackTooSmallError(
 			Left: &stackMesser{func() {
 				ctx.stackTop = 0
 			}},
-			Right: tree.NumericLiteral{42},
+			Right: tree.Argument{Type: tree.Hi, Index: 0},
 			Op:    tree.PLUS})
 	c.Assert(err, ErrorMatches, "popping from empty stack - this is likely a programmer error")
 }

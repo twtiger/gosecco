@@ -45,3 +45,37 @@ func (s *PeepholeSuite) Test_triggeringJumpPeephole(c *C) {
 		"ret_k\t7FFF0000\n"+
 		"ret_k\t0\n")
 }
+
+func (s *PeepholeSuite) Test_triggeringArithmeticStackPeephole(c *C) {
+	p := tree.Policy{
+		DefaultPositiveAction: "allow", DefaultNegativeAction: "kill", DefaultPolicyAction: "kill",
+		Rules: []*tree.Rule{
+			&tree.Rule{
+				Name: "write",
+				Body: tree.Comparison{
+					Op: tree.EQL,
+					Left: tree.Arithmetic{
+						Op:    tree.PLUS,
+						Left:  tree.Argument{Type: tree.Low, Index: 0},
+						Right: tree.NumericLiteral{1}},
+					Right: tree.NumericLiteral{2},
+				},
+			},
+		},
+	}
+	res, _ := Compile(p)
+	c.Assert(asm.Dump(res), Equals, ""+
+		"ld_abs\t4\n"+
+		"jeq_k\t00\t0A\tC000003E\n"+
+		"ld_abs\t0\n"+
+		"jeq_k\t00\t06\t1\n"+
+		"ld_imm\t2\n"+
+		"st\t0\n"+
+		"ld_abs\t14\n"+
+		"add_k\t1\n"+
+		"ldx_mem\t0\n"+
+		"jeq_x\t01\t02\n"+
+		"jmp\t1\n"+
+		"ret_k\t7FFF0000\n"+
+		"ret_k\t0\n")
+}
