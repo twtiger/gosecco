@@ -25,9 +25,6 @@ func Emulate(d data.SeccompWorkingMemory, filters []unix.SockFilter) uint32 {
 	}
 }
 
-// MEMWORDS is the size of scratch memory store
-const MEMWORDS = 16
-
 type emulator struct {
 	data    data.SeccompWorkingMemory
 	filters []unix.SockFilter
@@ -35,7 +32,7 @@ type emulator struct {
 
 	X uint32
 	A uint32
-	M [MEMWORDS]uint32
+	M [syscall.BPF_MEMWORDS]uint32
 }
 
 func bpfClass(code uint16) uint16 {
@@ -133,10 +130,10 @@ func (e *emulator) execLd(current unix.SockFilter) (uint32, bool) {
 	case syscall.BPF_IMM:
 		e.A = current.K
 	case syscall.BPF_MEM:
-		if current.K < MEMWORDS {
+		if current.K < syscall.BPF_MEMWORDS {
 			e.A = e.M[current.K]
 		} else {
-			panic(fmt.Sprintf("Index out of range: %d greater than MEMWORDS %d", current.K, MEMWORDS))
+			panic(fmt.Sprintf("Index out of range: %d greater than MEMWORDS %d", current.K, syscall.BPF_MEMWORDS))
 		}
 	default:
 		panic(fmt.Sprintf("Invalid mode: %d", bpfMode(cd)))
@@ -157,10 +154,10 @@ func (e *emulator) execLdx(current unix.SockFilter) (uint32, bool) {
 	case syscall.BPF_IMM:
 		e.X = current.K
 	case syscall.BPF_MEM:
-		if current.K < MEMWORDS {
+		if current.K < syscall.BPF_MEMWORDS {
 			e.X = e.M[current.K]
 		} else {
-			panic(fmt.Sprintf("Index out of range: %d greater than MEMWORDS", current.K, MEMWORDS))
+			panic(fmt.Sprintf("Index out of range: %d greater than MEMWORDS", current.K, syscall.BPF_MEMWORDS))
 		}
 	default:
 		panic(fmt.Sprintf("Invalid mode: %d", bpfMode(cd)))
