@@ -25,6 +25,7 @@ func Emulate(d data.SeccompWorkingMemory, filters []unix.SockFilter) uint32 {
 	}
 }
 
+// MEMWORDS is the size of scratch memory store
 const MEMWORDS = 16
 
 type emulator struct {
