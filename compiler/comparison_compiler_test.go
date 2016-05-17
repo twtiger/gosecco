@@ -59,7 +59,7 @@ func (s *ComparisonCompilerSuite) Test_SingleComparisonsArgumentToNumeric(c *C) 
 		"jeq_k\t00\t06\tC000003E\n"+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t02\t1\n"+
-		"ld_abs\t14\n"+
+		"ld_abs\t10\n"+
 		"jeq_k\t01\t02\t1\n"+
 		"jmp\t1\n"+
 		"ret_k\t7FFF0000\n"+

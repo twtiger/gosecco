@@ -26,11 +26,11 @@ func (s *NumericCompilerSuite) Test_compilationOfLiteral(c *C) {
 func (s *NumericCompilerSuite) Test_compilationOfArgument(c *C) {
 	ctx := createCompilerContext()
 	compileNumeric(ctx, tree.Argument{Type: tree.Low, Index: 3})
-	c.Assert(asm.Dump(ctx.result), Equals, "ld_abs	2C\n")
+	c.Assert(asm.Dump(ctx.result), Equals, "ld_abs	28\n")
 
 	ctx = createCompilerContext()
 	compileNumeric(ctx, tree.Argument{Type: tree.Hi, Index: 1})
-	c.Assert(asm.Dump(ctx.result), Equals, "ld_abs	18\n")
+	c.Assert(asm.Dump(ctx.result), Equals, "ld_abs	1C\n")
 }
 
 func (s *NumericCompilerSuite) Test_simpleAdditionOfNumbers(c *C) {
@@ -69,10 +69,10 @@ func (s *NumericCompilerSuite) Test_moreComplicatedExpression(c *C) {
 		},
 	)
 	c.Assert(asm.Dump(ctx.result), Equals, ""+
-		"ld_abs	1C\n"+
+		"ld_abs	18\n"+
 		"sub_k	F\n"+
 		"st	0\n"+
-		"ld_abs	18\n"+
+		"ld_abs	1C\n"+
 		"add_k	20\n"+
 		"mul_k	3\n"+
 		"and_k	2A\n"+

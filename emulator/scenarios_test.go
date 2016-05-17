@@ -96,7 +96,7 @@ func (s *ScenariosSuite) Test_simpleComparisonWithSuccessCase(c *C) {
 	filters := []unix.SockFilter{
 		unix.SockFilter{
 			Code: syscall.BPF_LD | syscall.BPF_W | syscall.BPF_ABS,
-			K:    uint32(0x14),
+			K:    uint32(0x10),
 		},
 		unix.SockFilter{
 			Code: syscall.BPF_JMP | syscall.BPF_JEQ | syscall.BPF_K,

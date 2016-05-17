@@ -81,29 +81,29 @@ func (e *emulator) getFromWorkingMemory(ix uint32) uint32 {
 	case 12:
 		return uint32(e.data.InstructionPointer & 0xFFFF)
 	case 16:
-		return uint32(e.data.Args[0] >> 32)
-	case 20:
 		return uint32(e.data.Args[0] & 0xFFFFFFFF)
+	case 20:
+		return uint32(e.data.Args[0] >> 32)
 	case 24:
-		return uint32(e.data.Args[1] >> 32)
-	case 28:
 		return uint32(e.data.Args[1] & 0xFFFFFFFF)
+	case 28:
+		return uint32(e.data.Args[1] >> 32)
 	case 32:
-		return uint32(e.data.Args[2] >> 32)
-	case 36:
 		return uint32(e.data.Args[2] & 0xFFFFFFFF)
+	case 36:
+		return uint32(e.data.Args[2] >> 32)
 	case 40:
-		return uint32(e.data.Args[3] >> 32)
-	case 44:
 		return uint32(e.data.Args[3] & 0xFFFFFFFF)
+	case 44:
+		return uint32(e.data.Args[3] >> 32)
 	case 48:
-		return uint32(e.data.Args[4] >> 32)
-	case 52:
 		return uint32(e.data.Args[4] & 0xFFFFFFFF)
+	case 52:
+		return uint32(e.data.Args[4] >> 32)
 	case 56:
-		return uint32(e.data.Args[5] >> 32)
-	case 60:
 		return uint32(e.data.Args[5] & 0xFFFFFFFF)
+	case 60:
+		return uint32(e.data.Args[5] >> 32)
 	default:
 		return 0
 	}

@@ -71,7 +71,7 @@ func (s *PeepholeSuite) Test_triggeringArithmeticStackPeephole(c *C) {
 		"jeq_k\t00\t06\t1\n"+
 		"ld_imm\t2\n"+
 		"st\t0\n"+
-		"ld_abs\t14\n"+
+		"ld_abs\t10\n"+
 		"add_k\t1\n"+
 		"ldx_mem\t0\n"+
 		"jeq_x\t01\t02\n"+

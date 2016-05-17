@@ -81,9 +81,9 @@ func (s *SeccompSuite) Test_parseSimplifiesValidExpression(c *C) {
 		"jeq_k\t00\t08\tC000003E\n"+
 		"ld_abs\t0\n"+
 		"jeq_k\t00\t04\t1\n"+
-		"ld_abs\t14\n"+
-		"jeq_k\t00\t04\t3\n"+
 		"ld_abs\t10\n"+
+		"jeq_k\t00\t04\t3\n"+
+		"ld_abs\t14\n"+
 		"jeq_k\t01\t02\t0\n"+
 		"jmp\t1\n"+
 		"ret_k\t7FFF0000\n"+

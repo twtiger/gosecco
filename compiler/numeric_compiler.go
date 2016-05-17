@@ -36,7 +36,7 @@ const argumentsStartIndex = uint32(0x10)
 // AcceptArgument implements Visitor
 func (s *numericCompilerVisitor) AcceptArgument(v tree.Argument) {
 	argIndex := argumentsStartIndex + uint32(v.Index*8)
-	if v.Type == tree.Low {
+	if v.Type == tree.Hi {
 		argIndex += 4
 	}
 

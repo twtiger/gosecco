@@ -56,7 +56,7 @@ func (s *EmulatorSuite) Test_loadValues(c *C) {
 			},
 			unix.SockFilter{
 				Code: syscall.BPF_LD | syscall.BPF_W | syscall.BPF_ABS,
-				K:    uint32(44),
+				K:    uint32(40),
 			},
 			unix.SockFilter{
 				Code: syscall.BPF_LD | syscall.BPF_W | syscall.BPF_IND,
@@ -64,7 +64,7 @@ func (s *EmulatorSuite) Test_loadValues(c *C) {
 			},
 			unix.SockFilter{
 				Code: syscall.BPF_LD | syscall.BPF_W | syscall.BPF_IND,
-				K:    uint32(42),
+				K:    uint32(38),
 			},
 			unix.SockFilter{
 				Code: syscall.BPF_LD | syscall.BPF_W | syscall.BPF_LEN,
@@ -166,9 +166,6 @@ func (s *EmulatorSuite) Test_loadWorkingMemory(c *C) {
 	c.Assert(e.A, Equals, uint32(0x87AE))
 
 	e.next()
-	c.Assert(e.A, Equals, uint32(0))
-
-	e.next()
 	c.Assert(e.A, Equals, uint32(0x1E162))
 
 	e.next()
@@ -200,6 +197,9 @@ func (s *EmulatorSuite) Test_loadWorkingMemory(c *C) {
 
 	e.next()
 	c.Assert(e.A, Equals, uint32(0x2f5c))
+
+	e.next()
+	c.Assert(e.A, Equals, uint32(0))
 
 	e.next()
 	c.Assert(e.A, Equals, uint32(0))
