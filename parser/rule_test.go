@@ -39,3 +39,8 @@ func (s *RuleSuite) Test_parseRuleHead_parsesValidRuleHeads(c *C) {
 	_, ok = parseRuleHead("fcntl[hm]")
 	c.Assert(ok, Equals, false)
 }
+
+func (s *RuleSuite) Test_parseRule_returnsErrorForInvalidLine(c *C) {
+	_, err := parseRule("  read:  ")
+	c.Assert(err, ErrorMatches, "No expression specified for rule: read")
+}

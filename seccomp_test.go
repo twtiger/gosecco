@@ -167,3 +167,10 @@ func (s *SeccompSuite) Test_compileBlacklistWithoutEnforce(c *C) {
 		"ret_k\t0\n"+
 		"ret_k\t7FF00000\n")
 }
+
+func (s *SeccompSuite) Test_emptySyscallExpression(c *C) {
+	f := getActualTestFolder() + "/empty_expression_test_policy"
+	_, ee := Prepare(f, SeccompSettings{})
+
+	c.Assert(ee, ErrorMatches, ".*?No expression specified for rule: write")
+}

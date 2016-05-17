@@ -50,6 +50,10 @@ func parseRule(s string) (tree.Rule, error) {
 		return tree.Rule{}, errors.New("Invalid specification of syscall name")
 	}
 
+	if len(parts) < 2 || len(strings.TrimSpace(parts[1])) == 0 {
+		return tree.Rule{}, fmt.Errorf("No expression specified for rule: %s", strings.TrimSpace(parts[0]))
+	}
+
 	x, hasReturn, ret, err := parseExpression(parts[1])
 	if err != nil {
 		return tree.Rule{}, err
