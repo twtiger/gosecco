@@ -204,18 +204,7 @@ func (c *compilerContext) registerJumps(index int, jt, jf label) {
 	c.jfs.registerJump(jf, index)
 }
 
-func (c *compilerContext) fixMaxJumps(l label, j *jumpMap, isPos bool) {
-	to := len(c.result)
-	for _, from := range j.allJumpsTo(l) {
-		if (to-from)-1 > c.maxJumpSize {
-			c.longJump(from, isPos, l)
-		}
-	}
-}
-
 func (c *compilerContext) labelHere(l label) {
-	c.fixMaxJumps(l, c.jts, true)
-	c.fixMaxJumps(l, c.jfs, false)
 	c.labels.addLabelAt(l, len(c.result))
 }
 
