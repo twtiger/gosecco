@@ -42,20 +42,13 @@ type longJumpContext struct {
 }
 
 func (c *longJumpContext) fixupLongJumps() {
-	// This is an optimization. Please don't comment away.
-	if c.maxIndexWithLongJump == -1 {
-		return
-	}
-
-	c.shifts = []shift{}
-
 	currentIndex := c.maxIndexWithLongJump
 	for currentIndex > -1 {
 		current := c.result[currentIndex]
 
 		if isConditionalJump(current) && hasLongJump(currentIndex, c.jtLongJumps, c.jfLongJumps) {
 			hadJt := c.handleJTLongJumpFor(currentIndex)
-			c.handleJFLongJumpFor(currentIndex, c.jfLongJumps, hadJt)
+			c.handleJFLongJumpFor(currentIndex, hadJt)
 		} else {
 			if isUnconditionalJump(current) {
 				c.result[currentIndex].K = uint32(fixupWithShifts(currentIndex, int(c.result[currentIndex].K), c.shifts))
@@ -107,10 +100,8 @@ func (c *compilerContext) fixupJumps() {
 }
 
 func (c *longJumpContext) handleJTLongJumpFor(currentIndex int) bool {
-	hadJt := false
 	if jmpLen, ok := c.jtLongJumps[currentIndex]; ok {
 		jmpLen = fixupWithShifts(currentIndex, jmpLen, c.shifts)
-		hadJt = true
 
 		newJf := int(c.result[currentIndex].Jf) + 1
 		if c.isLongJump(newJf) {
@@ -121,15 +112,16 @@ func (c *longJumpContext) handleJTLongJumpFor(currentIndex int) bool {
 		}
 
 		c.insertJumps(currentIndex, jmpLen, 0)
+
+		return true
 	}
-	return hadJt
+	return false
 }
 
-func (c *longJumpContext) handleJFLongJumpFor(currentIndex int, jfLongJumps map[int]int, hadJt bool) {
-	if jmpLen, ok := jfLongJumps[currentIndex]; ok {
+func (c *longJumpContext) handleJFLongJumpFor(currentIndex int, hadJt bool) {
+	if jmpLen, ok := c.jfLongJumps[currentIndex]; ok {
 		jmpLen = fixupWithShifts(currentIndex, jmpLen, c.shifts)
-		var incr int
-		incr, jmpLen = c.increment(hadJt, jmpLen, currentIndex)
+		incr, jmpLen := c.increment(hadJt, jmpLen, currentIndex)
 		c.insertJumps(currentIndex, jmpLen, incr)
 	}
 }
@@ -156,8 +148,7 @@ func (c *longJumpContext) increment(hadJt bool, jmpLen, currentIndex int) (int, 
 func (c *longJumpContext) shiftJf(hadJt bool, currentIndex int) {
 	newJf := fixupWithShifts(currentIndex, int(c.result[currentIndex].Jf), c.shifts)
 	if c.isLongJump(newJf) {
-		var incr int
-		incr, _ = c.increment(hadJt, 0, currentIndex)
+		incr, _ := c.increment(hadJt, 0, currentIndex)
 		c.insertJumps(currentIndex, newJf, incr)
 	} else {
 		c.result[currentIndex].Jf = uint8(newJf)
@@ -165,17 +156,14 @@ func (c *longJumpContext) shiftJf(hadJt bool, currentIndex int) {
 }
 
 func (c *longJumpContext) shiftJt(currentIndex int) bool {
-	hadJt := false
 	newJt := fixupWithShifts(currentIndex, int(c.result[currentIndex].Jt), c.shifts)
 	if c.isLongJump(newJt) {
-		hadJt = true
-
 		// Jf doesn't need to be modified here, because it will be fixed up with the shifts. Hopefully correctly...
 		c.insertJumps(currentIndex, newJt, 0)
-	} else {
-		c.result[currentIndex].Jt = uint8(newJt)
+		return true
 	}
-	return hadJt
+	c.result[currentIndex].Jt = uint8(newJt)
+	return false
 }
 
 func (c *longJumpContext) insertJumps(currentIndex, pos, incr int) {
