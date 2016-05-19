@@ -47,8 +47,8 @@ func (c *longJumpContext) fixupLongJumps() {
 		current := c.result[currentIndex]
 
 		if isConditionalJump(current) && hasLongJump(currentIndex, c.jtLongJumps, c.jfLongJumps) {
-			hadJt := c.handleJTLongJumpFor(currentIndex)
-			c.handleJFLongJumpFor(currentIndex, hadJt)
+			hadJt := c.handleJTLongJumpAt(currentIndex)
+			c.handleJFLongJumpAt(currentIndex, hadJt)
 		} else {
 			if isUnconditionalJump(current) {
 				c.result[currentIndex].K = uint32(fixupWithShifts(currentIndex, int(c.result[currentIndex].K), c.shifts))
@@ -99,7 +99,7 @@ func (c *compilerContext) fixupJumps() {
 	(&longJumpContext{c, maxIndexWithLongJump, jtLongJumps, jfLongJumps, nil}).fixupLongJumps()
 }
 
-func (c *longJumpContext) handleJTLongJumpFor(currentIndex int) bool {
+func (c *longJumpContext) handleJTLongJumpAt(currentIndex int) bool {
 	if jmpLen, ok := c.jtLongJumps[currentIndex]; ok {
 		jmpLen = fixupWithShifts(currentIndex, jmpLen, c.shifts)
 
@@ -118,15 +118,15 @@ func (c *longJumpContext) handleJTLongJumpFor(currentIndex int) bool {
 	return false
 }
 
-func (c *longJumpContext) handleJFLongJumpFor(currentIndex int, hadJt bool) {
+func (c *longJumpContext) handleJFLongJumpAt(currentIndex int, hadJt bool) {
 	if jmpLen, ok := c.jfLongJumps[currentIndex]; ok {
 		jmpLen = fixupWithShifts(currentIndex, jmpLen, c.shifts)
-		incr, jmpLen := c.increment(hadJt, jmpLen, currentIndex)
+		incr, jmpLen := c.incrementJt(hadJt, jmpLen, currentIndex)
 		c.insertJumps(currentIndex, jmpLen, incr)
 	}
 }
 
-func (c *longJumpContext) increment(hadJt bool, jmpLen, currentIndex int) (int, int) {
+func (c *longJumpContext) incrementJt(hadJt bool, jmpLen, currentIndex int) (int, int) {
 	incr := 0
 	if hadJt {
 		c.result[currentIndex+1].K++
@@ -148,7 +148,7 @@ func (c *longJumpContext) increment(hadJt bool, jmpLen, currentIndex int) (int, 
 func (c *longJumpContext) shiftJf(hadJt bool, currentIndex int) {
 	newJf := fixupWithShifts(currentIndex, int(c.result[currentIndex].Jf), c.shifts)
 	if c.isLongJump(newJf) {
-		incr, _ := c.increment(hadJt, 0, currentIndex)
+		incr, _ := c.incrementJt(hadJt, 0, currentIndex)
 		c.insertJumps(currentIndex, newJf, incr)
 	} else {
 		c.result[currentIndex].Jf = uint8(newJf)
