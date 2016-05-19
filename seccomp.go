@@ -39,12 +39,27 @@ func CheckSupport() error {
 // behavior of the compilation process
 type SeccompSettings struct {
 	// ExtraDefinitions contains paths to files with extra definitions to parse
-	ExtraDefinitions      []string
+	// These files should only contain variables/macros - rules will not be picked
+	// up.
+	ExtraDefinitions []string
+	// DefaultPositiveAction is the action to take when a syscall is matched, and the expression returns a positive result - and the rule
+	// doesn't have any specified custom actions.  It can be specified as one of "trap", "kill", "allow" or "trace". It can also be a number
+	// - this will be treated as an errno. You can also use the pre- defined classical names for errors instead of the number - such as
+	// EACCES.
 	DefaultPositiveAction string
+	// DefaultNegativeAction is the action to take when a syscall is matched, the expression returns a negative result and the rule doesn't
+	// have any custom actions defined. The action can be specified using the same syntax as described for DefaultPositiveAction.
 	DefaultNegativeAction string
-	DefaultPolicyAction   string
-	ActionOnX32           string
-	ActionOnAuditFailure  string
+	// DefaultPolicyAction is the action to take when the syscall is not matched. The action can be specified using the same syntax as
+	// described for DefaultPositiveAction.
+	DefaultPolicyAction string
+	// ActionOnX32 is the action to take if the syscall is a 32-bit ABI compatibility syscall. If no action is specified, this case will not
+	// be considered. The actions are specified using the same syntax as described for DefaultPositiveAction.
+	ActionOnX32 string
+	// ActionOnAuditFailure is the action to take if the policy is running on the wrong architecture compared to what it was compiled
+	// for. If not specified, it will default to "kill". The actions are specified using the same syntax as described for
+	// DefaultPositiveAction.
+	ActionOnAuditFailure string
 }
 
 // Prepare will take the given path and settings, parse and compile the given
