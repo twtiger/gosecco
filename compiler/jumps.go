@@ -3,7 +3,7 @@ package compiler
 import "golang.org/x/sys/unix"
 
 type shift struct {
-	position, incr int
+	position int
 }
 
 func (c *compilerContext) isLongJump(jumpSize int) bool {
@@ -77,100 +77,109 @@ func (c *compilerContext) fixupJumps() {
 		currentIndex := maxIndexWithLongJump
 		for currentIndex > -1 {
 			current := c.result[currentIndex]
-			if isJump(current) {
-				if isConditionalJump(current) &&
-					hasLongJump(currentIndex, jtLongJumps, jfLongJumps) {
 
-					hadPositive := false
-					if jmpLen, ok := jtLongJumps[currentIndex]; ok {
-						jmpLen = fixupWithShifts(currentIndex, jmpLen, shifts)
-
-						hadPositive = true
-						c.insertUnconditionalJump(currentIndex+1, jmpLen)
-						c.result[currentIndex].Jt = 0
-
-						newJf := int(c.result[currentIndex].Jf) + 1
-						if c.isLongJump(newJf) {
-							// Simple case, we can just add it to the long jumps for JF:
-							jfLongJumps[currentIndex] = newJf
-						} else {
-							c.result[currentIndex].Jf = uint8(newJf)
-						}
-
-						shifts = append(shifts, shift{currentIndex + 1, 1})
-					}
-
-					if jmpLen, ok := jfLongJumps[currentIndex]; ok {
-						jmpLen = fixupWithShifts(currentIndex, jmpLen, shifts)
-
-						incr := 0
-						if hadPositive {
-							c.result[currentIndex+1].K++
-							incr++
-							jmpLen--
-						} else {
-							newJt := int(c.result[currentIndex].Jt) + 1
-							if c.isLongJump(newJt) {
-								c.insertUnconditionalJump(currentIndex+1, newJt)
-								c.result[currentIndex].Jt = 0
-								shifts = append(shifts, shift{currentIndex + 1, 1})
-								incr++
-							} else {
-								c.result[currentIndex].Jt = uint8(newJt)
-							}
-						}
-						c.insertUnconditionalJump(currentIndex+1+incr, jmpLen)
-						c.result[currentIndex].Jf = uint8(incr)
-						shifts = append(shifts, shift{currentIndex + 1 + incr, 1})
-					}
+			if isConditionalJump(current) && hasLongJump(currentIndex, jtLongJumps, jfLongJumps) {
+				hadJt := c.handleJTLongJumpFor(currentIndex, jtLongJumps, jfLongJumps, &shifts)
+				c.handleJFLongJumpFor(currentIndex, jfLongJumps, hadJt, &shifts)
+			} else {
+				if isUnconditionalJump(current) {
+					c.result[currentIndex].K = uint32(fixupWithShifts(currentIndex, int(c.result[currentIndex].K), shifts))
 				} else {
-					if isUnconditionalJump(current) {
-						c.result[currentIndex].K = uint32(fixupWithShifts(currentIndex, int(c.result[currentIndex].K), shifts))
-					} else {
-						hadPositive := false
-
-						newJt := fixupWithShifts(currentIndex, int(c.result[currentIndex].Jt), shifts)
-						if c.isLongJump(newJt) {
-							hadPositive = true
-							c.insertUnconditionalJump(currentIndex+1, newJt)
-							c.result[currentIndex].Jt = 0
-
-							// Jf doesn't need to be modified here, because it will be fixed up with the shifts. Hopefully correctly...
-
-							shifts = append(shifts, shift{currentIndex + 1, 1})
-						} else {
-							c.result[currentIndex].Jt = uint8(newJt)
-						}
-
-						newJf := fixupWithShifts(currentIndex, int(c.result[currentIndex].Jf), shifts)
-						if c.isLongJump(newJf) {
-							incr := 0
-							if hadPositive {
-								c.result[currentIndex+1].K++
-								incr++
-							} else {
-								newJt := int(c.result[currentIndex].Jt) + 1
-								if c.isLongJump(newJt) {
-									c.insertUnconditionalJump(currentIndex+1, newJt)
-									c.result[currentIndex].Jt = 0
-									shifts = append(shifts, shift{currentIndex + 1, 1})
-									incr++
-								} else {
-									c.result[currentIndex].Jt = uint8(newJt)
-								}
-							}
-							c.insertUnconditionalJump(currentIndex+1+incr, newJf)
-							c.result[currentIndex].Jf = uint8(incr)
-							shifts = append(shifts, shift{currentIndex + 1 + incr, 1})
-						} else {
-							c.result[currentIndex].Jf = uint8(newJf)
-						}
-					}
+					hadJt := c.shiftJt(currentIndex, &shifts)
+					c.shiftJf(hadJt, currentIndex, &shifts)
 				}
 			}
 
 			currentIndex--
 		}
+	}
+}
+
+func (c *compilerContext) handleJTLongJumpFor(currentIndex int, jtLongJumps map[int]int, jfLongJumps map[int]int, shifts *[]shift) bool {
+	hadJt := false
+	if jmpLen, ok := jtLongJumps[currentIndex]; ok {
+		jmpLen = fixupWithShifts(currentIndex, jmpLen, *shifts)
+		hadJt = true
+		c.insertUnconditionalJump(currentIndex+1, jmpLen)
+		c.result[currentIndex].Jt = 0
+
+		newJf := int(c.result[currentIndex].Jf) + 1
+		if c.isLongJump(newJf) {
+			// Simple case, we can just add it to the long jumps for JF:
+			jfLongJumps[currentIndex] = newJf
+		} else {
+			c.result[currentIndex].Jf = uint8(newJf)
+		}
+
+		*shifts = append(*shifts, shift{currentIndex + 1})
+	}
+	return hadJt
+}
+
+func (c *compilerContext) handleJFLongJumpFor(currentIndex int, jfLongJumps map[int]int, hadJt bool, shifts *[]shift) {
+	if jmpLen, ok := jfLongJumps[currentIndex]; ok {
+		jmpLen = fixupWithShifts(currentIndex, jmpLen, *shifts)
+		incr := 0
+		if hadJt {
+			c.result[currentIndex+1].K++
+			incr++
+			jmpLen--
+		} else {
+			newJt := int(c.result[currentIndex].Jt) + 1
+			if c.isLongJump(newJt) {
+				c.insertUnconditionalJump(currentIndex+1, newJt)
+				c.result[currentIndex].Jt = 0
+				*shifts = append(*shifts, shift{currentIndex + 1})
+				incr++
+			} else {
+				c.result[currentIndex].Jt = uint8(newJt)
+			}
+		}
+		c.insertUnconditionalJump(currentIndex+1+incr, jmpLen)
+		c.result[currentIndex].Jf = uint8(incr)
+		*shifts = append(*shifts, shift{currentIndex + 1 + incr})
+	}
+}
+
+func (c *compilerContext) shiftJt(currentIndex int, shifts *[]shift) bool {
+	hadJt := false
+	newJt := fixupWithShifts(currentIndex, int(c.result[currentIndex].Jt), *shifts)
+	if c.isLongJump(newJt) {
+		hadJt = true
+		c.insertUnconditionalJump(currentIndex+1, newJt)
+		c.result[currentIndex].Jt = 0
+
+		// Jf doesn't need to be modified here, because it will be fixed up with the shifts. Hopefully correctly...
+		*shifts = append(*shifts, shift{currentIndex + 1})
+	} else {
+		c.result[currentIndex].Jt = uint8(newJt)
+	}
+	return hadJt
+}
+
+func (c *compilerContext) shiftJf(hadJt bool, currentIndex int, shifts *[]shift) {
+	newJf := fixupWithShifts(currentIndex, int(c.result[currentIndex].Jf), *shifts)
+	if c.isLongJump(newJf) {
+		incr := 0
+		if hadJt {
+			c.result[currentIndex+1].K++
+			incr++
+		} else {
+			newJt := int(c.result[currentIndex].Jt) + 1
+			if c.isLongJump(newJt) {
+				c.insertUnconditionalJump(currentIndex+1, newJt)
+				c.result[currentIndex].Jt = 0
+				*shifts = append(*shifts, shift{currentIndex + 1})
+				incr++
+			} else {
+				c.result[currentIndex].Jt = uint8(newJt)
+			}
+		}
+		c.insertUnconditionalJump(currentIndex+1+incr, newJf)
+		c.result[currentIndex].Jf = uint8(incr)
+		*shifts = append(*shifts, shift{currentIndex + 1 + incr})
+	} else {
+		c.result[currentIndex].Jf = uint8(newJf)
 	}
 }
 
