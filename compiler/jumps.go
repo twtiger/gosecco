@@ -71,10 +71,10 @@ func (c *compilerContext) fixupJumps() {
 		}
 	}
 
-	// This has no impact on our tests
-	//if maxIndexWithLongJump == -1 {
-	//	return
-	//}
+	// This is an optimization. Please don't comment away.
+	if maxIndexWithLongJump == -1 {
+		return
+	}
 
 	shifts := []shift{}
 
