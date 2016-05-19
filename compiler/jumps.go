@@ -71,27 +71,29 @@ func (c *compilerContext) fixupJumps() {
 		}
 	}
 
-	if maxIndexWithLongJump != -1 {
-		shifts := []shift{}
+	// This has no impact on our tests
+	//if maxIndexWithLongJump == -1 {
+	//	return
+	//}
 
-		currentIndex := maxIndexWithLongJump
-		for currentIndex > -1 {
-			current := c.result[currentIndex]
+	shifts := []shift{}
 
-			if isConditionalJump(current) && hasLongJump(currentIndex, jtLongJumps, jfLongJumps) {
-				hadJt := c.handleJTLongJumpFor(currentIndex, jtLongJumps, jfLongJumps, &shifts)
-				c.handleJFLongJumpFor(currentIndex, jfLongJumps, hadJt, &shifts)
+	currentIndex := maxIndexWithLongJump
+	for currentIndex > -1 {
+		current := c.result[currentIndex]
+
+		if isConditionalJump(current) && hasLongJump(currentIndex, jtLongJumps, jfLongJumps) {
+			hadJt := c.handleJTLongJumpFor(currentIndex, jtLongJumps, jfLongJumps, &shifts)
+			c.handleJFLongJumpFor(currentIndex, jfLongJumps, hadJt, &shifts)
+		} else {
+			if isUnconditionalJump(current) {
+				c.result[currentIndex].K = uint32(fixupWithShifts(currentIndex, int(c.result[currentIndex].K), shifts))
 			} else {
-				if isUnconditionalJump(current) {
-					c.result[currentIndex].K = uint32(fixupWithShifts(currentIndex, int(c.result[currentIndex].K), shifts))
-				} else {
-					hadJt := c.shiftJt(currentIndex, &shifts)
-					c.shiftJf(hadJt, currentIndex, &shifts)
-				}
+				hadJt := c.shiftJt(currentIndex, &shifts)
+				c.shiftJf(hadJt, currentIndex, &shifts)
 			}
-
-			currentIndex--
 		}
+		currentIndex--
 	}
 }
 
@@ -100,8 +102,6 @@ func (c *compilerContext) handleJTLongJumpFor(currentIndex int, jtLongJumps map[
 	if jmpLen, ok := jtLongJumps[currentIndex]; ok {
 		jmpLen = fixupWithShifts(currentIndex, jmpLen, *shifts)
 		hadJt = true
-		c.insertUnconditionalJump(currentIndex+1, jmpLen)
-		c.result[currentIndex].Jt = 0
 
 		newJf := int(c.result[currentIndex].Jf) + 1
 		if c.isLongJump(newJf) {
@@ -111,7 +111,7 @@ func (c *compilerContext) handleJTLongJumpFor(currentIndex int, jtLongJumps map[
 			c.result[currentIndex].Jf = uint8(newJf)
 		}
 
-		*shifts = append(*shifts, shift{currentIndex + 1})
+		shifts = c.insertJumps(currentIndex, jmpLen, 0, shifts)
 	}
 	return hadJt
 }
@@ -119,25 +119,39 @@ func (c *compilerContext) handleJTLongJumpFor(currentIndex int, jtLongJumps map[
 func (c *compilerContext) handleJFLongJumpFor(currentIndex int, jfLongJumps map[int]int, hadJt bool, shifts *[]shift) {
 	if jmpLen, ok := jfLongJumps[currentIndex]; ok {
 		jmpLen = fixupWithShifts(currentIndex, jmpLen, *shifts)
-		incr := 0
-		if hadJt {
-			c.result[currentIndex+1].K++
+		var incr int
+		shifts, incr, jmpLen = c.increment(hadJt, jmpLen, currentIndex, shifts)
+		shifts = c.insertJumps(currentIndex, jmpLen, incr, shifts)
+	}
+}
+
+func (c *compilerContext) increment(hadJt bool, jmpLen, currentIndex int, shifts *[]shift) (*[]shift, int, int) {
+	incr := 0
+	if hadJt {
+		c.result[currentIndex+1].K++
+		incr++
+		jmpLen--
+	} else {
+		newJt := int(c.result[currentIndex].Jt) + 1
+		if c.isLongJump(newJt) {
+			// incr in this case doesn't seem to do much, all tests pass when it is changed to 0
+			shifts = c.insertJumps(currentIndex, newJt, incr, shifts)
 			incr++
-			jmpLen--
 		} else {
-			newJt := int(c.result[currentIndex].Jt) + 1
-			if c.isLongJump(newJt) {
-				c.insertUnconditionalJump(currentIndex+1, newJt)
-				c.result[currentIndex].Jt = 0
-				*shifts = append(*shifts, shift{currentIndex + 1})
-				incr++
-			} else {
-				c.result[currentIndex].Jt = uint8(newJt)
-			}
+			c.result[currentIndex].Jt = uint8(newJt)
 		}
-		c.insertUnconditionalJump(currentIndex+1+incr, jmpLen)
-		c.result[currentIndex].Jf = uint8(incr)
-		*shifts = append(*shifts, shift{currentIndex + 1 + incr})
+	}
+	return shifts, incr, jmpLen
+}
+
+func (c *compilerContext) shiftJf(hadJt bool, currentIndex int, shifts *[]shift) {
+	newJf := fixupWithShifts(currentIndex, int(c.result[currentIndex].Jf), *shifts)
+	if c.isLongJump(newJf) {
+		var incr int
+		shifts, incr, _ = c.increment(hadJt, 0, currentIndex, shifts)
+		shifts = c.insertJumps(currentIndex, newJf, incr, shifts)
+	} else {
+		c.result[currentIndex].Jf = uint8(newJf)
 	}
 }
 
@@ -146,41 +160,20 @@ func (c *compilerContext) shiftJt(currentIndex int, shifts *[]shift) bool {
 	newJt := fixupWithShifts(currentIndex, int(c.result[currentIndex].Jt), *shifts)
 	if c.isLongJump(newJt) {
 		hadJt = true
-		c.insertUnconditionalJump(currentIndex+1, newJt)
-		c.result[currentIndex].Jt = 0
 
 		// Jf doesn't need to be modified here, because it will be fixed up with the shifts. Hopefully correctly...
-		*shifts = append(*shifts, shift{currentIndex + 1})
+		shifts = c.insertJumps(currentIndex, newJt, 0, shifts)
 	} else {
 		c.result[currentIndex].Jt = uint8(newJt)
 	}
 	return hadJt
 }
 
-func (c *compilerContext) shiftJf(hadJt bool, currentIndex int, shifts *[]shift) {
-	newJf := fixupWithShifts(currentIndex, int(c.result[currentIndex].Jf), *shifts)
-	if c.isLongJump(newJf) {
-		incr := 0
-		if hadJt {
-			c.result[currentIndex+1].K++
-			incr++
-		} else {
-			newJt := int(c.result[currentIndex].Jt) + 1
-			if c.isLongJump(newJt) {
-				c.insertUnconditionalJump(currentIndex+1, newJt)
-				c.result[currentIndex].Jt = 0
-				*shifts = append(*shifts, shift{currentIndex + 1})
-				incr++
-			} else {
-				c.result[currentIndex].Jt = uint8(newJt)
-			}
-		}
-		c.insertUnconditionalJump(currentIndex+1+incr, newJf)
-		c.result[currentIndex].Jf = uint8(incr)
-		*shifts = append(*shifts, shift{currentIndex + 1 + incr})
-	} else {
-		c.result[currentIndex].Jf = uint8(newJf)
-	}
+func (c *compilerContext) insertJumps(currentIndex, pos, incr int, shifts *[]shift) *[]shift {
+	c.insertUnconditionalJump(currentIndex+1+incr, pos)
+	c.result[currentIndex].Jf = uint8(incr)
+	*shifts = append(*shifts, shift{currentIndex + 1 + incr})
+	return shifts
 }
 
 func (c *compilerContext) hasPreviousUnconditionalJump(from int) bool {
