@@ -4,6 +4,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"github.com/twtiger/gosecco/constants"
 	"github.com/twtiger/gosecco/data"
 )
 
@@ -15,7 +16,8 @@ import "C"
 // See <linux/seccomp.h> for valid op and flag values.
 // uargs is typically a pointer to struct sock_fprog.
 func seccomp(op, flags uintptr, uargs unsafe.Pointer) error {
-	_, _, e := syscall.Syscall(syscall.PR_GET_SECCOMP, op, flags, uintptr(uargs))
+	nr, _ := constants.GetSyscall("seccomp")
+	_, _, e := syscall.Syscall(uintptr(nr), op, flags, uintptr(uargs))
 	if e != 0 {
 		return e
 	}
