@@ -1841,3 +1841,9 @@ func GetError(name string) (uint32, bool) {
 	res, ok := allErrors[name]
 	return uint32(res), ok
 }
+
+// GetConstant returns the constant for the given name if it exists
+func GetConstant(name string) (uint32, bool) {
+	res, ok := allConstants[strings.ToUpper(name)]
+	return uint32(res), ok
+}

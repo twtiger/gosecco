@@ -1,6 +1,8 @@
 package unifier
 
 import (
+	"fmt"
+	"syscall"
 	"testing"
 
 	"github.com/twtiger/gosecco/tree"
@@ -594,4 +596,48 @@ func (s *UnifierSuite) Test_Unify_withMacroDefinedInSeparateFile(c *C) {
 	c.Assert(len(output.Macros), Equals, 0)
 	c.Assert(len(output.Rules), Equals, 1)
 	c.Assert(tree.ExpressionString(output.Rules[0].Body), Equals, "(eq arg0 42)")
+}
+
+func (s *UnifierSuite) Test_Unify_withVariableReferenceToAConstant(c *C) {
+	rule := tree.Rule{
+		Name: "write",
+		Body: tree.Comparison{Op: tree.EQL, Left: tree.Argument{Index: 0}, Right: tree.Variable{"AF_ISDN"}},
+	}
+
+	input := tree.RawPolicy{
+		RuleOrMacros: []interface{}{
+			rule,
+		},
+	}
+	output, e := Unify(input, nil, "allow", "kill", "")
+
+	c.Assert(e, IsNil)
+	c.Assert(len(output.Macros), Equals, 0)
+	c.Assert(len(output.Rules), Equals, 1)
+	c.Assert(tree.ExpressionString(output.Rules[0].Body), Equals, fmt.Sprintf("(eq arg0 %d)", syscall.AF_ISDN))
+}
+
+func (s *UnifierSuite) Test_Unify_letsMacroTakePrecedenceOverConstant(c *C) {
+	rule := tree.Rule{
+		Name: "write",
+		Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.Variable{"AF_ISDN"}},
+	}
+
+	macro := tree.Macro{
+		Name: "AF_ISDN",
+		Body: tree.NumericLiteral{1},
+	}
+
+	input := tree.RawPolicy{
+		RuleOrMacros: []interface{}{
+			macro,
+			rule,
+		},
+	}
+
+	output, _ := Unify(input, nil, "", "", "")
+	c.Assert(len(output.Macros), Equals, 1)
+	c.Assert(output.Macros["AF_ISDN"], DeepEquals, macro)
+	c.Assert(len(output.Rules), Equals, 1)
+	c.Assert(tree.ExpressionString(output.Rules[0].Body), Equals, "(eq arg0 1)")
 }

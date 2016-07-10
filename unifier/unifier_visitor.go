@@ -3,6 +3,7 @@ package unifier
 import (
 	"errors"
 
+	"github.com/twtiger/gosecco/constants"
 	"github.com/twtiger/gosecco/tree"
 )
 
@@ -127,6 +128,11 @@ func (r *replacer) AcceptVariable(b tree.Variable) {
 	if ok {
 		r.expression = expr.Body
 	} else {
-		r.err = errors.New("Variable not defined")
+		value, ok2 := constants.GetConstant(b.Name)
+		if ok2 {
+			r.expression = tree.NumericLiteral{Value: uint64(value)}
+		} else {
+			r.err = errors.New("Variable not defined")
+		}
 	}
 }
