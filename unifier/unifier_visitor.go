@@ -126,7 +126,11 @@ func (r *replacer) AcceptOr(b tree.Or) {
 func (r *replacer) AcceptVariable(b tree.Variable) {
 	expr, ok := r.macros[b.Name]
 	if ok {
-		r.expression = expr.Body
+		x, ee := replace(expr.Body, r.macros)
+		if ee != nil {
+			r.err = ee
+		}
+		r.expression = x
 	} else {
 		value, ok2 := constants.GetConstant(b.Name)
 		if ok2 {

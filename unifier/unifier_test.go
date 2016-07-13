@@ -641,3 +641,57 @@ func (s *UnifierSuite) Test_Unify_letsMacroTakePrecedenceOverConstant(c *C) {
 	c.Assert(len(output.Rules), Equals, 1)
 	c.Assert(tree.ExpressionString(output.Rules[0].Body), Equals, "(eq arg0 1)")
 }
+
+func (s *UnifierSuite) Test_Unify_withMoreThanOneVariableResolution(c *C) {
+	rule := tree.Rule{
+		Name: "write",
+		Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.Variable{"var1"}},
+	}
+
+	macro1 := tree.Macro{
+		Name: "var1",
+		Body: tree.Variable{"var2"},
+	}
+
+	macro2 := tree.Macro{
+		Name: "var2",
+		Body: tree.NumericLiteral{1},
+	}
+
+	input := tree.RawPolicy{
+		RuleOrMacros: []interface{}{
+			macro2,
+			macro1,
+			rule,
+		},
+	}
+
+	output, _ := Unify(input, nil, "", "", "")
+	c.Assert(len(output.Macros), Equals, 2)
+	c.Assert(output.Macros["var1"], DeepEquals, macro1)
+	c.Assert(len(output.Rules), Equals, 1)
+	c.Assert(tree.ExpressionString(output.Rules[0].Body), Equals, "(eq arg0 1)")
+}
+
+func (s *UnifierSuite) Test_Unify_generatesErrorWithAMissingDependentVariable(c *C) {
+	rule := tree.Rule{
+		Name: "write",
+		Body: tree.Comparison{Left: tree.Argument{Index: 0}, Op: tree.EQL, Right: tree.Variable{"var1"}},
+	}
+
+	macro1 := tree.Macro{
+		Name: "var1",
+		Body: tree.Variable{"var2"},
+	}
+
+	input := tree.RawPolicy{
+		RuleOrMacros: []interface{}{
+			macro1,
+			rule,
+		},
+	}
+
+	_, e := Unify(input, nil, "", "", "")
+	c.Assert(e, Not(IsNil))
+	c.Assert(e, ErrorMatches, "Variable not defined")
+}
