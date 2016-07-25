@@ -363,7 +363,7 @@ func (s *UnifierSuite) Test_Unify_withNoVariableDefinedRaisesNoVariableDefinedEr
 	}
 
 	_, error := Unify(input, nil, "", "", "")
-	c.Assert(error, ErrorMatches, "Variable not defined")
+	c.Assert(error, ErrorMatches, "Variable 'var1' is not defined")
 }
 
 func (s *UnifierSuite) Test_Unify_withCallExpressionWhereVariableIsNotDefinedRaisesVariableUndefinedError(c *C) {
@@ -392,7 +392,7 @@ func (s *UnifierSuite) Test_Unify_withCallExpressionWhereVariableIsNotDefinedRai
 	}
 
 	_, error := Unify(input, nil, "", "", "")
-	c.Assert(error, ErrorMatches, "Variable not defined")
+	c.Assert(error, ErrorMatches, "Variable 'var2' is not defined")
 }
 
 func (s *UnifierSuite) Test_Unify_withDefaultPositiveNumericActionSetsPositiveAction(c *C) {
@@ -564,7 +564,7 @@ func (s *UnifierSuite) Test_Unify_earlierErrorShouldStillBeReported(c *C) {
 	_, e := Unify(input, nil, "allow", "kill", "")
 
 	c.Assert(e, Not(IsNil))
-	c.Assert(e, ErrorMatches, "Variable not defined")
+	c.Assert(e, ErrorMatches, "Variable 'var1' is not defined")
 }
 
 func (s *UnifierSuite) Test_Unify_withMacroDefinedInSeparateFile(c *C) {
@@ -693,5 +693,5 @@ func (s *UnifierSuite) Test_Unify_generatesErrorWithAMissingDependentVariable(c 
 
 	_, e := Unify(input, nil, "", "", "")
 	c.Assert(e, Not(IsNil))
-	c.Assert(e, ErrorMatches, "Variable not defined")
+	c.Assert(e, ErrorMatches, "Variable 'var2' is not defined")
 }

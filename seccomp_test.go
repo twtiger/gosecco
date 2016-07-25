@@ -43,7 +43,7 @@ func (s *SeccompSuite) Test_parseUnificationErrorReturnsError(c *C) {
 	set := SeccompSettings{}
 	f := getActualTestFolder() + "/missing_variable_policy"
 	_, ee := Prepare(f, set)
-	c.Assert(ee, ErrorMatches, "Variable not defined")
+	c.Assert(ee, ErrorMatches, "Variable 'b' is not defined")
 }
 
 func (s *SeccompSuite) Test_parseValidPolicyFile(c *C) {
