@@ -45,7 +45,13 @@ func (r *replacer) AcceptBinaryNegation(b tree.BinaryNegation) {
 func (r *replacer) AcceptBooleanLiteral(tree.BooleanLiteral) {}
 
 func (r *replacer) AcceptCall(b tree.Call) {
-	v := r.macros[b.Name] // we get the name of the macro
+	v, ok := r.macros[b.Name] // we get the name of the macro
+
+	if !ok {
+		err := fmt.Sprintf("Macro '%s' is not defined", b.Name)
+		r.err = errors.New(err)
+		return
+	}
 
 	nm := make(map[string]tree.Macro)
 	for i, k := range b.Args {

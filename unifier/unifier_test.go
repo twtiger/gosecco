@@ -395,6 +395,28 @@ func (s *UnifierSuite) Test_Unify_withCallExpressionWhereVariableIsNotDefinedRai
 	c.Assert(error, ErrorMatches, "Variable 'var2' is not defined")
 }
 
+func (s *UnifierSuite) Test_Unify_withUndefinedCallExpressionRaisesVariableUndefinedError(c *C) {
+	rule := tree.Rule{
+		Name: "write",
+		Body: tree.Call{Name: "compV1", Args: []tree.Any{tree.Argument{Index: 0}, tree.Variable{"var2"}}},
+	}
+
+	macro1 := tree.Macro{
+		Name: "var1",
+		Body: tree.Argument{Index: 5},
+	}
+
+	input := tree.RawPolicy{
+		RuleOrMacros: []interface{}{
+			macro1,
+			rule,
+		},
+	}
+
+	_, error := Unify(input, nil, "", "", "")
+	c.Assert(error, ErrorMatches, "Macro 'compV1' is not defined")
+}
+
 func (s *UnifierSuite) Test_Unify_withDefaultPositiveNumericActionSetsPositiveAction(c *C) {
 	rule := tree.Rule{
 		Name: "write",
