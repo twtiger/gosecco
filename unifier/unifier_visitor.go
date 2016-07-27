@@ -1,7 +1,6 @@
 package unifier
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/twtiger/gosecco/constants"
@@ -48,8 +47,7 @@ func (r *replacer) AcceptCall(b tree.Call) {
 	v, ok := r.macros[b.Name] // we get the name of the macro
 
 	if !ok {
-		err := fmt.Sprintf("Macro '%s' is not defined", b.Name)
-		r.err = errors.New(err)
+		r.err = fmt.Errorf("Macro '%s' is not defined", b.Name)
 		return
 	}
 
@@ -143,8 +141,7 @@ func (r *replacer) AcceptVariable(b tree.Variable) {
 		if ok2 {
 			r.expression = tree.NumericLiteral{Value: uint64(value)}
 		} else {
-			err := fmt.Sprintf("Variable '%s' is not defined", b.Name)
-			r.err = errors.New(err)
+			r.err = fmt.Errorf("Variable '%s' is not defined", b.Name)
 		}
 	}
 }
