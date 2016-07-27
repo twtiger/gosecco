@@ -8,1836 +8,1733 @@ import (
 // AllConstants contain a mapping from the name of a constant to its value
 var AllConstants = make(map[string]int)
 
+// AllConstantNumbers contain a mapping from the number of a constant to all registered constants with that value
+var AllConstantNumbers = make(map[int][]string)
+
 // AllErrors contain a mapping from all error names to their value
 var AllErrors = make(map[string]int)
+
+// AllErrorNumbers contain a mapping from all error values to their name
+var AllErrorNumbers = make(map[int]string)
 
 // Syscalls contain a mapping from each syscall name to its number
 var Syscalls = make(map[string]int)
 
+// SyscallNumbers contain a mapping from each syscall number to its name
+var SyscallNumbers = make(map[int]string)
+
+// RegisterConstant puts the given constant in the map of all constants, and also adds it to the list of constants with that number
+func RegisterConstant(name string, num int) {
+	nm := strings.ToUpper(name)
+	AllConstants[nm] = num
+	AllConstantNumbers[num] = append(AllConstantNumbers[num], nm)
+}
+
+// RegisterError puts the given error in the map of all error, and also adds it to the list of errors with that number, and also registers it as a constant
+func RegisterError(name string, num int) {
+	nm := strings.ToUpper(name)
+	AllErrors[nm] = num
+	AllErrorNumbers[num] = nm
+	RegisterConstant(nm, num)
+}
+
+// RegisterSyscall puts the given syscall in the map of all syscalls, and also adds it to the mapping from number to syscall
+func RegisterSyscall(name string, num int) {
+	nm := strings.ToLower(name)
+	Syscalls[nm] = num
+	SyscallNumbers[num] = nm
+}
+
 func init() {
-	AllConstants["AF_ALG"] = syscall.AF_ALG
-	AllConstants["AF_APPLETALK"] = syscall.AF_APPLETALK
-	AllConstants["AF_ASH"] = syscall.AF_ASH
-	AllConstants["AF_ATMPVC"] = syscall.AF_ATMPVC
-	AllConstants["AF_ATMSVC"] = syscall.AF_ATMSVC
-	AllConstants["AF_AX25"] = syscall.AF_AX25
-	AllConstants["AF_BLUETOOTH"] = syscall.AF_BLUETOOTH
-	AllConstants["AF_BRIDGE"] = syscall.AF_BRIDGE
-	AllConstants["AF_CAIF"] = syscall.AF_CAIF
-	AllConstants["AF_CAN"] = syscall.AF_CAN
-	AllConstants["AF_DECnet"] = syscall.AF_DECnet
-	AllConstants["AF_ECONET"] = syscall.AF_ECONET
-	AllConstants["AF_FILE"] = syscall.AF_FILE
-	AllConstants["AF_IEEE802154"] = syscall.AF_IEEE802154
-	AllConstants["AF_INET"] = syscall.AF_INET
-	AllConstants["AF_INET6"] = syscall.AF_INET6
-	AllConstants["AF_IPX"] = syscall.AF_IPX
-	AllConstants["AF_IRDA"] = syscall.AF_IRDA
-	AllConstants["AF_ISDN"] = syscall.AF_ISDN
-	AllConstants["AF_IUCV"] = syscall.AF_IUCV
-	AllConstants["AF_KEY"] = syscall.AF_KEY
-	AllConstants["AF_LLC"] = syscall.AF_LLC
-	AllConstants["AF_LOCAL"] = syscall.AF_LOCAL
-	AllConstants["AF_MAX"] = syscall.AF_MAX
-	AllConstants["AF_NETBEUI"] = syscall.AF_NETBEUI
-	AllConstants["AF_NETLINK"] = syscall.AF_NETLINK
-	AllConstants["AF_NETROM"] = syscall.AF_NETROM
-	AllConstants["AF_PACKET"] = syscall.AF_PACKET
-	AllConstants["AF_PHONET"] = syscall.AF_PHONET
-	AllConstants["AF_PPPOX"] = syscall.AF_PPPOX
-	AllConstants["AF_RDS"] = syscall.AF_RDS
-	AllConstants["AF_ROSE"] = syscall.AF_ROSE
-	AllConstants["AF_ROUTE"] = syscall.AF_ROUTE
-	AllConstants["AF_RXRPC"] = syscall.AF_RXRPC
-	AllConstants["AF_SECURITY"] = syscall.AF_SECURITY
-	AllConstants["AF_SNA"] = syscall.AF_SNA
-	AllConstants["AF_TIPC"] = syscall.AF_TIPC
-	AllConstants["AF_UNIX"] = syscall.AF_UNIX
-	AllConstants["AF_UNSPEC"] = syscall.AF_UNSPEC
-	AllConstants["AF_WANPIPE"] = syscall.AF_WANPIPE
-	AllConstants["AF_X25"] = syscall.AF_X25
-	AllConstants["ARPHRD_ADAPT"] = syscall.ARPHRD_ADAPT
-	AllConstants["ARPHRD_APPLETLK"] = syscall.ARPHRD_APPLETLK
-	AllConstants["ARPHRD_ARCNET"] = syscall.ARPHRD_ARCNET
-	AllConstants["ARPHRD_ASH"] = syscall.ARPHRD_ASH
-	AllConstants["ARPHRD_ATM"] = syscall.ARPHRD_ATM
-	AllConstants["ARPHRD_AX25"] = syscall.ARPHRD_AX25
-	AllConstants["ARPHRD_BIF"] = syscall.ARPHRD_BIF
-	AllConstants["ARPHRD_CHAOS"] = syscall.ARPHRD_CHAOS
-	AllConstants["ARPHRD_CISCO"] = syscall.ARPHRD_CISCO
-	AllConstants["ARPHRD_CSLIP"] = syscall.ARPHRD_CSLIP
-	AllConstants["ARPHRD_CSLIP6"] = syscall.ARPHRD_CSLIP6
-	AllConstants["ARPHRD_DDCMP"] = syscall.ARPHRD_DDCMP
-	AllConstants["ARPHRD_DLCI"] = syscall.ARPHRD_DLCI
-	AllConstants["ARPHRD_ECONET"] = syscall.ARPHRD_ECONET
-	AllConstants["ARPHRD_EETHER"] = syscall.ARPHRD_EETHER
-	AllConstants["ARPHRD_ETHER"] = syscall.ARPHRD_ETHER
-	AllConstants["ARPHRD_EUI64"] = syscall.ARPHRD_EUI64
-	AllConstants["ARPHRD_FCAL"] = syscall.ARPHRD_FCAL
-	AllConstants["ARPHRD_FCFABRIC"] = syscall.ARPHRD_FCFABRIC
-	AllConstants["ARPHRD_FCPL"] = syscall.ARPHRD_FCPL
-	AllConstants["ARPHRD_FCPP"] = syscall.ARPHRD_FCPP
-	AllConstants["ARPHRD_FDDI"] = syscall.ARPHRD_FDDI
-	AllConstants["ARPHRD_FRAD"] = syscall.ARPHRD_FRAD
-	AllConstants["ARPHRD_HDLC"] = syscall.ARPHRD_HDLC
-	AllConstants["ARPHRD_HIPPI"] = syscall.ARPHRD_HIPPI
-	AllConstants["ARPHRD_HWX25"] = syscall.ARPHRD_HWX25
-	AllConstants["ARPHRD_IEEE1394"] = syscall.ARPHRD_IEEE1394
-	AllConstants["ARPHRD_IEEE802"] = syscall.ARPHRD_IEEE802
-	AllConstants["ARPHRD_IEEE80211"] = syscall.ARPHRD_IEEE80211
-	AllConstants["ARPHRD_IEEE80211_PRISM"] = syscall.ARPHRD_IEEE80211_PRISM
-	AllConstants["ARPHRD_IEEE80211_RADIOTAP"] = syscall.ARPHRD_IEEE80211_RADIOTAP
-	AllConstants["ARPHRD_IEEE802154"] = syscall.ARPHRD_IEEE802154
-	AllConstants["ARPHRD_IEEE802154_PHY"] = syscall.ARPHRD_IEEE802154_PHY
-	AllConstants["ARPHRD_IEEE802_TR"] = syscall.ARPHRD_IEEE802_TR
-	AllConstants["ARPHRD_INFINIBAND"] = syscall.ARPHRD_INFINIBAND
-	AllConstants["ARPHRD_IPDDP"] = syscall.ARPHRD_IPDDP
-	AllConstants["ARPHRD_IPGRE"] = syscall.ARPHRD_IPGRE
-	AllConstants["ARPHRD_IRDA"] = syscall.ARPHRD_IRDA
-	AllConstants["ARPHRD_LAPB"] = syscall.ARPHRD_LAPB
-	AllConstants["ARPHRD_LOCALTLK"] = syscall.ARPHRD_LOCALTLK
-	AllConstants["ARPHRD_LOOPBACK"] = syscall.ARPHRD_LOOPBACK
-	AllConstants["ARPHRD_METRICOM"] = syscall.ARPHRD_METRICOM
-	AllConstants["ARPHRD_NETROM"] = syscall.ARPHRD_NETROM
-	AllConstants["ARPHRD_NONE"] = syscall.ARPHRD_NONE
-	AllConstants["ARPHRD_PIMREG"] = syscall.ARPHRD_PIMREG
-	AllConstants["ARPHRD_PPP"] = syscall.ARPHRD_PPP
-	AllConstants["ARPHRD_PRONET"] = syscall.ARPHRD_PRONET
-	AllConstants["ARPHRD_RAWHDLC"] = syscall.ARPHRD_RAWHDLC
-	AllConstants["ARPHRD_ROSE"] = syscall.ARPHRD_ROSE
-	AllConstants["ARPHRD_RSRVD"] = syscall.ARPHRD_RSRVD
-	AllConstants["ARPHRD_SIT"] = syscall.ARPHRD_SIT
-	AllConstants["ARPHRD_SKIP"] = syscall.ARPHRD_SKIP
-	AllConstants["ARPHRD_SLIP"] = syscall.ARPHRD_SLIP
-	AllConstants["ARPHRD_SLIP6"] = syscall.ARPHRD_SLIP6
-	AllConstants["ARPHRD_TUNNEL"] = syscall.ARPHRD_TUNNEL
-	AllConstants["ARPHRD_TUNNEL6"] = syscall.ARPHRD_TUNNEL6
-	AllConstants["ARPHRD_VOID"] = syscall.ARPHRD_VOID
-	AllConstants["ARPHRD_X25"] = syscall.ARPHRD_X25
-	AllConstants["BPF_A"] = syscall.BPF_A
-	AllConstants["BPF_ABS"] = syscall.BPF_ABS
-	AllConstants["BPF_ADD"] = syscall.BPF_ADD
-	AllConstants["BPF_ALU"] = syscall.BPF_ALU
-	AllConstants["BPF_AND"] = syscall.BPF_AND
-	AllConstants["BPF_B"] = syscall.BPF_B
-	AllConstants["BPF_DIV"] = syscall.BPF_DIV
-	AllConstants["BPF_H"] = syscall.BPF_H
-	AllConstants["BPF_IMM"] = syscall.BPF_IMM
-	AllConstants["BPF_IND"] = syscall.BPF_IND
-	AllConstants["BPF_JA"] = syscall.BPF_JA
-	AllConstants["BPF_JEQ"] = syscall.BPF_JEQ
-	AllConstants["BPF_JGE"] = syscall.BPF_JGE
-	AllConstants["BPF_JGT"] = syscall.BPF_JGT
-	AllConstants["BPF_JMP"] = syscall.BPF_JMP
-	AllConstants["BPF_JSET"] = syscall.BPF_JSET
-	AllConstants["BPF_K"] = syscall.BPF_K
-	AllConstants["BPF_LD"] = syscall.BPF_LD
-	AllConstants["BPF_LDX"] = syscall.BPF_LDX
-	AllConstants["BPF_LEN"] = syscall.BPF_LEN
-	AllConstants["BPF_LSH"] = syscall.BPF_LSH
-	AllConstants["BPF_MAJOR_VERSION"] = syscall.BPF_MAJOR_VERSION
-	AllConstants["BPF_MAXINSNS"] = syscall.BPF_MAXINSNS
-	AllConstants["BPF_MEM"] = syscall.BPF_MEM
-	AllConstants["BPF_MEMWORDS"] = syscall.BPF_MEMWORDS
-	AllConstants["BPF_MINOR_VERSION"] = syscall.BPF_MINOR_VERSION
-	AllConstants["BPF_MISC"] = syscall.BPF_MISC
-	AllConstants["BPF_MSH"] = syscall.BPF_MSH
-	AllConstants["BPF_MUL"] = syscall.BPF_MUL
-	AllConstants["BPF_NEG"] = syscall.BPF_NEG
-	AllConstants["BPF_OR"] = syscall.BPF_OR
-	AllConstants["BPF_RET"] = syscall.BPF_RET
-	AllConstants["BPF_RSH"] = syscall.BPF_RSH
-	AllConstants["BPF_ST"] = syscall.BPF_ST
-	AllConstants["BPF_STX"] = syscall.BPF_STX
-	AllConstants["BPF_SUB"] = syscall.BPF_SUB
-	AllConstants["BPF_TAX"] = syscall.BPF_TAX
-	AllConstants["BPF_TXA"] = syscall.BPF_TXA
-	AllConstants["BPF_W"] = syscall.BPF_W
-	AllConstants["BPF_X"] = syscall.BPF_X
-	AllConstants["CLONE_CHILD_CLEARTID"] = syscall.CLONE_CHILD_CLEARTID
-	AllConstants["CLONE_CHILD_SETTID"] = syscall.CLONE_CHILD_SETTID
-	AllConstants["CLONE_DETACHED"] = syscall.CLONE_DETACHED
-	AllConstants["CLONE_FILES"] = syscall.CLONE_FILES
-	AllConstants["CLONE_FS"] = syscall.CLONE_FS
-	AllConstants["CLONE_IO"] = syscall.CLONE_IO
-	AllConstants["CLONE_NEWIPC"] = syscall.CLONE_NEWIPC
-	AllConstants["CLONE_NEWNET"] = syscall.CLONE_NEWNET
-	AllConstants["CLONE_NEWNS"] = syscall.CLONE_NEWNS
-	AllConstants["CLONE_NEWPID"] = syscall.CLONE_NEWPID
-	AllConstants["CLONE_NEWUSER"] = syscall.CLONE_NEWUSER
-	AllConstants["CLONE_NEWUTS"] = syscall.CLONE_NEWUTS
-	AllConstants["CLONE_PARENT"] = syscall.CLONE_PARENT
-	AllConstants["CLONE_PARENT_SETTID"] = syscall.CLONE_PARENT_SETTID
-	AllConstants["CLONE_PTRACE"] = syscall.CLONE_PTRACE
-	AllConstants["CLONE_SETTLS"] = syscall.CLONE_SETTLS
-	AllConstants["CLONE_SIGHAND"] = syscall.CLONE_SIGHAND
-	AllConstants["CLONE_SYSVSEM"] = syscall.CLONE_SYSVSEM
-	AllConstants["CLONE_THREAD"] = syscall.CLONE_THREAD
-	AllConstants["CLONE_UNTRACED"] = syscall.CLONE_UNTRACED
-	AllConstants["CLONE_VFORK"] = syscall.CLONE_VFORK
-	AllConstants["CLONE_VM"] = syscall.CLONE_VM
-	AllConstants["DT_BLK"] = syscall.DT_BLK
-	AllConstants["DT_CHR"] = syscall.DT_CHR
-	AllConstants["DT_DIR"] = syscall.DT_DIR
-	AllConstants["DT_FIFO"] = syscall.DT_FIFO
-	AllConstants["DT_LNK"] = syscall.DT_LNK
-	AllConstants["DT_REG"] = syscall.DT_REG
-	AllConstants["DT_SOCK"] = syscall.DT_SOCK
-	AllConstants["DT_UNKNOWN"] = syscall.DT_UNKNOWN
-	AllConstants["DT_WHT"] = syscall.DT_WHT
-	AllConstants["EPOLLERR"] = syscall.EPOLLERR
-	AllConstants["EPOLLET"] = syscall.EPOLLET
-	AllConstants["EPOLLHUP"] = syscall.EPOLLHUP
-	AllConstants["EPOLLIN"] = syscall.EPOLLIN
-	AllConstants["EPOLLMSG"] = syscall.EPOLLMSG
-	AllConstants["EPOLLONESHOT"] = syscall.EPOLLONESHOT
-	AllConstants["EPOLLOUT"] = syscall.EPOLLOUT
-	AllConstants["EPOLLPRI"] = syscall.EPOLLPRI
-	AllConstants["EPOLLRDBAND"] = syscall.EPOLLRDBAND
-	AllConstants["EPOLLRDHUP"] = syscall.EPOLLRDHUP
-	AllConstants["EPOLLRDNORM"] = syscall.EPOLLRDNORM
-	AllConstants["EPOLLWRBAND"] = syscall.EPOLLWRBAND
-	AllConstants["EPOLLWRNORM"] = syscall.EPOLLWRNORM
-	AllConstants["EPOLL_CLOEXEC"] = syscall.EPOLL_CLOEXEC
-	AllConstants["EPOLL_CTL_ADD"] = syscall.EPOLL_CTL_ADD
-	AllConstants["EPOLL_CTL_DEL"] = syscall.EPOLL_CTL_DEL
-	AllConstants["EPOLL_CTL_MOD"] = syscall.EPOLL_CTL_MOD
-	AllConstants["EPOLL_NONBLOCK"] = syscall.EPOLL_NONBLOCK
-	AllConstants["ETH_P_1588"] = syscall.ETH_P_1588
-	AllConstants["ETH_P_8021Q"] = syscall.ETH_P_8021Q
-	AllConstants["ETH_P_802_2"] = syscall.ETH_P_802_2
-	AllConstants["ETH_P_802_3"] = syscall.ETH_P_802_3
-	AllConstants["ETH_P_AARP"] = syscall.ETH_P_AARP
-	AllConstants["ETH_P_ALL"] = syscall.ETH_P_ALL
-	AllConstants["ETH_P_AOE"] = syscall.ETH_P_AOE
-	AllConstants["ETH_P_ARCNET"] = syscall.ETH_P_ARCNET
-	AllConstants["ETH_P_ARP"] = syscall.ETH_P_ARP
-	AllConstants["ETH_P_ATALK"] = syscall.ETH_P_ATALK
-	AllConstants["ETH_P_ATMFATE"] = syscall.ETH_P_ATMFATE
-	AllConstants["ETH_P_ATMMPOA"] = syscall.ETH_P_ATMMPOA
-	AllConstants["ETH_P_AX25"] = syscall.ETH_P_AX25
-	AllConstants["ETH_P_BPQ"] = syscall.ETH_P_BPQ
-	AllConstants["ETH_P_CAIF"] = syscall.ETH_P_CAIF
-	AllConstants["ETH_P_CAN"] = syscall.ETH_P_CAN
-	AllConstants["ETH_P_CONTROL"] = syscall.ETH_P_CONTROL
-	AllConstants["ETH_P_CUST"] = syscall.ETH_P_CUST
-	AllConstants["ETH_P_DDCMP"] = syscall.ETH_P_DDCMP
-	AllConstants["ETH_P_DEC"] = syscall.ETH_P_DEC
-	AllConstants["ETH_P_DIAG"] = syscall.ETH_P_DIAG
-	AllConstants["ETH_P_DNA_DL"] = syscall.ETH_P_DNA_DL
-	AllConstants["ETH_P_DNA_RC"] = syscall.ETH_P_DNA_RC
-	AllConstants["ETH_P_DNA_RT"] = syscall.ETH_P_DNA_RT
-	AllConstants["ETH_P_DSA"] = syscall.ETH_P_DSA
-	AllConstants["ETH_P_ECONET"] = syscall.ETH_P_ECONET
-	AllConstants["ETH_P_EDSA"] = syscall.ETH_P_EDSA
-	AllConstants["ETH_P_FCOE"] = syscall.ETH_P_FCOE
-	AllConstants["ETH_P_FIP"] = syscall.ETH_P_FIP
-	AllConstants["ETH_P_HDLC"] = syscall.ETH_P_HDLC
-	AllConstants["ETH_P_IEEE802154"] = syscall.ETH_P_IEEE802154
-	AllConstants["ETH_P_IEEEPUP"] = syscall.ETH_P_IEEEPUP
-	AllConstants["ETH_P_IEEEPUPAT"] = syscall.ETH_P_IEEEPUPAT
-	AllConstants["ETH_P_IP"] = syscall.ETH_P_IP
-	AllConstants["ETH_P_IPV6"] = syscall.ETH_P_IPV6
-	AllConstants["ETH_P_IPX"] = syscall.ETH_P_IPX
-	AllConstants["ETH_P_IRDA"] = syscall.ETH_P_IRDA
-	AllConstants["ETH_P_LAT"] = syscall.ETH_P_LAT
-	AllConstants["ETH_P_LINK_CTL"] = syscall.ETH_P_LINK_CTL
-	AllConstants["ETH_P_LOCALTALK"] = syscall.ETH_P_LOCALTALK
-	AllConstants["ETH_P_LOOP"] = syscall.ETH_P_LOOP
-	AllConstants["ETH_P_MOBITEX"] = syscall.ETH_P_MOBITEX
-	AllConstants["ETH_P_MPLS_MC"] = syscall.ETH_P_MPLS_MC
-	AllConstants["ETH_P_MPLS_UC"] = syscall.ETH_P_MPLS_UC
-	AllConstants["ETH_P_PAE"] = syscall.ETH_P_PAE
-	AllConstants["ETH_P_PAUSE"] = syscall.ETH_P_PAUSE
-	AllConstants["ETH_P_PHONET"] = syscall.ETH_P_PHONET
-	AllConstants["ETH_P_PPPTALK"] = syscall.ETH_P_PPPTALK
-	AllConstants["ETH_P_PPP_DISC"] = syscall.ETH_P_PPP_DISC
-	AllConstants["ETH_P_PPP_MP"] = syscall.ETH_P_PPP_MP
-	AllConstants["ETH_P_PPP_SES"] = syscall.ETH_P_PPP_SES
-	AllConstants["ETH_P_PUP"] = syscall.ETH_P_PUP
-	AllConstants["ETH_P_PUPAT"] = syscall.ETH_P_PUPAT
-	AllConstants["ETH_P_RARP"] = syscall.ETH_P_RARP
-	AllConstants["ETH_P_SCA"] = syscall.ETH_P_SCA
-	AllConstants["ETH_P_SLOW"] = syscall.ETH_P_SLOW
-	AllConstants["ETH_P_SNAP"] = syscall.ETH_P_SNAP
-	AllConstants["ETH_P_TEB"] = syscall.ETH_P_TEB
-	AllConstants["ETH_P_TIPC"] = syscall.ETH_P_TIPC
-	AllConstants["ETH_P_TRAILER"] = syscall.ETH_P_TRAILER
-	AllConstants["ETH_P_TR_802_2"] = syscall.ETH_P_TR_802_2
-	AllConstants["ETH_P_WAN_PPP"] = syscall.ETH_P_WAN_PPP
-	AllConstants["ETH_P_WCCP"] = syscall.ETH_P_WCCP
-	AllConstants["ETH_P_X25"] = syscall.ETH_P_X25
-	AllConstants["FD_CLOEXEC"] = syscall.FD_CLOEXEC
-	AllConstants["FD_SETSIZE"] = syscall.FD_SETSIZE
-	AllConstants["F_DUPFD"] = syscall.F_DUPFD
-	AllConstants["F_DUPFD_CLOEXEC"] = syscall.F_DUPFD_CLOEXEC
-	AllConstants["F_EXLCK"] = syscall.F_EXLCK
-	AllConstants["F_GETFD"] = syscall.F_GETFD
-	AllConstants["F_GETFL"] = syscall.F_GETFL
-	AllConstants["F_GETLEASE"] = syscall.F_GETLEASE
-	AllConstants["F_GETLK"] = syscall.F_GETLK
-	AllConstants["F_GETLK64"] = syscall.F_GETLK64
-	AllConstants["F_GETOWN"] = syscall.F_GETOWN
-	AllConstants["F_GETOWN_EX"] = syscall.F_GETOWN_EX
-	AllConstants["F_GETPIPE_SZ"] = syscall.F_GETPIPE_SZ
-	AllConstants["F_GETSIG"] = syscall.F_GETSIG
-	AllConstants["F_LOCK"] = syscall.F_LOCK
-	AllConstants["F_NOTIFY"] = syscall.F_NOTIFY
-	AllConstants["F_OK"] = syscall.F_OK
-	AllConstants["F_RDLCK"] = syscall.F_RDLCK
-	AllConstants["F_SETFD"] = syscall.F_SETFD
-	AllConstants["F_SETFL"] = syscall.F_SETFL
-	AllConstants["F_SETLEASE"] = syscall.F_SETLEASE
-	AllConstants["F_SETLK"] = syscall.F_SETLK
-	AllConstants["F_SETLK64"] = syscall.F_SETLK64
-	AllConstants["F_SETLKW"] = syscall.F_SETLKW
-	AllConstants["F_SETLKW64"] = syscall.F_SETLKW64
-	AllConstants["F_SETOWN"] = syscall.F_SETOWN
-	AllConstants["F_SETOWN_EX"] = syscall.F_SETOWN_EX
-	AllConstants["F_SETPIPE_SZ"] = syscall.F_SETPIPE_SZ
-	AllConstants["F_SETSIG"] = syscall.F_SETSIG
-	AllConstants["F_SHLCK"] = syscall.F_SHLCK
-	AllConstants["F_TEST"] = syscall.F_TEST
-	AllConstants["F_TLOCK"] = syscall.F_TLOCK
-	AllConstants["F_ULOCK"] = syscall.F_ULOCK
-	AllConstants["F_UNLCK"] = syscall.F_UNLCK
-	AllConstants["F_WRLCK"] = syscall.F_WRLCK
-	AllConstants["ICMPV6_FILTER"] = syscall.ICMPV6_FILTER
-	AllConstants["IFA_F_DADFAILED"] = syscall.IFA_F_DADFAILED
-	AllConstants["IFA_F_DEPRECATED"] = syscall.IFA_F_DEPRECATED
-	AllConstants["IFA_F_HOMEADDRESS"] = syscall.IFA_F_HOMEADDRESS
-	AllConstants["IFA_F_NODAD"] = syscall.IFA_F_NODAD
-	AllConstants["IFA_F_OPTIMISTIC"] = syscall.IFA_F_OPTIMISTIC
-	AllConstants["IFA_F_PERMANENT"] = syscall.IFA_F_PERMANENT
-	AllConstants["IFA_F_SECONDARY"] = syscall.IFA_F_SECONDARY
-	AllConstants["IFA_F_TEMPORARY"] = syscall.IFA_F_TEMPORARY
-	AllConstants["IFA_F_TENTATIVE"] = syscall.IFA_F_TENTATIVE
-	AllConstants["IFA_MAX"] = syscall.IFA_MAX
-	AllConstants["IFF_ALLMULTI"] = syscall.IFF_ALLMULTI
-	AllConstants["IFF_AUTOMEDIA"] = syscall.IFF_AUTOMEDIA
-	AllConstants["IFF_BROADCAST"] = syscall.IFF_BROADCAST
-	AllConstants["IFF_DEBUG"] = syscall.IFF_DEBUG
-	AllConstants["IFF_DYNAMIC"] = syscall.IFF_DYNAMIC
-	AllConstants["IFF_LOOPBACK"] = syscall.IFF_LOOPBACK
-	AllConstants["IFF_MASTER"] = syscall.IFF_MASTER
-	AllConstants["IFF_MULTICAST"] = syscall.IFF_MULTICAST
-	AllConstants["IFF_NOARP"] = syscall.IFF_NOARP
-	AllConstants["IFF_NOTRAILERS"] = syscall.IFF_NOTRAILERS
-	AllConstants["IFF_NO_PI"] = syscall.IFF_NO_PI
-	AllConstants["IFF_ONE_QUEUE"] = syscall.IFF_ONE_QUEUE
-	AllConstants["IFF_POINTOPOINT"] = syscall.IFF_POINTOPOINT
-	AllConstants["IFF_PORTSEL"] = syscall.IFF_PORTSEL
-	AllConstants["IFF_PROMISC"] = syscall.IFF_PROMISC
-	AllConstants["IFF_RUNNING"] = syscall.IFF_RUNNING
-	AllConstants["IFF_SLAVE"] = syscall.IFF_SLAVE
-	AllConstants["IFF_TAP"] = syscall.IFF_TAP
-	AllConstants["IFF_TUN"] = syscall.IFF_TUN
-	AllConstants["IFF_TUN_EXCL"] = syscall.IFF_TUN_EXCL
-	AllConstants["IFF_UP"] = syscall.IFF_UP
-	AllConstants["IFF_VNET_HDR"] = syscall.IFF_VNET_HDR
-	AllConstants["IFNAMSIZ"] = syscall.IFNAMSIZ
-	AllConstants["IN_ACCESS"] = syscall.IN_ACCESS
-	AllConstants["IN_ALL_EVENTS"] = syscall.IN_ALL_EVENTS
-	AllConstants["IN_ATTRIB"] = syscall.IN_ATTRIB
-	AllConstants["IN_CLASSA_HOST"] = syscall.IN_CLASSA_HOST
-	AllConstants["IN_CLASSA_MAX"] = syscall.IN_CLASSA_MAX
-	AllConstants["IN_CLASSA_NET"] = syscall.IN_CLASSA_NET
-	AllConstants["IN_CLASSA_NSHIFT"] = syscall.IN_CLASSA_NSHIFT
-	AllConstants["IN_CLASSB_HOST"] = syscall.IN_CLASSB_HOST
-	AllConstants["IN_CLASSB_MAX"] = syscall.IN_CLASSB_MAX
-	AllConstants["IN_CLASSB_NET"] = syscall.IN_CLASSB_NET
-	AllConstants["IN_CLASSB_NSHIFT"] = syscall.IN_CLASSB_NSHIFT
-	AllConstants["IN_CLASSC_HOST"] = syscall.IN_CLASSC_HOST
-	AllConstants["IN_CLASSC_NET"] = syscall.IN_CLASSC_NET
-	AllConstants["IN_CLASSC_NSHIFT"] = syscall.IN_CLASSC_NSHIFT
-	AllConstants["IN_CLOEXEC"] = syscall.IN_CLOEXEC
-	AllConstants["IN_CLOSE"] = syscall.IN_CLOSE
-	AllConstants["IN_CLOSE_NOWRITE"] = syscall.IN_CLOSE_NOWRITE
-	AllConstants["IN_CLOSE_WRITE"] = syscall.IN_CLOSE_WRITE
-	AllConstants["IN_CREATE"] = syscall.IN_CREATE
-	AllConstants["IN_DELETE"] = syscall.IN_DELETE
-	AllConstants["IN_DELETE_SELF"] = syscall.IN_DELETE_SELF
-	AllConstants["IN_DONT_FOLLOW"] = syscall.IN_DONT_FOLLOW
-	AllConstants["IN_EXCL_UNLINK"] = syscall.IN_EXCL_UNLINK
-	AllConstants["IN_IGNORED"] = syscall.IN_IGNORED
-	AllConstants["IN_ISDIR"] = syscall.IN_ISDIR
-	AllConstants["IN_LOOPBACKNET"] = syscall.IN_LOOPBACKNET
-	AllConstants["IN_MASK_ADD"] = syscall.IN_MASK_ADD
-	AllConstants["IN_MODIFY"] = syscall.IN_MODIFY
-	AllConstants["IN_MOVE"] = syscall.IN_MOVE
-	AllConstants["IN_MOVED_FROM"] = syscall.IN_MOVED_FROM
-	AllConstants["IN_MOVED_TO"] = syscall.IN_MOVED_TO
-	AllConstants["IN_MOVE_SELF"] = syscall.IN_MOVE_SELF
-	AllConstants["IN_NONBLOCK"] = syscall.IN_NONBLOCK
-	AllConstants["IN_ONESHOT"] = syscall.IN_ONESHOT
-	AllConstants["IN_ONLYDIR"] = syscall.IN_ONLYDIR
-	AllConstants["IN_OPEN"] = syscall.IN_OPEN
-	AllConstants["IN_Q_OVERFLOW"] = syscall.IN_Q_OVERFLOW
-	AllConstants["IN_UNMOUNT"] = syscall.IN_UNMOUNT
-	AllConstants["IPPROTO_AH"] = syscall.IPPROTO_AH
-	AllConstants["IPPROTO_COMP"] = syscall.IPPROTO_COMP
-	AllConstants["IPPROTO_DCCP"] = syscall.IPPROTO_DCCP
-	AllConstants["IPPROTO_DSTOPTS"] = syscall.IPPROTO_DSTOPTS
-	AllConstants["IPPROTO_EGP"] = syscall.IPPROTO_EGP
-	AllConstants["IPPROTO_ENCAP"] = syscall.IPPROTO_ENCAP
-	AllConstants["IPPROTO_ESP"] = syscall.IPPROTO_ESP
-	AllConstants["IPPROTO_FRAGMENT"] = syscall.IPPROTO_FRAGMENT
-	AllConstants["IPPROTO_GRE"] = syscall.IPPROTO_GRE
-	AllConstants["IPPROTO_HOPOPTS"] = syscall.IPPROTO_HOPOPTS
-	AllConstants["IPPROTO_ICMP"] = syscall.IPPROTO_ICMP
-	AllConstants["IPPROTO_ICMPV6"] = syscall.IPPROTO_ICMPV6
-	AllConstants["IPPROTO_IDP"] = syscall.IPPROTO_IDP
-	AllConstants["IPPROTO_IGMP"] = syscall.IPPROTO_IGMP
-	AllConstants["IPPROTO_IP"] = syscall.IPPROTO_IP
-	AllConstants["IPPROTO_IPIP"] = syscall.IPPROTO_IPIP
-	AllConstants["IPPROTO_IPV6"] = syscall.IPPROTO_IPV6
-	AllConstants["IPPROTO_MTP"] = syscall.IPPROTO_MTP
-	AllConstants["IPPROTO_NONE"] = syscall.IPPROTO_NONE
-	AllConstants["IPPROTO_PIM"] = syscall.IPPROTO_PIM
-	AllConstants["IPPROTO_PUP"] = syscall.IPPROTO_PUP
-	AllConstants["IPPROTO_RAW"] = syscall.IPPROTO_RAW
-	AllConstants["IPPROTO_ROUTING"] = syscall.IPPROTO_ROUTING
-	AllConstants["IPPROTO_RSVP"] = syscall.IPPROTO_RSVP
-	AllConstants["IPPROTO_SCTP"] = syscall.IPPROTO_SCTP
-	AllConstants["IPPROTO_TCP"] = syscall.IPPROTO_TCP
-	AllConstants["IPPROTO_TP"] = syscall.IPPROTO_TP
-	AllConstants["IPPROTO_UDP"] = syscall.IPPROTO_UDP
-	AllConstants["IPPROTO_UDPLITE"] = syscall.IPPROTO_UDPLITE
-	AllConstants["IPV6_2292DSTOPTS"] = syscall.IPV6_2292DSTOPTS
-	AllConstants["IPV6_2292HOPLIMIT"] = syscall.IPV6_2292HOPLIMIT
-	AllConstants["IPV6_2292HOPOPTS"] = syscall.IPV6_2292HOPOPTS
-	AllConstants["IPV6_2292PKTINFO"] = syscall.IPV6_2292PKTINFO
-	AllConstants["IPV6_2292PKTOPTIONS"] = syscall.IPV6_2292PKTOPTIONS
-	AllConstants["IPV6_2292RTHDR"] = syscall.IPV6_2292RTHDR
-	AllConstants["IPV6_ADDRFORM"] = syscall.IPV6_ADDRFORM
-	AllConstants["IPV6_ADD_MEMBERSHIP"] = syscall.IPV6_ADD_MEMBERSHIP
-	AllConstants["IPV6_AUTHHDR"] = syscall.IPV6_AUTHHDR
-	AllConstants["IPV6_CHECKSUM"] = syscall.IPV6_CHECKSUM
-	AllConstants["IPV6_DROP_MEMBERSHIP"] = syscall.IPV6_DROP_MEMBERSHIP
-	AllConstants["IPV6_DSTOPTS"] = syscall.IPV6_DSTOPTS
-	AllConstants["IPV6_HOPLIMIT"] = syscall.IPV6_HOPLIMIT
-	AllConstants["IPV6_HOPOPTS"] = syscall.IPV6_HOPOPTS
-	AllConstants["IPV6_IPSEC_POLICY"] = syscall.IPV6_IPSEC_POLICY
-	AllConstants["IPV6_JOIN_ANYCAST"] = syscall.IPV6_JOIN_ANYCAST
-	AllConstants["IPV6_JOIN_GROUP"] = syscall.IPV6_JOIN_GROUP
-	AllConstants["IPV6_LEAVE_ANYCAST"] = syscall.IPV6_LEAVE_ANYCAST
-	AllConstants["IPV6_LEAVE_GROUP"] = syscall.IPV6_LEAVE_GROUP
-	AllConstants["IPV6_MTU"] = syscall.IPV6_MTU
-	AllConstants["IPV6_MTU_DISCOVER"] = syscall.IPV6_MTU_DISCOVER
-	AllConstants["IPV6_MULTICAST_HOPS"] = syscall.IPV6_MULTICAST_HOPS
-	AllConstants["IPV6_MULTICAST_IF"] = syscall.IPV6_MULTICAST_IF
-	AllConstants["IPV6_MULTICAST_LOOP"] = syscall.IPV6_MULTICAST_LOOP
-	AllConstants["IPV6_NEXTHOP"] = syscall.IPV6_NEXTHOP
-	AllConstants["IPV6_PKTINFO"] = syscall.IPV6_PKTINFO
-	AllConstants["IPV6_PMTUDISC_DO"] = syscall.IPV6_PMTUDISC_DO
-	AllConstants["IPV6_PMTUDISC_DONT"] = syscall.IPV6_PMTUDISC_DONT
-	AllConstants["IPV6_PMTUDISC_PROBE"] = syscall.IPV6_PMTUDISC_PROBE
-	AllConstants["IPV6_PMTUDISC_WANT"] = syscall.IPV6_PMTUDISC_WANT
-	AllConstants["IPV6_RECVDSTOPTS"] = syscall.IPV6_RECVDSTOPTS
-	AllConstants["IPV6_RECVERR"] = syscall.IPV6_RECVERR
-	AllConstants["IPV6_RECVHOPLIMIT"] = syscall.IPV6_RECVHOPLIMIT
-	AllConstants["IPV6_RECVHOPOPTS"] = syscall.IPV6_RECVHOPOPTS
-	AllConstants["IPV6_RECVPKTINFO"] = syscall.IPV6_RECVPKTINFO
-	AllConstants["IPV6_RECVRTHDR"] = syscall.IPV6_RECVRTHDR
-	AllConstants["IPV6_RECVTCLASS"] = syscall.IPV6_RECVTCLASS
-	AllConstants["IPV6_ROUTER_ALERT"] = syscall.IPV6_ROUTER_ALERT
-	AllConstants["IPV6_RTHDR"] = syscall.IPV6_RTHDR
-	AllConstants["IPV6_RTHDRDSTOPTS"] = syscall.IPV6_RTHDRDSTOPTS
-	AllConstants["IPV6_RTHDR_LOOSE"] = syscall.IPV6_RTHDR_LOOSE
-	AllConstants["IPV6_RTHDR_STRICT"] = syscall.IPV6_RTHDR_STRICT
-	AllConstants["IPV6_RTHDR_TYPE_0"] = syscall.IPV6_RTHDR_TYPE_0
-	AllConstants["IPV6_RXDSTOPTS"] = syscall.IPV6_RXDSTOPTS
-	AllConstants["IPV6_RXHOPOPTS"] = syscall.IPV6_RXHOPOPTS
-	AllConstants["IPV6_TCLASS"] = syscall.IPV6_TCLASS
-	AllConstants["IPV6_UNICAST_HOPS"] = syscall.IPV6_UNICAST_HOPS
-	AllConstants["IPV6_V6ONLY"] = syscall.IPV6_V6ONLY
-	AllConstants["IPV6_XFRM_POLICY"] = syscall.IPV6_XFRM_POLICY
-	AllConstants["IP_ADD_MEMBERSHIP"] = syscall.IP_ADD_MEMBERSHIP
-	AllConstants["IP_ADD_SOURCE_MEMBERSHIP"] = syscall.IP_ADD_SOURCE_MEMBERSHIP
-	AllConstants["IP_BLOCK_SOURCE"] = syscall.IP_BLOCK_SOURCE
-	AllConstants["IP_DEFAULT_MULTICAST_LOOP"] = syscall.IP_DEFAULT_MULTICAST_LOOP
-	AllConstants["IP_DEFAULT_MULTICAST_TTL"] = syscall.IP_DEFAULT_MULTICAST_TTL
-	AllConstants["IP_DF"] = syscall.IP_DF
-	AllConstants["IP_DROP_MEMBERSHIP"] = syscall.IP_DROP_MEMBERSHIP
-	AllConstants["IP_DROP_SOURCE_MEMBERSHIP"] = syscall.IP_DROP_SOURCE_MEMBERSHIP
-	AllConstants["IP_FREEBIND"] = syscall.IP_FREEBIND
-	AllConstants["IP_HDRINCL"] = syscall.IP_HDRINCL
-	AllConstants["IP_IPSEC_POLICY"] = syscall.IP_IPSEC_POLICY
-	AllConstants["IP_MAXPACKET"] = syscall.IP_MAXPACKET
-	AllConstants["IP_MAX_MEMBERSHIPS"] = syscall.IP_MAX_MEMBERSHIPS
-	AllConstants["IP_MF"] = syscall.IP_MF
-	AllConstants["IP_MINTTL"] = syscall.IP_MINTTL
-	AllConstants["IP_MSFILTER"] = syscall.IP_MSFILTER
-	AllConstants["IP_MSS"] = syscall.IP_MSS
-	AllConstants["IP_MTU"] = syscall.IP_MTU
-	AllConstants["IP_MTU_DISCOVER"] = syscall.IP_MTU_DISCOVER
-	AllConstants["IP_MULTICAST_IF"] = syscall.IP_MULTICAST_IF
-	AllConstants["IP_MULTICAST_LOOP"] = syscall.IP_MULTICAST_LOOP
-	AllConstants["IP_MULTICAST_TTL"] = syscall.IP_MULTICAST_TTL
-	AllConstants["IP_OFFMASK"] = syscall.IP_OFFMASK
-	AllConstants["IP_OPTIONS"] = syscall.IP_OPTIONS
-	AllConstants["IP_ORIGDSTADDR"] = syscall.IP_ORIGDSTADDR
-	AllConstants["IP_PASSSEC"] = syscall.IP_PASSSEC
-	AllConstants["IP_PKTINFO"] = syscall.IP_PKTINFO
-	AllConstants["IP_PKTOPTIONS"] = syscall.IP_PKTOPTIONS
-	AllConstants["IP_PMTUDISC"] = syscall.IP_PMTUDISC
-	AllConstants["IP_PMTUDISC_DO"] = syscall.IP_PMTUDISC_DO
-	AllConstants["IP_PMTUDISC_DONT"] = syscall.IP_PMTUDISC_DONT
-	AllConstants["IP_PMTUDISC_PROBE"] = syscall.IP_PMTUDISC_PROBE
-	AllConstants["IP_PMTUDISC_WANT"] = syscall.IP_PMTUDISC_WANT
-	AllConstants["IP_RECVERR"] = syscall.IP_RECVERR
-	AllConstants["IP_RECVOPTS"] = syscall.IP_RECVOPTS
-	AllConstants["IP_RECVORIGDSTADDR"] = syscall.IP_RECVORIGDSTADDR
-	AllConstants["IP_RECVRETOPTS"] = syscall.IP_RECVRETOPTS
-	AllConstants["IP_RECVTOS"] = syscall.IP_RECVTOS
-	AllConstants["IP_RECVTTL"] = syscall.IP_RECVTTL
-	AllConstants["IP_RETOPTS"] = syscall.IP_RETOPTS
-	AllConstants["IP_RF"] = syscall.IP_RF
-	AllConstants["IP_ROUTER_ALERT"] = syscall.IP_ROUTER_ALERT
-	AllConstants["IP_TOS"] = syscall.IP_TOS
-	AllConstants["IP_TRANSPARENT"] = syscall.IP_TRANSPARENT
-	AllConstants["IP_TTL"] = syscall.IP_TTL
-	AllConstants["IP_UNBLOCK_SOURCE"] = syscall.IP_UNBLOCK_SOURCE
-	AllConstants["IP_XFRM_POLICY"] = syscall.IP_XFRM_POLICY
-	AllConstants["IUCLC"] = syscall.IUCLC
-	AllConstants["LINUX_REBOOT_CMD_CAD_OFF"] = syscall.LINUX_REBOOT_CMD_CAD_OFF
-	AllConstants["LINUX_REBOOT_CMD_CAD_ON"] = syscall.LINUX_REBOOT_CMD_CAD_ON
-	AllConstants["LINUX_REBOOT_CMD_HALT"] = syscall.LINUX_REBOOT_CMD_HALT
-	AllConstants["LINUX_REBOOT_CMD_KEXEC"] = syscall.LINUX_REBOOT_CMD_KEXEC
-	AllConstants["LINUX_REBOOT_CMD_POWER_OFF"] = syscall.LINUX_REBOOT_CMD_POWER_OFF
-	AllConstants["LINUX_REBOOT_CMD_RESTART"] = syscall.LINUX_REBOOT_CMD_RESTART
-	AllConstants["LINUX_REBOOT_CMD_RESTART2"] = syscall.LINUX_REBOOT_CMD_RESTART2
-	AllConstants["LINUX_REBOOT_CMD_SW_SUSPEND"] = syscall.LINUX_REBOOT_CMD_SW_SUSPEND
-	AllConstants["LINUX_REBOOT_MAGIC1"] = syscall.LINUX_REBOOT_MAGIC1
-	AllConstants["LINUX_REBOOT_MAGIC2"] = syscall.LINUX_REBOOT_MAGIC2
-	AllConstants["LOCK_EX"] = syscall.LOCK_EX
-	AllConstants["LOCK_NB"] = syscall.LOCK_NB
-	AllConstants["LOCK_SH"] = syscall.LOCK_SH
-	AllConstants["LOCK_UN"] = syscall.LOCK_UN
-	AllConstants["MADV_DOFORK"] = syscall.MADV_DOFORK
-	AllConstants["MADV_DONTFORK"] = syscall.MADV_DONTFORK
-	AllConstants["MADV_DONTNEED"] = syscall.MADV_DONTNEED
-	AllConstants["MADV_HUGEPAGE"] = syscall.MADV_HUGEPAGE
-	AllConstants["MADV_HWPOISON"] = syscall.MADV_HWPOISON
-	AllConstants["MADV_MERGEABLE"] = syscall.MADV_MERGEABLE
-	AllConstants["MADV_NOHUGEPAGE"] = syscall.MADV_NOHUGEPAGE
-	AllConstants["MADV_NORMAL"] = syscall.MADV_NORMAL
-	AllConstants["MADV_RANDOM"] = syscall.MADV_RANDOM
-	AllConstants["MADV_REMOVE"] = syscall.MADV_REMOVE
-	AllConstants["MADV_SEQUENTIAL"] = syscall.MADV_SEQUENTIAL
-	AllConstants["MADV_UNMERGEABLE"] = syscall.MADV_UNMERGEABLE
-	AllConstants["MADV_WILLNEED"] = syscall.MADV_WILLNEED
-	AllConstants["MAP_32BIT"] = syscall.MAP_32BIT
-	AllConstants["MAP_ANON"] = syscall.MAP_ANON
-	AllConstants["MAP_ANONYMOUS"] = syscall.MAP_ANONYMOUS
-	AllConstants["MAP_DENYWRITE"] = syscall.MAP_DENYWRITE
-	AllConstants["MAP_EXECUTABLE"] = syscall.MAP_EXECUTABLE
-	AllConstants["MAP_FILE"] = syscall.MAP_FILE
-	AllConstants["MAP_FIXED"] = syscall.MAP_FIXED
-	AllConstants["MAP_GROWSDOWN"] = syscall.MAP_GROWSDOWN
-	AllConstants["MAP_HUGETLB"] = syscall.MAP_HUGETLB
-	AllConstants["MAP_LOCKED"] = syscall.MAP_LOCKED
-	AllConstants["MAP_NONBLOCK"] = syscall.MAP_NONBLOCK
-	AllConstants["MAP_NORESERVE"] = syscall.MAP_NORESERVE
-	AllConstants["MAP_POPULATE"] = syscall.MAP_POPULATE
-	AllConstants["MAP_PRIVATE"] = syscall.MAP_PRIVATE
-	AllConstants["MAP_SHARED"] = syscall.MAP_SHARED
-	AllConstants["MAP_STACK"] = syscall.MAP_STACK
-	AllConstants["MAP_TYPE"] = syscall.MAP_TYPE
-	AllConstants["MCL_CURRENT"] = syscall.MCL_CURRENT
-	AllConstants["MCL_FUTURE"] = syscall.MCL_FUTURE
-	AllConstants["MNT_DETACH"] = syscall.MNT_DETACH
-	AllConstants["MNT_EXPIRE"] = syscall.MNT_EXPIRE
-	AllConstants["MNT_FORCE"] = syscall.MNT_FORCE
-	AllConstants["MSG_CMSG_CLOEXEC"] = syscall.MSG_CMSG_CLOEXEC
-	AllConstants["MSG_CONFIRM"] = syscall.MSG_CONFIRM
-	AllConstants["MSG_CTRUNC"] = syscall.MSG_CTRUNC
-	AllConstants["MSG_DONTROUTE"] = syscall.MSG_DONTROUTE
-	AllConstants["MSG_DONTWAIT"] = syscall.MSG_DONTWAIT
-	AllConstants["MSG_EOR"] = syscall.MSG_EOR
-	AllConstants["MSG_ERRQUEUE"] = syscall.MSG_ERRQUEUE
-	AllConstants["MSG_FASTOPEN"] = syscall.MSG_FASTOPEN
-	AllConstants["MSG_FIN"] = syscall.MSG_FIN
-	AllConstants["MSG_MORE"] = syscall.MSG_MORE
-	AllConstants["MSG_NOSIGNAL"] = syscall.MSG_NOSIGNAL
-	AllConstants["MSG_OOB"] = syscall.MSG_OOB
-	AllConstants["MSG_PEEK"] = syscall.MSG_PEEK
-	AllConstants["MSG_PROXY"] = syscall.MSG_PROXY
-	AllConstants["MSG_RST"] = syscall.MSG_RST
-	AllConstants["MSG_SYN"] = syscall.MSG_SYN
-	AllConstants["MSG_TRUNC"] = syscall.MSG_TRUNC
-	AllConstants["MSG_TRYHARD"] = syscall.MSG_TRYHARD
-	AllConstants["MSG_WAITALL"] = syscall.MSG_WAITALL
-	AllConstants["MSG_WAITFORONE"] = syscall.MSG_WAITFORONE
-	AllConstants["MS_ACTIVE"] = syscall.MS_ACTIVE
-	AllConstants["MS_ASYNC"] = syscall.MS_ASYNC
-	AllConstants["MS_BIND"] = syscall.MS_BIND
-	AllConstants["MS_DIRSYNC"] = syscall.MS_DIRSYNC
-	AllConstants["MS_INVALIDATE"] = syscall.MS_INVALIDATE
-	AllConstants["MS_I_VERSION"] = syscall.MS_I_VERSION
-	AllConstants["MS_KERNMOUNT"] = syscall.MS_KERNMOUNT
-	AllConstants["MS_MANDLOCK"] = syscall.MS_MANDLOCK
-	AllConstants["MS_MGC_MSK"] = syscall.MS_MGC_MSK
-	AllConstants["MS_MGC_VAL"] = syscall.MS_MGC_VAL
-	AllConstants["MS_MOVE"] = syscall.MS_MOVE
-	AllConstants["MS_NOATIME"] = syscall.MS_NOATIME
-	AllConstants["MS_NODEV"] = syscall.MS_NODEV
-	AllConstants["MS_NODIRATIME"] = syscall.MS_NODIRATIME
-	AllConstants["MS_NOEXEC"] = syscall.MS_NOEXEC
-	AllConstants["MS_NOSUID"] = syscall.MS_NOSUID
-	AllConstants["MS_NOUSER"] = syscall.MS_NOUSER
-	AllConstants["MS_POSIXACL"] = syscall.MS_POSIXACL
-	AllConstants["MS_PRIVATE"] = syscall.MS_PRIVATE
-	AllConstants["MS_RDONLY"] = syscall.MS_RDONLY
-	AllConstants["MS_REC"] = syscall.MS_REC
-	AllConstants["MS_RELATIME"] = syscall.MS_RELATIME
-	AllConstants["MS_REMOUNT"] = syscall.MS_REMOUNT
-	AllConstants["MS_RMT_MASK"] = syscall.MS_RMT_MASK
-	AllConstants["MS_SHARED"] = syscall.MS_SHARED
-	AllConstants["MS_SILENT"] = syscall.MS_SILENT
-	AllConstants["MS_SLAVE"] = syscall.MS_SLAVE
-	AllConstants["MS_STRICTATIME"] = syscall.MS_STRICTATIME
-	AllConstants["MS_SYNC"] = syscall.MS_SYNC
-	AllConstants["MS_SYNCHRONOUS"] = syscall.MS_SYNCHRONOUS
-	AllConstants["MS_UNBINDABLE"] = syscall.MS_UNBINDABLE
-	AllConstants["NAME_MAX"] = syscall.NAME_MAX
-	AllConstants["NETLINK_ADD_MEMBERSHIP"] = syscall.NETLINK_ADD_MEMBERSHIP
-	AllConstants["NETLINK_AUDIT"] = syscall.NETLINK_AUDIT
-	AllConstants["NETLINK_BROADCAST_ERROR"] = syscall.NETLINK_BROADCAST_ERROR
-	AllConstants["NETLINK_CONNECTOR"] = syscall.NETLINK_CONNECTOR
-	AllConstants["NETLINK_DNRTMSG"] = syscall.NETLINK_DNRTMSG
-	AllConstants["NETLINK_DROP_MEMBERSHIP"] = syscall.NETLINK_DROP_MEMBERSHIP
-	AllConstants["NETLINK_ECRYPTFS"] = syscall.NETLINK_ECRYPTFS
-	AllConstants["NETLINK_FIB_LOOKUP"] = syscall.NETLINK_FIB_LOOKUP
-	AllConstants["NETLINK_FIREWALL"] = syscall.NETLINK_FIREWALL
-	AllConstants["NETLINK_GENERIC"] = syscall.NETLINK_GENERIC
-	AllConstants["NETLINK_INET_DIAG"] = syscall.NETLINK_INET_DIAG
-	AllConstants["NETLINK_IP6_FW"] = syscall.NETLINK_IP6_FW
-	AllConstants["NETLINK_ISCSI"] = syscall.NETLINK_ISCSI
-	AllConstants["NETLINK_KOBJECT_UEVENT"] = syscall.NETLINK_KOBJECT_UEVENT
-	AllConstants["NETLINK_NETFILTER"] = syscall.NETLINK_NETFILTER
-	AllConstants["NETLINK_NFLOG"] = syscall.NETLINK_NFLOG
-	AllConstants["NETLINK_NO_ENOBUFS"] = syscall.NETLINK_NO_ENOBUFS
-	AllConstants["NETLINK_PKTINFO"] = syscall.NETLINK_PKTINFO
-	AllConstants["NETLINK_ROUTE"] = syscall.NETLINK_ROUTE
-	AllConstants["NETLINK_SCSITRANSPORT"] = syscall.NETLINK_SCSITRANSPORT
-	AllConstants["NETLINK_SELINUX"] = syscall.NETLINK_SELINUX
-	AllConstants["NETLINK_UNUSED"] = syscall.NETLINK_UNUSED
-	AllConstants["NETLINK_USERSOCK"] = syscall.NETLINK_USERSOCK
-	AllConstants["NETLINK_XFRM"] = syscall.NETLINK_XFRM
-	AllConstants["NLA_ALIGNTO"] = syscall.NLA_ALIGNTO
-	AllConstants["NLA_F_NESTED"] = syscall.NLA_F_NESTED
-	AllConstants["NLA_F_NET_BYTEORDER"] = syscall.NLA_F_NET_BYTEORDER
-	AllConstants["NLA_HDRLEN"] = syscall.NLA_HDRLEN
-	AllConstants["NLMSG_ALIGNTO"] = syscall.NLMSG_ALIGNTO
-	AllConstants["NLMSG_DONE"] = syscall.NLMSG_DONE
-	AllConstants["NLMSG_ERROR"] = syscall.NLMSG_ERROR
-	AllConstants["NLMSG_HDRLEN"] = syscall.NLMSG_HDRLEN
-	AllConstants["NLMSG_MIN_TYPE"] = syscall.NLMSG_MIN_TYPE
-	AllConstants["NLMSG_NOOP"] = syscall.NLMSG_NOOP
-	AllConstants["NLMSG_OVERRUN"] = syscall.NLMSG_OVERRUN
-	AllConstants["NLM_F_ACK"] = syscall.NLM_F_ACK
-	AllConstants["NLM_F_APPEND"] = syscall.NLM_F_APPEND
-	AllConstants["NLM_F_ATOMIC"] = syscall.NLM_F_ATOMIC
-	AllConstants["NLM_F_CREATE"] = syscall.NLM_F_CREATE
-	AllConstants["NLM_F_DUMP"] = syscall.NLM_F_DUMP
-	AllConstants["NLM_F_ECHO"] = syscall.NLM_F_ECHO
-	AllConstants["NLM_F_EXCL"] = syscall.NLM_F_EXCL
-	AllConstants["NLM_F_MATCH"] = syscall.NLM_F_MATCH
-	AllConstants["NLM_F_MULTI"] = syscall.NLM_F_MULTI
-	AllConstants["NLM_F_REPLACE"] = syscall.NLM_F_REPLACE
-	AllConstants["NLM_F_REQUEST"] = syscall.NLM_F_REQUEST
-	AllConstants["NLM_F_ROOT"] = syscall.NLM_F_ROOT
-	AllConstants["OLCUC"] = syscall.OLCUC
-	AllConstants["O_ACCMODE"] = syscall.O_ACCMODE
-	AllConstants["O_APPEND"] = syscall.O_APPEND
-	AllConstants["O_ASYNC"] = syscall.O_ASYNC
-	AllConstants["O_CLOEXEC"] = syscall.O_CLOEXEC
-	AllConstants["O_CREAT"] = syscall.O_CREAT
-	AllConstants["O_DIRECT"] = syscall.O_DIRECT
-	AllConstants["O_DIRECTORY"] = syscall.O_DIRECTORY
-	AllConstants["O_DSYNC"] = syscall.O_DSYNC
-	AllConstants["O_EXCL"] = syscall.O_EXCL
-	AllConstants["O_FSYNC"] = syscall.O_FSYNC
-	AllConstants["O_LARGEFILE"] = syscall.O_LARGEFILE
-	AllConstants["O_NDELAY"] = syscall.O_NDELAY
-	AllConstants["O_NOATIME"] = syscall.O_NOATIME
-	AllConstants["O_NOCTTY"] = syscall.O_NOCTTY
-	AllConstants["O_NOFOLLOW"] = syscall.O_NOFOLLOW
-	AllConstants["O_NONBLOCK"] = syscall.O_NONBLOCK
-	AllConstants["O_RDONLY"] = syscall.O_RDONLY
-	AllConstants["O_RDWR"] = syscall.O_RDWR
-	AllConstants["O_RSYNC"] = syscall.O_RSYNC
-	AllConstants["O_SYNC"] = syscall.O_SYNC
-	AllConstants["O_TRUNC"] = syscall.O_TRUNC
-	AllConstants["O_WRONLY"] = syscall.O_WRONLY
-	AllConstants["PACKET_ADD_MEMBERSHIP"] = syscall.PACKET_ADD_MEMBERSHIP
-	AllConstants["PACKET_BROADCAST"] = syscall.PACKET_BROADCAST
-	AllConstants["PACKET_DROP_MEMBERSHIP"] = syscall.PACKET_DROP_MEMBERSHIP
-	AllConstants["PACKET_FASTROUTE"] = syscall.PACKET_FASTROUTE
-	AllConstants["PACKET_HOST"] = syscall.PACKET_HOST
-	AllConstants["PACKET_LOOPBACK"] = syscall.PACKET_LOOPBACK
-	AllConstants["PACKET_MR_ALLMULTI"] = syscall.PACKET_MR_ALLMULTI
-	AllConstants["PACKET_MR_MULTICAST"] = syscall.PACKET_MR_MULTICAST
-	AllConstants["PACKET_MR_PROMISC"] = syscall.PACKET_MR_PROMISC
-	AllConstants["PACKET_MULTICAST"] = syscall.PACKET_MULTICAST
-	AllConstants["PACKET_OTHERHOST"] = syscall.PACKET_OTHERHOST
-	AllConstants["PACKET_OUTGOING"] = syscall.PACKET_OUTGOING
-	AllConstants["PACKET_RECV_OUTPUT"] = syscall.PACKET_RECV_OUTPUT
-	AllConstants["PACKET_RX_RING"] = syscall.PACKET_RX_RING
-	AllConstants["PACKET_STATISTICS"] = syscall.PACKET_STATISTICS
-	AllConstants["PRIO_PGRP"] = syscall.PRIO_PGRP
-	AllConstants["PRIO_PROCESS"] = syscall.PRIO_PROCESS
-	AllConstants["PRIO_USER"] = syscall.PRIO_USER
-	AllConstants["PROT_EXEC"] = syscall.PROT_EXEC
-	AllConstants["PROT_GROWSDOWN"] = syscall.PROT_GROWSDOWN
-	AllConstants["PROT_GROWSUP"] = syscall.PROT_GROWSUP
-	AllConstants["PROT_NONE"] = syscall.PROT_NONE
-	AllConstants["PROT_READ"] = syscall.PROT_READ
-	AllConstants["PROT_WRITE"] = syscall.PROT_WRITE
-	AllConstants["PR_CAPBSET_DROP"] = syscall.PR_CAPBSET_DROP
-	AllConstants["PR_CAPBSET_READ"] = syscall.PR_CAPBSET_READ
-	AllConstants["PR_ENDIAN_BIG"] = syscall.PR_ENDIAN_BIG
-	AllConstants["PR_ENDIAN_LITTLE"] = syscall.PR_ENDIAN_LITTLE
-	AllConstants["PR_ENDIAN_PPC_LITTLE"] = syscall.PR_ENDIAN_PPC_LITTLE
-	AllConstants["PR_FPEMU_NOPRINT"] = syscall.PR_FPEMU_NOPRINT
-	AllConstants["PR_FPEMU_SIGFPE"] = syscall.PR_FPEMU_SIGFPE
-	AllConstants["PR_FP_EXC_ASYNC"] = syscall.PR_FP_EXC_ASYNC
-	AllConstants["PR_FP_EXC_DISABLED"] = syscall.PR_FP_EXC_DISABLED
-	AllConstants["PR_FP_EXC_DIV"] = syscall.PR_FP_EXC_DIV
-	AllConstants["PR_FP_EXC_INV"] = syscall.PR_FP_EXC_INV
-	AllConstants["PR_FP_EXC_NONRECOV"] = syscall.PR_FP_EXC_NONRECOV
-	AllConstants["PR_FP_EXC_OVF"] = syscall.PR_FP_EXC_OVF
-	AllConstants["PR_FP_EXC_PRECISE"] = syscall.PR_FP_EXC_PRECISE
-	AllConstants["PR_FP_EXC_RES"] = syscall.PR_FP_EXC_RES
-	AllConstants["PR_FP_EXC_SW_ENABLE"] = syscall.PR_FP_EXC_SW_ENABLE
-	AllConstants["PR_FP_EXC_UND"] = syscall.PR_FP_EXC_UND
-	AllConstants["PR_GET_DUMPABLE"] = syscall.PR_GET_DUMPABLE
-	AllConstants["PR_GET_ENDIAN"] = syscall.PR_GET_ENDIAN
-	AllConstants["PR_GET_FPEMU"] = syscall.PR_GET_FPEMU
-	AllConstants["PR_GET_FPEXC"] = syscall.PR_GET_FPEXC
-	AllConstants["PR_GET_KEEPCAPS"] = syscall.PR_GET_KEEPCAPS
-	AllConstants["PR_GET_NAME"] = syscall.PR_GET_NAME
-	AllConstants["PR_GET_PDEATHSIG"] = syscall.PR_GET_PDEATHSIG
-	AllConstants["PR_GET_SECCOMP"] = syscall.PR_GET_SECCOMP
-	AllConstants["PR_GET_SECUREBITS"] = syscall.PR_GET_SECUREBITS
-	AllConstants["PR_GET_TIMERSLACK"] = syscall.PR_GET_TIMERSLACK
-	AllConstants["PR_GET_TIMING"] = syscall.PR_GET_TIMING
-	AllConstants["PR_GET_TSC"] = syscall.PR_GET_TSC
-	AllConstants["PR_GET_UNALIGN"] = syscall.PR_GET_UNALIGN
-	AllConstants["PR_MCE_KILL"] = syscall.PR_MCE_KILL
-	AllConstants["PR_MCE_KILL_CLEAR"] = syscall.PR_MCE_KILL_CLEAR
-	AllConstants["PR_MCE_KILL_DEFAULT"] = syscall.PR_MCE_KILL_DEFAULT
-	AllConstants["PR_MCE_KILL_EARLY"] = syscall.PR_MCE_KILL_EARLY
-	AllConstants["PR_MCE_KILL_GET"] = syscall.PR_MCE_KILL_GET
-	AllConstants["PR_MCE_KILL_LATE"] = syscall.PR_MCE_KILL_LATE
-	AllConstants["PR_MCE_KILL_SET"] = syscall.PR_MCE_KILL_SET
-	AllConstants["PR_SET_DUMPABLE"] = syscall.PR_SET_DUMPABLE
-	AllConstants["PR_SET_ENDIAN"] = syscall.PR_SET_ENDIAN
-	AllConstants["PR_SET_FPEMU"] = syscall.PR_SET_FPEMU
-	AllConstants["PR_SET_FPEXC"] = syscall.PR_SET_FPEXC
-	AllConstants["PR_SET_KEEPCAPS"] = syscall.PR_SET_KEEPCAPS
-	AllConstants["PR_SET_NAME"] = syscall.PR_SET_NAME
-	AllConstants["PR_SET_PDEATHSIG"] = syscall.PR_SET_PDEATHSIG
-	AllConstants["PR_SET_PTRACER"] = syscall.PR_SET_PTRACER
-	AllConstants["PR_SET_SECCOMP"] = syscall.PR_SET_SECCOMP
-	AllConstants["PR_SET_SECUREBITS"] = syscall.PR_SET_SECUREBITS
-	AllConstants["PR_SET_TIMERSLACK"] = syscall.PR_SET_TIMERSLACK
-	AllConstants["PR_SET_TIMING"] = syscall.PR_SET_TIMING
-	AllConstants["PR_SET_TSC"] = syscall.PR_SET_TSC
-	AllConstants["PR_SET_UNALIGN"] = syscall.PR_SET_UNALIGN
-	AllConstants["PR_TASK_PERF_EVENTS_DISABLE"] = syscall.PR_TASK_PERF_EVENTS_DISABLE
-	AllConstants["PR_TASK_PERF_EVENTS_ENABLE"] = syscall.PR_TASK_PERF_EVENTS_ENABLE
-	AllConstants["PR_TIMING_STATISTICAL"] = syscall.PR_TIMING_STATISTICAL
-	AllConstants["PR_TIMING_TIMESTAMP"] = syscall.PR_TIMING_TIMESTAMP
-	AllConstants["PR_TSC_ENABLE"] = syscall.PR_TSC_ENABLE
-	AllConstants["PR_TSC_SIGSEGV"] = syscall.PR_TSC_SIGSEGV
-	AllConstants["PR_UNALIGN_NOPRINT"] = syscall.PR_UNALIGN_NOPRINT
-	AllConstants["PR_UNALIGN_SIGBUS"] = syscall.PR_UNALIGN_SIGBUS
-	AllConstants["PTRACE_ARCH_PRCTL"] = syscall.PTRACE_ARCH_PRCTL
-	AllConstants["PTRACE_ATTACH"] = syscall.PTRACE_ATTACH
-	AllConstants["PTRACE_CONT"] = syscall.PTRACE_CONT
-	AllConstants["PTRACE_DETACH"] = syscall.PTRACE_DETACH
-	AllConstants["PTRACE_EVENT_CLONE"] = syscall.PTRACE_EVENT_CLONE
-	AllConstants["PTRACE_EVENT_EXEC"] = syscall.PTRACE_EVENT_EXEC
-	AllConstants["PTRACE_EVENT_EXIT"] = syscall.PTRACE_EVENT_EXIT
-	AllConstants["PTRACE_EVENT_FORK"] = syscall.PTRACE_EVENT_FORK
-	AllConstants["PTRACE_EVENT_VFORK"] = syscall.PTRACE_EVENT_VFORK
-	AllConstants["PTRACE_EVENT_VFORK_DONE"] = syscall.PTRACE_EVENT_VFORK_DONE
-	AllConstants["PTRACE_GETEVENTMSG"] = syscall.PTRACE_GETEVENTMSG
-	AllConstants["PTRACE_GETFPREGS"] = syscall.PTRACE_GETFPREGS
-	AllConstants["PTRACE_GETFPXREGS"] = syscall.PTRACE_GETFPXREGS
-	AllConstants["PTRACE_GETREGS"] = syscall.PTRACE_GETREGS
-	AllConstants["PTRACE_GETREGSET"] = syscall.PTRACE_GETREGSET
-	AllConstants["PTRACE_GETSIGINFO"] = syscall.PTRACE_GETSIGINFO
-	AllConstants["PTRACE_GET_THREAD_AREA"] = syscall.PTRACE_GET_THREAD_AREA
-	AllConstants["PTRACE_KILL"] = syscall.PTRACE_KILL
-	AllConstants["PTRACE_OLDSETOPTIONS"] = syscall.PTRACE_OLDSETOPTIONS
-	AllConstants["PTRACE_O_MASK"] = syscall.PTRACE_O_MASK
-	AllConstants["PTRACE_O_TRACECLONE"] = syscall.PTRACE_O_TRACECLONE
-	AllConstants["PTRACE_O_TRACEEXEC"] = syscall.PTRACE_O_TRACEEXEC
-	AllConstants["PTRACE_O_TRACEEXIT"] = syscall.PTRACE_O_TRACEEXIT
-	AllConstants["PTRACE_O_TRACEFORK"] = syscall.PTRACE_O_TRACEFORK
-	AllConstants["PTRACE_O_TRACESYSGOOD"] = syscall.PTRACE_O_TRACESYSGOOD
-	AllConstants["PTRACE_O_TRACEVFORK"] = syscall.PTRACE_O_TRACEVFORK
-	AllConstants["PTRACE_O_TRACEVFORKDONE"] = syscall.PTRACE_O_TRACEVFORKDONE
-	AllConstants["PTRACE_PEEKDATA"] = syscall.PTRACE_PEEKDATA
-	AllConstants["PTRACE_PEEKTEXT"] = syscall.PTRACE_PEEKTEXT
-	AllConstants["PTRACE_PEEKUSR"] = syscall.PTRACE_PEEKUSR
-	AllConstants["PTRACE_POKEDATA"] = syscall.PTRACE_POKEDATA
-	AllConstants["PTRACE_POKETEXT"] = syscall.PTRACE_POKETEXT
-	AllConstants["PTRACE_POKEUSR"] = syscall.PTRACE_POKEUSR
-	AllConstants["PTRACE_SETFPREGS"] = syscall.PTRACE_SETFPREGS
-	AllConstants["PTRACE_SETFPXREGS"] = syscall.PTRACE_SETFPXREGS
-	AllConstants["PTRACE_SETOPTIONS"] = syscall.PTRACE_SETOPTIONS
-	AllConstants["PTRACE_SETREGS"] = syscall.PTRACE_SETREGS
-	AllConstants["PTRACE_SETREGSET"] = syscall.PTRACE_SETREGSET
-	AllConstants["PTRACE_SETSIGINFO"] = syscall.PTRACE_SETSIGINFO
-	AllConstants["PTRACE_SET_THREAD_AREA"] = syscall.PTRACE_SET_THREAD_AREA
-	AllConstants["PTRACE_SINGLEBLOCK"] = syscall.PTRACE_SINGLEBLOCK
-	AllConstants["PTRACE_SINGLESTEP"] = syscall.PTRACE_SINGLESTEP
-	AllConstants["PTRACE_SYSCALL"] = syscall.PTRACE_SYSCALL
-	AllConstants["PTRACE_SYSEMU"] = syscall.PTRACE_SYSEMU
-	AllConstants["PTRACE_SYSEMU_SINGLESTEP"] = syscall.PTRACE_SYSEMU_SINGLESTEP
-	AllConstants["PTRACE_TRACEME"] = syscall.PTRACE_TRACEME
-	AllConstants["RLIMIT_AS"] = syscall.RLIMIT_AS
-	AllConstants["RLIMIT_CORE"] = syscall.RLIMIT_CORE
-	AllConstants["RLIMIT_CPU"] = syscall.RLIMIT_CPU
-	AllConstants["RLIMIT_DATA"] = syscall.RLIMIT_DATA
-	AllConstants["RLIMIT_FSIZE"] = syscall.RLIMIT_FSIZE
-	AllConstants["RLIMIT_NOFILE"] = syscall.RLIMIT_NOFILE
-	AllConstants["RLIMIT_STACK"] = syscall.RLIMIT_STACK
-	AllConstants["RLIM_INFINITY"] = syscall.RLIM_INFINITY
-	AllConstants["RTAX_ADVMSS"] = syscall.RTAX_ADVMSS
-	AllConstants["RTAX_CWND"] = syscall.RTAX_CWND
-	AllConstants["RTAX_FEATURES"] = syscall.RTAX_FEATURES
-	AllConstants["RTAX_FEATURE_ALLFRAG"] = syscall.RTAX_FEATURE_ALLFRAG
-	AllConstants["RTAX_FEATURE_ECN"] = syscall.RTAX_FEATURE_ECN
-	AllConstants["RTAX_FEATURE_SACK"] = syscall.RTAX_FEATURE_SACK
-	AllConstants["RTAX_FEATURE_TIMESTAMP"] = syscall.RTAX_FEATURE_TIMESTAMP
-	AllConstants["RTAX_HOPLIMIT"] = syscall.RTAX_HOPLIMIT
-	AllConstants["RTAX_INITCWND"] = syscall.RTAX_INITCWND
-	AllConstants["RTAX_INITRWND"] = syscall.RTAX_INITRWND
-	AllConstants["RTAX_LOCK"] = syscall.RTAX_LOCK
-	AllConstants["RTAX_MAX"] = syscall.RTAX_MAX
-	AllConstants["RTAX_MTU"] = syscall.RTAX_MTU
-	AllConstants["RTAX_REORDERING"] = syscall.RTAX_REORDERING
-	AllConstants["RTAX_RTO_MIN"] = syscall.RTAX_RTO_MIN
-	AllConstants["RTAX_RTT"] = syscall.RTAX_RTT
-	AllConstants["RTAX_RTTVAR"] = syscall.RTAX_RTTVAR
-	AllConstants["RTAX_SSTHRESH"] = syscall.RTAX_SSTHRESH
-	AllConstants["RTAX_UNSPEC"] = syscall.RTAX_UNSPEC
-	AllConstants["RTAX_WINDOW"] = syscall.RTAX_WINDOW
-	AllConstants["RTA_ALIGNTO"] = syscall.RTA_ALIGNTO
-	AllConstants["RTA_MAX"] = syscall.RTA_MAX
-	AllConstants["RTCF_DIRECTSRC"] = syscall.RTCF_DIRECTSRC
-	AllConstants["RTCF_DOREDIRECT"] = syscall.RTCF_DOREDIRECT
-	AllConstants["RTCF_LOG"] = syscall.RTCF_LOG
-	AllConstants["RTCF_MASQ"] = syscall.RTCF_MASQ
-	AllConstants["RTCF_NAT"] = syscall.RTCF_NAT
-	AllConstants["RTCF_VALVE"] = syscall.RTCF_VALVE
-	AllConstants["RTF_ADDRCLASSMASK"] = syscall.RTF_ADDRCLASSMASK
-	AllConstants["RTF_ADDRCONF"] = syscall.RTF_ADDRCONF
-	AllConstants["RTF_ALLONLINK"] = syscall.RTF_ALLONLINK
-	AllConstants["RTF_BROADCAST"] = syscall.RTF_BROADCAST
-	AllConstants["RTF_CACHE"] = syscall.RTF_CACHE
-	AllConstants["RTF_DEFAULT"] = syscall.RTF_DEFAULT
-	AllConstants["RTF_DYNAMIC"] = syscall.RTF_DYNAMIC
-	AllConstants["RTF_FLOW"] = syscall.RTF_FLOW
-	AllConstants["RTF_GATEWAY"] = syscall.RTF_GATEWAY
-	AllConstants["RTF_HOST"] = syscall.RTF_HOST
-	AllConstants["RTF_INTERFACE"] = syscall.RTF_INTERFACE
-	AllConstants["RTF_IRTT"] = syscall.RTF_IRTT
-	AllConstants["RTF_LINKRT"] = syscall.RTF_LINKRT
-	AllConstants["RTF_LOCAL"] = syscall.RTF_LOCAL
-	AllConstants["RTF_MODIFIED"] = syscall.RTF_MODIFIED
-	AllConstants["RTF_MSS"] = syscall.RTF_MSS
-	AllConstants["RTF_MTU"] = syscall.RTF_MTU
-	AllConstants["RTF_MULTICAST"] = syscall.RTF_MULTICAST
-	AllConstants["RTF_NAT"] = syscall.RTF_NAT
-	AllConstants["RTF_NOFORWARD"] = syscall.RTF_NOFORWARD
-	AllConstants["RTF_NONEXTHOP"] = syscall.RTF_NONEXTHOP
-	AllConstants["RTF_NOPMTUDISC"] = syscall.RTF_NOPMTUDISC
-	AllConstants["RTF_POLICY"] = syscall.RTF_POLICY
-	AllConstants["RTF_REINSTATE"] = syscall.RTF_REINSTATE
-	AllConstants["RTF_REJECT"] = syscall.RTF_REJECT
-	AllConstants["RTF_STATIC"] = syscall.RTF_STATIC
-	AllConstants["RTF_THROW"] = syscall.RTF_THROW
-	AllConstants["RTF_UP"] = syscall.RTF_UP
-	AllConstants["RTF_WINDOW"] = syscall.RTF_WINDOW
-	AllConstants["RTF_XRESOLVE"] = syscall.RTF_XRESOLVE
-	AllConstants["RTM_BASE"] = syscall.RTM_BASE
-	AllConstants["RTM_DELACTION"] = syscall.RTM_DELACTION
-	AllConstants["RTM_DELADDR"] = syscall.RTM_DELADDR
-	AllConstants["RTM_DELADDRLABEL"] = syscall.RTM_DELADDRLABEL
-	AllConstants["RTM_DELLINK"] = syscall.RTM_DELLINK
-	AllConstants["RTM_DELNEIGH"] = syscall.RTM_DELNEIGH
-	AllConstants["RTM_DELQDISC"] = syscall.RTM_DELQDISC
-	AllConstants["RTM_DELROUTE"] = syscall.RTM_DELROUTE
-	AllConstants["RTM_DELRULE"] = syscall.RTM_DELRULE
-	AllConstants["RTM_DELTCLASS"] = syscall.RTM_DELTCLASS
-	AllConstants["RTM_DELTFILTER"] = syscall.RTM_DELTFILTER
-	AllConstants["RTM_F_CLONED"] = syscall.RTM_F_CLONED
-	AllConstants["RTM_F_EQUALIZE"] = syscall.RTM_F_EQUALIZE
-	AllConstants["RTM_F_NOTIFY"] = syscall.RTM_F_NOTIFY
-	AllConstants["RTM_F_PREFIX"] = syscall.RTM_F_PREFIX
-	AllConstants["RTM_GETACTION"] = syscall.RTM_GETACTION
-	AllConstants["RTM_GETADDR"] = syscall.RTM_GETADDR
-	AllConstants["RTM_GETADDRLABEL"] = syscall.RTM_GETADDRLABEL
-	AllConstants["RTM_GETANYCAST"] = syscall.RTM_GETANYCAST
-	AllConstants["RTM_GETDCB"] = syscall.RTM_GETDCB
-	AllConstants["RTM_GETLINK"] = syscall.RTM_GETLINK
-	AllConstants["RTM_GETMULTICAST"] = syscall.RTM_GETMULTICAST
-	AllConstants["RTM_GETNEIGH"] = syscall.RTM_GETNEIGH
-	AllConstants["RTM_GETNEIGHTBL"] = syscall.RTM_GETNEIGHTBL
-	AllConstants["RTM_GETQDISC"] = syscall.RTM_GETQDISC
-	AllConstants["RTM_GETROUTE"] = syscall.RTM_GETROUTE
-	AllConstants["RTM_GETRULE"] = syscall.RTM_GETRULE
-	AllConstants["RTM_GETTCLASS"] = syscall.RTM_GETTCLASS
-	AllConstants["RTM_GETTFILTER"] = syscall.RTM_GETTFILTER
-	AllConstants["RTM_MAX"] = syscall.RTM_MAX
-	AllConstants["RTM_NEWACTION"] = syscall.RTM_NEWACTION
-	AllConstants["RTM_NEWADDR"] = syscall.RTM_NEWADDR
-	AllConstants["RTM_NEWADDRLABEL"] = syscall.RTM_NEWADDRLABEL
-	AllConstants["RTM_NEWLINK"] = syscall.RTM_NEWLINK
-	AllConstants["RTM_NEWNDUSEROPT"] = syscall.RTM_NEWNDUSEROPT
-	AllConstants["RTM_NEWNEIGH"] = syscall.RTM_NEWNEIGH
-	AllConstants["RTM_NEWNEIGHTBL"] = syscall.RTM_NEWNEIGHTBL
-	AllConstants["RTM_NEWPREFIX"] = syscall.RTM_NEWPREFIX
-	AllConstants["RTM_NEWQDISC"] = syscall.RTM_NEWQDISC
-	AllConstants["RTM_NEWROUTE"] = syscall.RTM_NEWROUTE
-	AllConstants["RTM_NEWRULE"] = syscall.RTM_NEWRULE
-	AllConstants["RTM_NEWTCLASS"] = syscall.RTM_NEWTCLASS
-	AllConstants["RTM_NEWTFILTER"] = syscall.RTM_NEWTFILTER
-	AllConstants["RTM_NR_FAMILIES"] = syscall.RTM_NR_FAMILIES
-	AllConstants["RTM_NR_MSGTYPES"] = syscall.RTM_NR_MSGTYPES
-	AllConstants["RTM_SETDCB"] = syscall.RTM_SETDCB
-	AllConstants["RTM_SETLINK"] = syscall.RTM_SETLINK
-	AllConstants["RTM_SETNEIGHTBL"] = syscall.RTM_SETNEIGHTBL
-	AllConstants["RTNH_ALIGNTO"] = syscall.RTNH_ALIGNTO
-	AllConstants["RTNH_F_DEAD"] = syscall.RTNH_F_DEAD
-	AllConstants["RTNH_F_ONLINK"] = syscall.RTNH_F_ONLINK
-	AllConstants["RTNH_F_PERVASIVE"] = syscall.RTNH_F_PERVASIVE
-	AllConstants["RTN_MAX"] = syscall.RTN_MAX
-	AllConstants["RTPROT_BIRD"] = syscall.RTPROT_BIRD
-	AllConstants["RTPROT_BOOT"] = syscall.RTPROT_BOOT
-	AllConstants["RTPROT_DHCP"] = syscall.RTPROT_DHCP
-	AllConstants["RTPROT_DNROUTED"] = syscall.RTPROT_DNROUTED
-	AllConstants["RTPROT_GATED"] = syscall.RTPROT_GATED
-	AllConstants["RTPROT_KERNEL"] = syscall.RTPROT_KERNEL
-	AllConstants["RTPROT_MRT"] = syscall.RTPROT_MRT
-	AllConstants["RTPROT_NTK"] = syscall.RTPROT_NTK
-	AllConstants["RTPROT_RA"] = syscall.RTPROT_RA
-	AllConstants["RTPROT_REDIRECT"] = syscall.RTPROT_REDIRECT
-	AllConstants["RTPROT_STATIC"] = syscall.RTPROT_STATIC
-	AllConstants["RTPROT_UNSPEC"] = syscall.RTPROT_UNSPEC
-	AllConstants["RTPROT_XORP"] = syscall.RTPROT_XORP
-	AllConstants["RTPROT_ZEBRA"] = syscall.RTPROT_ZEBRA
-	AllConstants["RT_CLASS_DEFAULT"] = syscall.RT_CLASS_DEFAULT
-	AllConstants["RT_CLASS_LOCAL"] = syscall.RT_CLASS_LOCAL
-	AllConstants["RT_CLASS_MAIN"] = syscall.RT_CLASS_MAIN
-	AllConstants["RT_CLASS_MAX"] = syscall.RT_CLASS_MAX
-	AllConstants["RT_CLASS_UNSPEC"] = syscall.RT_CLASS_UNSPEC
-	AllConstants["RUSAGE_CHILDREN"] = syscall.RUSAGE_CHILDREN
-	AllConstants["RUSAGE_SELF"] = syscall.RUSAGE_SELF
-	AllConstants["RUSAGE_THREAD"] = syscall.RUSAGE_THREAD
-	AllConstants["SCM_CREDENTIALS"] = syscall.SCM_CREDENTIALS
-	AllConstants["SCM_RIGHTS"] = syscall.SCM_RIGHTS
-	AllConstants["SCM_TIMESTAMP"] = syscall.SCM_TIMESTAMP
-	AllConstants["SCM_TIMESTAMPING"] = syscall.SCM_TIMESTAMPING
-	AllConstants["SCM_TIMESTAMPNS"] = syscall.SCM_TIMESTAMPNS
-	AllConstants["SHUT_RD"] = syscall.SHUT_RD
-	AllConstants["SHUT_RDWR"] = syscall.SHUT_RDWR
-	AllConstants["SHUT_WR"] = syscall.SHUT_WR
-	AllConstants["SIOCADDDLCI"] = syscall.SIOCADDDLCI
-	AllConstants["SIOCADDMULTI"] = syscall.SIOCADDMULTI
-	AllConstants["SIOCADDRT"] = syscall.SIOCADDRT
-	AllConstants["SIOCATMARK"] = syscall.SIOCATMARK
-	AllConstants["SIOCDARP"] = syscall.SIOCDARP
-	AllConstants["SIOCDELDLCI"] = syscall.SIOCDELDLCI
-	AllConstants["SIOCDELMULTI"] = syscall.SIOCDELMULTI
-	AllConstants["SIOCDELRT"] = syscall.SIOCDELRT
-	AllConstants["SIOCDEVPRIVATE"] = syscall.SIOCDEVPRIVATE
-	AllConstants["SIOCDIFADDR"] = syscall.SIOCDIFADDR
-	AllConstants["SIOCDRARP"] = syscall.SIOCDRARP
-	AllConstants["SIOCGARP"] = syscall.SIOCGARP
-	AllConstants["SIOCGIFADDR"] = syscall.SIOCGIFADDR
-	AllConstants["SIOCGIFBR"] = syscall.SIOCGIFBR
-	AllConstants["SIOCGIFBRDADDR"] = syscall.SIOCGIFBRDADDR
-	AllConstants["SIOCGIFCONF"] = syscall.SIOCGIFCONF
-	AllConstants["SIOCGIFCOUNT"] = syscall.SIOCGIFCOUNT
-	AllConstants["SIOCGIFDSTADDR"] = syscall.SIOCGIFDSTADDR
-	AllConstants["SIOCGIFENCAP"] = syscall.SIOCGIFENCAP
-	AllConstants["SIOCGIFFLAGS"] = syscall.SIOCGIFFLAGS
-	AllConstants["SIOCGIFHWADDR"] = syscall.SIOCGIFHWADDR
-	AllConstants["SIOCGIFINDEX"] = syscall.SIOCGIFINDEX
-	AllConstants["SIOCGIFMAP"] = syscall.SIOCGIFMAP
-	AllConstants["SIOCGIFMEM"] = syscall.SIOCGIFMEM
-	AllConstants["SIOCGIFMETRIC"] = syscall.SIOCGIFMETRIC
-	AllConstants["SIOCGIFMTU"] = syscall.SIOCGIFMTU
-	AllConstants["SIOCGIFNAME"] = syscall.SIOCGIFNAME
-	AllConstants["SIOCGIFNETMASK"] = syscall.SIOCGIFNETMASK
-	AllConstants["SIOCGIFPFLAGS"] = syscall.SIOCGIFPFLAGS
-	AllConstants["SIOCGIFSLAVE"] = syscall.SIOCGIFSLAVE
-	AllConstants["SIOCGIFTXQLEN"] = syscall.SIOCGIFTXQLEN
-	AllConstants["SIOCGPGRP"] = syscall.SIOCGPGRP
-	AllConstants["SIOCGRARP"] = syscall.SIOCGRARP
-	AllConstants["SIOCGSTAMP"] = syscall.SIOCGSTAMP
-	AllConstants["SIOCGSTAMPNS"] = syscall.SIOCGSTAMPNS
-	AllConstants["SIOCPROTOPRIVATE"] = syscall.SIOCPROTOPRIVATE
-	AllConstants["SIOCRTMSG"] = syscall.SIOCRTMSG
-	AllConstants["SIOCSARP"] = syscall.SIOCSARP
-	AllConstants["SIOCSIFADDR"] = syscall.SIOCSIFADDR
-	AllConstants["SIOCSIFBR"] = syscall.SIOCSIFBR
-	AllConstants["SIOCSIFBRDADDR"] = syscall.SIOCSIFBRDADDR
-	AllConstants["SIOCSIFDSTADDR"] = syscall.SIOCSIFDSTADDR
-	AllConstants["SIOCSIFENCAP"] = syscall.SIOCSIFENCAP
-	AllConstants["SIOCSIFFLAGS"] = syscall.SIOCSIFFLAGS
-	AllConstants["SIOCSIFHWADDR"] = syscall.SIOCSIFHWADDR
-	AllConstants["SIOCSIFHWBROADCAST"] = syscall.SIOCSIFHWBROADCAST
-	AllConstants["SIOCSIFLINK"] = syscall.SIOCSIFLINK
-	AllConstants["SIOCSIFMAP"] = syscall.SIOCSIFMAP
-	AllConstants["SIOCSIFMEM"] = syscall.SIOCSIFMEM
-	AllConstants["SIOCSIFMETRIC"] = syscall.SIOCSIFMETRIC
-	AllConstants["SIOCSIFMTU"] = syscall.SIOCSIFMTU
-	AllConstants["SIOCSIFNAME"] = syscall.SIOCSIFNAME
-	AllConstants["SIOCSIFNETMASK"] = syscall.SIOCSIFNETMASK
-	AllConstants["SIOCSIFPFLAGS"] = syscall.SIOCSIFPFLAGS
-	AllConstants["SIOCSIFSLAVE"] = syscall.SIOCSIFSLAVE
-	AllConstants["SIOCSIFTXQLEN"] = syscall.SIOCSIFTXQLEN
-	AllConstants["SIOCSPGRP"] = syscall.SIOCSPGRP
-	AllConstants["SIOCSRARP"] = syscall.SIOCSRARP
-	AllConstants["SOCK_CLOEXEC"] = syscall.SOCK_CLOEXEC
-	AllConstants["SOCK_DCCP"] = syscall.SOCK_DCCP
-	AllConstants["SOCK_DGRAM"] = syscall.SOCK_DGRAM
-	AllConstants["SOCK_NONBLOCK"] = syscall.SOCK_NONBLOCK
-	AllConstants["SOCK_PACKET"] = syscall.SOCK_PACKET
-	AllConstants["SOCK_RAW"] = syscall.SOCK_RAW
-	AllConstants["SOCK_RDM"] = syscall.SOCK_RDM
-	AllConstants["SOCK_SEQPACKET"] = syscall.SOCK_SEQPACKET
-	AllConstants["SOCK_STREAM"] = syscall.SOCK_STREAM
-	AllConstants["SOL_AAL"] = syscall.SOL_AAL
-	AllConstants["SOL_ATM"] = syscall.SOL_ATM
-	AllConstants["SOL_DECNET"] = syscall.SOL_DECNET
-	AllConstants["SOL_ICMPV6"] = syscall.SOL_ICMPV6
-	AllConstants["SOL_IP"] = syscall.SOL_IP
-	AllConstants["SOL_IPV6"] = syscall.SOL_IPV6
-	AllConstants["SOL_IRDA"] = syscall.SOL_IRDA
-	AllConstants["SOL_PACKET"] = syscall.SOL_PACKET
-	AllConstants["SOL_RAW"] = syscall.SOL_RAW
-	AllConstants["SOL_SOCKET"] = syscall.SOL_SOCKET
-	AllConstants["SOL_TCP"] = syscall.SOL_TCP
-	AllConstants["SOL_X25"] = syscall.SOL_X25
-	AllConstants["SOMAXCONN"] = syscall.SOMAXCONN
-	AllConstants["SO_ACCEPTCONN"] = syscall.SO_ACCEPTCONN
-	AllConstants["SO_ATTACH_FILTER"] = syscall.SO_ATTACH_FILTER
-	AllConstants["SO_BINDTODEVICE"] = syscall.SO_BINDTODEVICE
-	AllConstants["SO_BROADCAST"] = syscall.SO_BROADCAST
-	AllConstants["SO_BSDCOMPAT"] = syscall.SO_BSDCOMPAT
-	AllConstants["SO_DEBUG"] = syscall.SO_DEBUG
-	AllConstants["SO_DETACH_FILTER"] = syscall.SO_DETACH_FILTER
-	AllConstants["SO_DOMAIN"] = syscall.SO_DOMAIN
-	AllConstants["SO_DONTROUTE"] = syscall.SO_DONTROUTE
-	AllConstants["SO_ERROR"] = syscall.SO_ERROR
-	AllConstants["SO_KEEPALIVE"] = syscall.SO_KEEPALIVE
-	AllConstants["SO_LINGER"] = syscall.SO_LINGER
-	AllConstants["SO_MARK"] = syscall.SO_MARK
-	AllConstants["SO_NO_CHECK"] = syscall.SO_NO_CHECK
-	AllConstants["SO_OOBINLINE"] = syscall.SO_OOBINLINE
-	AllConstants["SO_PASSCRED"] = syscall.SO_PASSCRED
-	AllConstants["SO_PASSSEC"] = syscall.SO_PASSSEC
-	AllConstants["SO_PEERCRED"] = syscall.SO_PEERCRED
-	AllConstants["SO_PEERNAME"] = syscall.SO_PEERNAME
-	AllConstants["SO_PEERSEC"] = syscall.SO_PEERSEC
-	AllConstants["SO_PRIORITY"] = syscall.SO_PRIORITY
-	AllConstants["SO_PROTOCOL"] = syscall.SO_PROTOCOL
-	AllConstants["SO_RCVBUF"] = syscall.SO_RCVBUF
-	AllConstants["SO_RCVBUFFORCE"] = syscall.SO_RCVBUFFORCE
-	AllConstants["SO_RCVLOWAT"] = syscall.SO_RCVLOWAT
-	AllConstants["SO_RCVTIMEO"] = syscall.SO_RCVTIMEO
-	AllConstants["SO_REUSEADDR"] = syscall.SO_REUSEADDR
-	AllConstants["SO_RXQ_OVFL"] = syscall.SO_RXQ_OVFL
-	AllConstants["SO_SECURITY_AUTHENTICATION"] = syscall.SO_SECURITY_AUTHENTICATION
-	AllConstants["SO_SECURITY_ENCRYPTION_NETWORK"] = syscall.SO_SECURITY_ENCRYPTION_NETWORK
-	AllConstants["SO_SECURITY_ENCRYPTION_TRANSPORT"] = syscall.SO_SECURITY_ENCRYPTION_TRANSPORT
-	AllConstants["SO_SNDBUF"] = syscall.SO_SNDBUF
-	AllConstants["SO_SNDBUFFORCE"] = syscall.SO_SNDBUFFORCE
-	AllConstants["SO_SNDLOWAT"] = syscall.SO_SNDLOWAT
-	AllConstants["SO_SNDTIMEO"] = syscall.SO_SNDTIMEO
-	AllConstants["SO_TIMESTAMP"] = syscall.SO_TIMESTAMP
-	AllConstants["SO_TIMESTAMPING"] = syscall.SO_TIMESTAMPING
-	AllConstants["SO_TIMESTAMPNS"] = syscall.SO_TIMESTAMPNS
-	AllConstants["SO_TYPE"] = syscall.SO_TYPE
-	AllConstants["S_BLKSIZE"] = syscall.S_BLKSIZE
-	AllConstants["S_IEXEC"] = syscall.S_IEXEC
-	AllConstants["S_IFBLK"] = syscall.S_IFBLK
-	AllConstants["S_IFCHR"] = syscall.S_IFCHR
-	AllConstants["S_IFDIR"] = syscall.S_IFDIR
-	AllConstants["S_IFIFO"] = syscall.S_IFIFO
-	AllConstants["S_IFLNK"] = syscall.S_IFLNK
-	AllConstants["S_IFMT"] = syscall.S_IFMT
-	AllConstants["S_IFREG"] = syscall.S_IFREG
-	AllConstants["S_IFSOCK"] = syscall.S_IFSOCK
-	AllConstants["S_IREAD"] = syscall.S_IREAD
-	AllConstants["S_IRGRP"] = syscall.S_IRGRP
-	AllConstants["S_IROTH"] = syscall.S_IROTH
-	AllConstants["S_IRUSR"] = syscall.S_IRUSR
-	AllConstants["S_IRWXG"] = syscall.S_IRWXG
-	AllConstants["S_IRWXO"] = syscall.S_IRWXO
-	AllConstants["S_IRWXU"] = syscall.S_IRWXU
-	AllConstants["S_ISGID"] = syscall.S_ISGID
-	AllConstants["S_ISUID"] = syscall.S_ISUID
-	AllConstants["S_ISVTX"] = syscall.S_ISVTX
-	AllConstants["S_IWGRP"] = syscall.S_IWGRP
-	AllConstants["S_IWOTH"] = syscall.S_IWOTH
-	AllConstants["S_IWRITE"] = syscall.S_IWRITE
-	AllConstants["S_IWUSR"] = syscall.S_IWUSR
-	AllConstants["S_IXGRP"] = syscall.S_IXGRP
-	AllConstants["S_IXOTH"] = syscall.S_IXOTH
-	AllConstants["S_IXUSR"] = syscall.S_IXUSR
-	AllConstants["TCGETS"] = syscall.TCGETS
-	AllConstants["TCIFLUSH"] = syscall.TCIFLUSH
-	AllConstants["TCIOFLUSH"] = syscall.TCIOFLUSH
-	AllConstants["TCOFLUSH"] = syscall.TCOFLUSH
-	AllConstants["TCP_CONGESTION"] = syscall.TCP_CONGESTION
-	AllConstants["TCP_CORK"] = syscall.TCP_CORK
-	AllConstants["TCP_DEFER_ACCEPT"] = syscall.TCP_DEFER_ACCEPT
-	AllConstants["TCP_INFO"] = syscall.TCP_INFO
-	AllConstants["TCP_KEEPCNT"] = syscall.TCP_KEEPCNT
-	AllConstants["TCP_KEEPIDLE"] = syscall.TCP_KEEPIDLE
-	AllConstants["TCP_KEEPINTVL"] = syscall.TCP_KEEPINTVL
-	AllConstants["TCP_LINGER2"] = syscall.TCP_LINGER2
-	AllConstants["TCP_MAXSEG"] = syscall.TCP_MAXSEG
-	AllConstants["TCP_MAXWIN"] = syscall.TCP_MAXWIN
-	AllConstants["TCP_MAX_WINSHIFT"] = syscall.TCP_MAX_WINSHIFT
-	AllConstants["TCP_MD5SIG"] = syscall.TCP_MD5SIG
-	AllConstants["TCP_MD5SIG_MAXKEYLEN"] = syscall.TCP_MD5SIG_MAXKEYLEN
-	AllConstants["TCP_MSS"] = syscall.TCP_MSS
-	AllConstants["TCP_NODELAY"] = syscall.TCP_NODELAY
-	AllConstants["TCP_QUICKACK"] = syscall.TCP_QUICKACK
-	AllConstants["TCP_SYNCNT"] = syscall.TCP_SYNCNT
-	AllConstants["TCP_WINDOW_CLAMP"] = syscall.TCP_WINDOW_CLAMP
-	AllConstants["TCSETS"] = syscall.TCSETS
-	AllConstants["TIOCCBRK"] = syscall.TIOCCBRK
-	AllConstants["TIOCCONS"] = syscall.TIOCCONS
-	AllConstants["TIOCEXCL"] = syscall.TIOCEXCL
-	AllConstants["TIOCGDEV"] = syscall.TIOCGDEV
-	AllConstants["TIOCGETD"] = syscall.TIOCGETD
-	AllConstants["TIOCGICOUNT"] = syscall.TIOCGICOUNT
-	AllConstants["TIOCGLCKTRMIOS"] = syscall.TIOCGLCKTRMIOS
-	AllConstants["TIOCGPGRP"] = syscall.TIOCGPGRP
-	AllConstants["TIOCGPTN"] = syscall.TIOCGPTN
-	AllConstants["TIOCGRS485"] = syscall.TIOCGRS485
-	AllConstants["TIOCGSERIAL"] = syscall.TIOCGSERIAL
-	AllConstants["TIOCGSID"] = syscall.TIOCGSID
-	AllConstants["TIOCGSOFTCAR"] = syscall.TIOCGSOFTCAR
-	AllConstants["TIOCGWINSZ"] = syscall.TIOCGWINSZ
-	AllConstants["TIOCINQ"] = syscall.TIOCINQ
-	AllConstants["TIOCLINUX"] = syscall.TIOCLINUX
-	AllConstants["TIOCMBIC"] = syscall.TIOCMBIC
-	AllConstants["TIOCMBIS"] = syscall.TIOCMBIS
-	AllConstants["TIOCMGET"] = syscall.TIOCMGET
-	AllConstants["TIOCMIWAIT"] = syscall.TIOCMIWAIT
-	AllConstants["TIOCMSET"] = syscall.TIOCMSET
-	AllConstants["TIOCM_CAR"] = syscall.TIOCM_CAR
-	AllConstants["TIOCM_CD"] = syscall.TIOCM_CD
-	AllConstants["TIOCM_CTS"] = syscall.TIOCM_CTS
-	AllConstants["TIOCM_DSR"] = syscall.TIOCM_DSR
-	AllConstants["TIOCM_DTR"] = syscall.TIOCM_DTR
-	AllConstants["TIOCM_LE"] = syscall.TIOCM_LE
-	AllConstants["TIOCM_RI"] = syscall.TIOCM_RI
-	AllConstants["TIOCM_RNG"] = syscall.TIOCM_RNG
-	AllConstants["TIOCM_RTS"] = syscall.TIOCM_RTS
-	AllConstants["TIOCM_SR"] = syscall.TIOCM_SR
-	AllConstants["TIOCM_ST"] = syscall.TIOCM_ST
-	AllConstants["TIOCNOTTY"] = syscall.TIOCNOTTY
-	AllConstants["TIOCNXCL"] = syscall.TIOCNXCL
-	AllConstants["TIOCOUTQ"] = syscall.TIOCOUTQ
-	AllConstants["TIOCPKT"] = syscall.TIOCPKT
-	AllConstants["TIOCPKT_DATA"] = syscall.TIOCPKT_DATA
-	AllConstants["TIOCPKT_DOSTOP"] = syscall.TIOCPKT_DOSTOP
-	AllConstants["TIOCPKT_FLUSHREAD"] = syscall.TIOCPKT_FLUSHREAD
-	AllConstants["TIOCPKT_FLUSHWRITE"] = syscall.TIOCPKT_FLUSHWRITE
-	AllConstants["TIOCPKT_IOCTL"] = syscall.TIOCPKT_IOCTL
-	AllConstants["TIOCPKT_NOSTOP"] = syscall.TIOCPKT_NOSTOP
-	AllConstants["TIOCPKT_START"] = syscall.TIOCPKT_START
-	AllConstants["TIOCPKT_STOP"] = syscall.TIOCPKT_STOP
-	AllConstants["TIOCSBRK"] = syscall.TIOCSBRK
-	AllConstants["TIOCSCTTY"] = syscall.TIOCSCTTY
-	AllConstants["TIOCSERCONFIG"] = syscall.TIOCSERCONFIG
-	AllConstants["TIOCSERGETLSR"] = syscall.TIOCSERGETLSR
-	AllConstants["TIOCSERGETMULTI"] = syscall.TIOCSERGETMULTI
-	AllConstants["TIOCSERGSTRUCT"] = syscall.TIOCSERGSTRUCT
-	AllConstants["TIOCSERGWILD"] = syscall.TIOCSERGWILD
-	AllConstants["TIOCSERSETMULTI"] = syscall.TIOCSERSETMULTI
-	AllConstants["TIOCSERSWILD"] = syscall.TIOCSERSWILD
-	AllConstants["TIOCSER_TEMT"] = syscall.TIOCSER_TEMT
-	AllConstants["TIOCSETD"] = syscall.TIOCSETD
-	AllConstants["TIOCSIG"] = syscall.TIOCSIG
-	AllConstants["TIOCSLCKTRMIOS"] = syscall.TIOCSLCKTRMIOS
-	AllConstants["TIOCSPGRP"] = syscall.TIOCSPGRP
-	AllConstants["TIOCSPTLCK"] = syscall.TIOCSPTLCK
-	AllConstants["TIOCSRS485"] = syscall.TIOCSRS485
-	AllConstants["TIOCSSERIAL"] = syscall.TIOCSSERIAL
-	AllConstants["TIOCSSOFTCAR"] = syscall.TIOCSSOFTCAR
-	AllConstants["TIOCSTI"] = syscall.TIOCSTI
-	AllConstants["TIOCSWINSZ"] = syscall.TIOCSWINSZ
-	AllConstants["TUNATTACHFILTER"] = syscall.TUNATTACHFILTER
-	AllConstants["TUNDETACHFILTER"] = syscall.TUNDETACHFILTER
-	AllConstants["TUNGETFEATURES"] = syscall.TUNGETFEATURES
-	AllConstants["TUNGETIFF"] = syscall.TUNGETIFF
-	AllConstants["TUNGETSNDBUF"] = syscall.TUNGETSNDBUF
-	AllConstants["TUNGETVNETHDRSZ"] = syscall.TUNGETVNETHDRSZ
-	AllConstants["TUNSETDEBUG"] = syscall.TUNSETDEBUG
-	AllConstants["TUNSETGROUP"] = syscall.TUNSETGROUP
-	AllConstants["TUNSETIFF"] = syscall.TUNSETIFF
-	AllConstants["TUNSETLINK"] = syscall.TUNSETLINK
-	AllConstants["TUNSETNOCSUM"] = syscall.TUNSETNOCSUM
-	AllConstants["TUNSETOFFLOAD"] = syscall.TUNSETOFFLOAD
-	AllConstants["TUNSETOWNER"] = syscall.TUNSETOWNER
-	AllConstants["TUNSETPERSIST"] = syscall.TUNSETPERSIST
-	AllConstants["TUNSETSNDBUF"] = syscall.TUNSETSNDBUF
-	AllConstants["TUNSETTXFILTER"] = syscall.TUNSETTXFILTER
-	AllConstants["TUNSETVNETHDRSZ"] = syscall.TUNSETVNETHDRSZ
-	AllConstants["WALL"] = syscall.WALL
-	AllConstants["WCLONE"] = syscall.WCLONE
-	AllConstants["WCONTINUED"] = syscall.WCONTINUED
-	AllConstants["WEXITED"] = syscall.WEXITED
-	AllConstants["WNOHANG"] = syscall.WNOHANG
-	AllConstants["WNOTHREAD"] = syscall.WNOTHREAD
-	AllConstants["WNOWAIT"] = syscall.WNOWAIT
-	AllConstants["WORDSIZE"] = syscall.WORDSIZE
-	AllConstants["WSTOPPED"] = syscall.WSTOPPED
-	AllConstants["WUNTRACED"] = syscall.WUNTRACED
-	AllConstants["XCASE"] = syscall.XCASE
+	RegisterConstant("AF_ALG", syscall.AF_ALG)
+	RegisterConstant("AF_APPLETALK", syscall.AF_APPLETALK)
+	RegisterConstant("AF_ASH", syscall.AF_ASH)
+	RegisterConstant("AF_ATMPVC", syscall.AF_ATMPVC)
+	RegisterConstant("AF_ATMSVC", syscall.AF_ATMSVC)
+	RegisterConstant("AF_AX25", syscall.AF_AX25)
+	RegisterConstant("AF_BLUETOOTH", syscall.AF_BLUETOOTH)
+	RegisterConstant("AF_BRIDGE", syscall.AF_BRIDGE)
+	RegisterConstant("AF_CAIF", syscall.AF_CAIF)
+	RegisterConstant("AF_CAN", syscall.AF_CAN)
+	RegisterConstant("AF_DECnet", syscall.AF_DECnet)
+	RegisterConstant("AF_ECONET", syscall.AF_ECONET)
+	RegisterConstant("AF_FILE", syscall.AF_FILE)
+	RegisterConstant("AF_IEEE802154", syscall.AF_IEEE802154)
+	RegisterConstant("AF_INET", syscall.AF_INET)
+	RegisterConstant("AF_INET6", syscall.AF_INET6)
+	RegisterConstant("AF_IPX", syscall.AF_IPX)
+	RegisterConstant("AF_IRDA", syscall.AF_IRDA)
+	RegisterConstant("AF_ISDN", syscall.AF_ISDN)
+	RegisterConstant("AF_IUCV", syscall.AF_IUCV)
+	RegisterConstant("AF_KEY", syscall.AF_KEY)
+	RegisterConstant("AF_LLC", syscall.AF_LLC)
+	RegisterConstant("AF_LOCAL", syscall.AF_LOCAL)
+	RegisterConstant("AF_MAX", syscall.AF_MAX)
+	RegisterConstant("AF_NETBEUI", syscall.AF_NETBEUI)
+	RegisterConstant("AF_NETLINK", syscall.AF_NETLINK)
+	RegisterConstant("AF_NETROM", syscall.AF_NETROM)
+	RegisterConstant("AF_PACKET", syscall.AF_PACKET)
+	RegisterConstant("AF_PHONET", syscall.AF_PHONET)
+	RegisterConstant("AF_PPPOX", syscall.AF_PPPOX)
+	RegisterConstant("AF_RDS", syscall.AF_RDS)
+	RegisterConstant("AF_ROSE", syscall.AF_ROSE)
+	RegisterConstant("AF_ROUTE", syscall.AF_ROUTE)
+	RegisterConstant("AF_RXRPC", syscall.AF_RXRPC)
+	RegisterConstant("AF_SECURITY", syscall.AF_SECURITY)
+	RegisterConstant("AF_SNA", syscall.AF_SNA)
+	RegisterConstant("AF_TIPC", syscall.AF_TIPC)
+	RegisterConstant("AF_UNIX", syscall.AF_UNIX)
+	RegisterConstant("AF_UNSPEC", syscall.AF_UNSPEC)
+	RegisterConstant("AF_WANPIPE", syscall.AF_WANPIPE)
+	RegisterConstant("AF_X25", syscall.AF_X25)
+	RegisterConstant("ARPHRD_ADAPT", syscall.ARPHRD_ADAPT)
+	RegisterConstant("ARPHRD_APPLETLK", syscall.ARPHRD_APPLETLK)
+	RegisterConstant("ARPHRD_ARCNET", syscall.ARPHRD_ARCNET)
+	RegisterConstant("ARPHRD_ASH", syscall.ARPHRD_ASH)
+	RegisterConstant("ARPHRD_ATM", syscall.ARPHRD_ATM)
+	RegisterConstant("ARPHRD_AX25", syscall.ARPHRD_AX25)
+	RegisterConstant("ARPHRD_BIF", syscall.ARPHRD_BIF)
+	RegisterConstant("ARPHRD_CHAOS", syscall.ARPHRD_CHAOS)
+	RegisterConstant("ARPHRD_CISCO", syscall.ARPHRD_CISCO)
+	RegisterConstant("ARPHRD_CSLIP", syscall.ARPHRD_CSLIP)
+	RegisterConstant("ARPHRD_CSLIP6", syscall.ARPHRD_CSLIP6)
+	RegisterConstant("ARPHRD_DDCMP", syscall.ARPHRD_DDCMP)
+	RegisterConstant("ARPHRD_DLCI", syscall.ARPHRD_DLCI)
+	RegisterConstant("ARPHRD_ECONET", syscall.ARPHRD_ECONET)
+	RegisterConstant("ARPHRD_EETHER", syscall.ARPHRD_EETHER)
+	RegisterConstant("ARPHRD_ETHER", syscall.ARPHRD_ETHER)
+	RegisterConstant("ARPHRD_EUI64", syscall.ARPHRD_EUI64)
+	RegisterConstant("ARPHRD_FCAL", syscall.ARPHRD_FCAL)
+	RegisterConstant("ARPHRD_FCFABRIC", syscall.ARPHRD_FCFABRIC)
+	RegisterConstant("ARPHRD_FCPL", syscall.ARPHRD_FCPL)
+	RegisterConstant("ARPHRD_FCPP", syscall.ARPHRD_FCPP)
+	RegisterConstant("ARPHRD_FDDI", syscall.ARPHRD_FDDI)
+	RegisterConstant("ARPHRD_FRAD", syscall.ARPHRD_FRAD)
+	RegisterConstant("ARPHRD_HDLC", syscall.ARPHRD_HDLC)
+	RegisterConstant("ARPHRD_HIPPI", syscall.ARPHRD_HIPPI)
+	RegisterConstant("ARPHRD_HWX25", syscall.ARPHRD_HWX25)
+	RegisterConstant("ARPHRD_IEEE1394", syscall.ARPHRD_IEEE1394)
+	RegisterConstant("ARPHRD_IEEE802", syscall.ARPHRD_IEEE802)
+	RegisterConstant("ARPHRD_IEEE80211", syscall.ARPHRD_IEEE80211)
+	RegisterConstant("ARPHRD_IEEE80211_PRISM", syscall.ARPHRD_IEEE80211_PRISM)
+	RegisterConstant("ARPHRD_IEEE80211_RADIOTAP", syscall.ARPHRD_IEEE80211_RADIOTAP)
+	RegisterConstant("ARPHRD_IEEE802154", syscall.ARPHRD_IEEE802154)
+	RegisterConstant("ARPHRD_IEEE802154_PHY", syscall.ARPHRD_IEEE802154_PHY)
+	RegisterConstant("ARPHRD_IEEE802_TR", syscall.ARPHRD_IEEE802_TR)
+	RegisterConstant("ARPHRD_INFINIBAND", syscall.ARPHRD_INFINIBAND)
+	RegisterConstant("ARPHRD_IPDDP", syscall.ARPHRD_IPDDP)
+	RegisterConstant("ARPHRD_IPGRE", syscall.ARPHRD_IPGRE)
+	RegisterConstant("ARPHRD_IRDA", syscall.ARPHRD_IRDA)
+	RegisterConstant("ARPHRD_LAPB", syscall.ARPHRD_LAPB)
+	RegisterConstant("ARPHRD_LOCALTLK", syscall.ARPHRD_LOCALTLK)
+	RegisterConstant("ARPHRD_LOOPBACK", syscall.ARPHRD_LOOPBACK)
+	RegisterConstant("ARPHRD_METRICOM", syscall.ARPHRD_METRICOM)
+	RegisterConstant("ARPHRD_NETROM", syscall.ARPHRD_NETROM)
+	RegisterConstant("ARPHRD_NONE", syscall.ARPHRD_NONE)
+	RegisterConstant("ARPHRD_PIMREG", syscall.ARPHRD_PIMREG)
+	RegisterConstant("ARPHRD_PPP", syscall.ARPHRD_PPP)
+	RegisterConstant("ARPHRD_PRONET", syscall.ARPHRD_PRONET)
+	RegisterConstant("ARPHRD_RAWHDLC", syscall.ARPHRD_RAWHDLC)
+	RegisterConstant("ARPHRD_ROSE", syscall.ARPHRD_ROSE)
+	RegisterConstant("ARPHRD_RSRVD", syscall.ARPHRD_RSRVD)
+	RegisterConstant("ARPHRD_SIT", syscall.ARPHRD_SIT)
+	RegisterConstant("ARPHRD_SKIP", syscall.ARPHRD_SKIP)
+	RegisterConstant("ARPHRD_SLIP", syscall.ARPHRD_SLIP)
+	RegisterConstant("ARPHRD_SLIP6", syscall.ARPHRD_SLIP6)
+	RegisterConstant("ARPHRD_TUNNEL", syscall.ARPHRD_TUNNEL)
+	RegisterConstant("ARPHRD_TUNNEL6", syscall.ARPHRD_TUNNEL6)
+	RegisterConstant("ARPHRD_VOID", syscall.ARPHRD_VOID)
+	RegisterConstant("ARPHRD_X25", syscall.ARPHRD_X25)
+	RegisterConstant("BPF_A", syscall.BPF_A)
+	RegisterConstant("BPF_ABS", syscall.BPF_ABS)
+	RegisterConstant("BPF_ADD", syscall.BPF_ADD)
+	RegisterConstant("BPF_ALU", syscall.BPF_ALU)
+	RegisterConstant("BPF_AND", syscall.BPF_AND)
+	RegisterConstant("BPF_B", syscall.BPF_B)
+	RegisterConstant("BPF_DIV", syscall.BPF_DIV)
+	RegisterConstant("BPF_H", syscall.BPF_H)
+	RegisterConstant("BPF_IMM", syscall.BPF_IMM)
+	RegisterConstant("BPF_IND", syscall.BPF_IND)
+	RegisterConstant("BPF_JA", syscall.BPF_JA)
+	RegisterConstant("BPF_JEQ", syscall.BPF_JEQ)
+	RegisterConstant("BPF_JGE", syscall.BPF_JGE)
+	RegisterConstant("BPF_JGT", syscall.BPF_JGT)
+	RegisterConstant("BPF_JMP", syscall.BPF_JMP)
+	RegisterConstant("BPF_JSET", syscall.BPF_JSET)
+	RegisterConstant("BPF_K", syscall.BPF_K)
+	RegisterConstant("BPF_LD", syscall.BPF_LD)
+	RegisterConstant("BPF_LDX", syscall.BPF_LDX)
+	RegisterConstant("BPF_LEN", syscall.BPF_LEN)
+	RegisterConstant("BPF_LSH", syscall.BPF_LSH)
+	RegisterConstant("BPF_MAJOR_VERSION", syscall.BPF_MAJOR_VERSION)
+	RegisterConstant("BPF_MAXINSNS", syscall.BPF_MAXINSNS)
+	RegisterConstant("BPF_MEM", syscall.BPF_MEM)
+	RegisterConstant("BPF_MEMWORDS", syscall.BPF_MEMWORDS)
+	RegisterConstant("BPF_MINOR_VERSION", syscall.BPF_MINOR_VERSION)
+	RegisterConstant("BPF_MISC", syscall.BPF_MISC)
+	RegisterConstant("BPF_MSH", syscall.BPF_MSH)
+	RegisterConstant("BPF_MUL", syscall.BPF_MUL)
+	RegisterConstant("BPF_NEG", syscall.BPF_NEG)
+	RegisterConstant("BPF_OR", syscall.BPF_OR)
+	RegisterConstant("BPF_RET", syscall.BPF_RET)
+	RegisterConstant("BPF_RSH", syscall.BPF_RSH)
+	RegisterConstant("BPF_ST", syscall.BPF_ST)
+	RegisterConstant("BPF_STX", syscall.BPF_STX)
+	RegisterConstant("BPF_SUB", syscall.BPF_SUB)
+	RegisterConstant("BPF_TAX", syscall.BPF_TAX)
+	RegisterConstant("BPF_TXA", syscall.BPF_TXA)
+	RegisterConstant("BPF_W", syscall.BPF_W)
+	RegisterConstant("BPF_X", syscall.BPF_X)
+	RegisterConstant("CLONE_CHILD_CLEARTID", syscall.CLONE_CHILD_CLEARTID)
+	RegisterConstant("CLONE_CHILD_SETTID", syscall.CLONE_CHILD_SETTID)
+	RegisterConstant("CLONE_DETACHED", syscall.CLONE_DETACHED)
+	RegisterConstant("CLONE_FILES", syscall.CLONE_FILES)
+	RegisterConstant("CLONE_FS", syscall.CLONE_FS)
+	RegisterConstant("CLONE_IO", syscall.CLONE_IO)
+	RegisterConstant("CLONE_NEWIPC", syscall.CLONE_NEWIPC)
+	RegisterConstant("CLONE_NEWNET", syscall.CLONE_NEWNET)
+	RegisterConstant("CLONE_NEWNS", syscall.CLONE_NEWNS)
+	RegisterConstant("CLONE_NEWPID", syscall.CLONE_NEWPID)
+	RegisterConstant("CLONE_NEWUSER", syscall.CLONE_NEWUSER)
+	RegisterConstant("CLONE_NEWUTS", syscall.CLONE_NEWUTS)
+	RegisterConstant("CLONE_PARENT", syscall.CLONE_PARENT)
+	RegisterConstant("CLONE_PARENT_SETTID", syscall.CLONE_PARENT_SETTID)
+	RegisterConstant("CLONE_PTRACE", syscall.CLONE_PTRACE)
+	RegisterConstant("CLONE_SETTLS", syscall.CLONE_SETTLS)
+	RegisterConstant("CLONE_SIGHAND", syscall.CLONE_SIGHAND)
+	RegisterConstant("CLONE_SYSVSEM", syscall.CLONE_SYSVSEM)
+	RegisterConstant("CLONE_THREAD", syscall.CLONE_THREAD)
+	RegisterConstant("CLONE_UNTRACED", syscall.CLONE_UNTRACED)
+	RegisterConstant("CLONE_VFORK", syscall.CLONE_VFORK)
+	RegisterConstant("CLONE_VM", syscall.CLONE_VM)
+	RegisterConstant("DT_BLK", syscall.DT_BLK)
+	RegisterConstant("DT_CHR", syscall.DT_CHR)
+	RegisterConstant("DT_DIR", syscall.DT_DIR)
+	RegisterConstant("DT_FIFO", syscall.DT_FIFO)
+	RegisterConstant("DT_LNK", syscall.DT_LNK)
+	RegisterConstant("DT_REG", syscall.DT_REG)
+	RegisterConstant("DT_SOCK", syscall.DT_SOCK)
+	RegisterConstant("DT_UNKNOWN", syscall.DT_UNKNOWN)
+	RegisterConstant("DT_WHT", syscall.DT_WHT)
+	RegisterConstant("EPOLLERR", syscall.EPOLLERR)
+	RegisterConstant("EPOLLET", syscall.EPOLLET)
+	RegisterConstant("EPOLLHUP", syscall.EPOLLHUP)
+	RegisterConstant("EPOLLIN", syscall.EPOLLIN)
+	RegisterConstant("EPOLLMSG", syscall.EPOLLMSG)
+	RegisterConstant("EPOLLONESHOT", syscall.EPOLLONESHOT)
+	RegisterConstant("EPOLLOUT", syscall.EPOLLOUT)
+	RegisterConstant("EPOLLPRI", syscall.EPOLLPRI)
+	RegisterConstant("EPOLLRDBAND", syscall.EPOLLRDBAND)
+	RegisterConstant("EPOLLRDHUP", syscall.EPOLLRDHUP)
+	RegisterConstant("EPOLLRDNORM", syscall.EPOLLRDNORM)
+	RegisterConstant("EPOLLWRBAND", syscall.EPOLLWRBAND)
+	RegisterConstant("EPOLLWRNORM", syscall.EPOLLWRNORM)
+	RegisterConstant("EPOLL_CLOEXEC", syscall.EPOLL_CLOEXEC)
+	RegisterConstant("EPOLL_CTL_ADD", syscall.EPOLL_CTL_ADD)
+	RegisterConstant("EPOLL_CTL_DEL", syscall.EPOLL_CTL_DEL)
+	RegisterConstant("EPOLL_CTL_MOD", syscall.EPOLL_CTL_MOD)
+	RegisterConstant("EPOLL_NONBLOCK", syscall.EPOLL_NONBLOCK)
+	RegisterConstant("ETH_P_1588", syscall.ETH_P_1588)
+	RegisterConstant("ETH_P_8021Q", syscall.ETH_P_8021Q)
+	RegisterConstant("ETH_P_802_2", syscall.ETH_P_802_2)
+	RegisterConstant("ETH_P_802_3", syscall.ETH_P_802_3)
+	RegisterConstant("ETH_P_AARP", syscall.ETH_P_AARP)
+	RegisterConstant("ETH_P_ALL", syscall.ETH_P_ALL)
+	RegisterConstant("ETH_P_AOE", syscall.ETH_P_AOE)
+	RegisterConstant("ETH_P_ARCNET", syscall.ETH_P_ARCNET)
+	RegisterConstant("ETH_P_ARP", syscall.ETH_P_ARP)
+	RegisterConstant("ETH_P_ATALK", syscall.ETH_P_ATALK)
+	RegisterConstant("ETH_P_ATMFATE", syscall.ETH_P_ATMFATE)
+	RegisterConstant("ETH_P_ATMMPOA", syscall.ETH_P_ATMMPOA)
+	RegisterConstant("ETH_P_AX25", syscall.ETH_P_AX25)
+	RegisterConstant("ETH_P_BPQ", syscall.ETH_P_BPQ)
+	RegisterConstant("ETH_P_CAIF", syscall.ETH_P_CAIF)
+	RegisterConstant("ETH_P_CAN", syscall.ETH_P_CAN)
+	RegisterConstant("ETH_P_CONTROL", syscall.ETH_P_CONTROL)
+	RegisterConstant("ETH_P_CUST", syscall.ETH_P_CUST)
+	RegisterConstant("ETH_P_DDCMP", syscall.ETH_P_DDCMP)
+	RegisterConstant("ETH_P_DEC", syscall.ETH_P_DEC)
+	RegisterConstant("ETH_P_DIAG", syscall.ETH_P_DIAG)
+	RegisterConstant("ETH_P_DNA_DL", syscall.ETH_P_DNA_DL)
+	RegisterConstant("ETH_P_DNA_RC", syscall.ETH_P_DNA_RC)
+	RegisterConstant("ETH_P_DNA_RT", syscall.ETH_P_DNA_RT)
+	RegisterConstant("ETH_P_DSA", syscall.ETH_P_DSA)
+	RegisterConstant("ETH_P_ECONET", syscall.ETH_P_ECONET)
+	RegisterConstant("ETH_P_EDSA", syscall.ETH_P_EDSA)
+	RegisterConstant("ETH_P_FCOE", syscall.ETH_P_FCOE)
+	RegisterConstant("ETH_P_FIP", syscall.ETH_P_FIP)
+	RegisterConstant("ETH_P_HDLC", syscall.ETH_P_HDLC)
+	RegisterConstant("ETH_P_IEEE802154", syscall.ETH_P_IEEE802154)
+	RegisterConstant("ETH_P_IEEEPUP", syscall.ETH_P_IEEEPUP)
+	RegisterConstant("ETH_P_IEEEPUPAT", syscall.ETH_P_IEEEPUPAT)
+	RegisterConstant("ETH_P_IP", syscall.ETH_P_IP)
+	RegisterConstant("ETH_P_IPV6", syscall.ETH_P_IPV6)
+	RegisterConstant("ETH_P_IPX", syscall.ETH_P_IPX)
+	RegisterConstant("ETH_P_IRDA", syscall.ETH_P_IRDA)
+	RegisterConstant("ETH_P_LAT", syscall.ETH_P_LAT)
+	RegisterConstant("ETH_P_LINK_CTL", syscall.ETH_P_LINK_CTL)
+	RegisterConstant("ETH_P_LOCALTALK", syscall.ETH_P_LOCALTALK)
+	RegisterConstant("ETH_P_LOOP", syscall.ETH_P_LOOP)
+	RegisterConstant("ETH_P_MOBITEX", syscall.ETH_P_MOBITEX)
+	RegisterConstant("ETH_P_MPLS_MC", syscall.ETH_P_MPLS_MC)
+	RegisterConstant("ETH_P_MPLS_UC", syscall.ETH_P_MPLS_UC)
+	RegisterConstant("ETH_P_PAE", syscall.ETH_P_PAE)
+	RegisterConstant("ETH_P_PAUSE", syscall.ETH_P_PAUSE)
+	RegisterConstant("ETH_P_PHONET", syscall.ETH_P_PHONET)
+	RegisterConstant("ETH_P_PPPTALK", syscall.ETH_P_PPPTALK)
+	RegisterConstant("ETH_P_PPP_DISC", syscall.ETH_P_PPP_DISC)
+	RegisterConstant("ETH_P_PPP_MP", syscall.ETH_P_PPP_MP)
+	RegisterConstant("ETH_P_PPP_SES", syscall.ETH_P_PPP_SES)
+	RegisterConstant("ETH_P_PUP", syscall.ETH_P_PUP)
+	RegisterConstant("ETH_P_PUPAT", syscall.ETH_P_PUPAT)
+	RegisterConstant("ETH_P_RARP", syscall.ETH_P_RARP)
+	RegisterConstant("ETH_P_SCA", syscall.ETH_P_SCA)
+	RegisterConstant("ETH_P_SLOW", syscall.ETH_P_SLOW)
+	RegisterConstant("ETH_P_SNAP", syscall.ETH_P_SNAP)
+	RegisterConstant("ETH_P_TEB", syscall.ETH_P_TEB)
+	RegisterConstant("ETH_P_TIPC", syscall.ETH_P_TIPC)
+	RegisterConstant("ETH_P_TRAILER", syscall.ETH_P_TRAILER)
+	RegisterConstant("ETH_P_TR_802_2", syscall.ETH_P_TR_802_2)
+	RegisterConstant("ETH_P_WAN_PPP", syscall.ETH_P_WAN_PPP)
+	RegisterConstant("ETH_P_WCCP", syscall.ETH_P_WCCP)
+	RegisterConstant("ETH_P_X25", syscall.ETH_P_X25)
+	RegisterConstant("FD_CLOEXEC", syscall.FD_CLOEXEC)
+	RegisterConstant("FD_SETSIZE", syscall.FD_SETSIZE)
+	RegisterConstant("F_DUPFD", syscall.F_DUPFD)
+	RegisterConstant("F_DUPFD_CLOEXEC", syscall.F_DUPFD_CLOEXEC)
+	RegisterConstant("F_EXLCK", syscall.F_EXLCK)
+	RegisterConstant("F_GETFD", syscall.F_GETFD)
+	RegisterConstant("F_GETFL", syscall.F_GETFL)
+	RegisterConstant("F_GETLEASE", syscall.F_GETLEASE)
+	RegisterConstant("F_GETLK", syscall.F_GETLK)
+	RegisterConstant("F_GETLK64", syscall.F_GETLK64)
+	RegisterConstant("F_GETOWN", syscall.F_GETOWN)
+	RegisterConstant("F_GETOWN_EX", syscall.F_GETOWN_EX)
+	RegisterConstant("F_GETPIPE_SZ", syscall.F_GETPIPE_SZ)
+	RegisterConstant("F_GETSIG", syscall.F_GETSIG)
+	RegisterConstant("F_LOCK", syscall.F_LOCK)
+	RegisterConstant("F_NOTIFY", syscall.F_NOTIFY)
+	RegisterConstant("F_OK", syscall.F_OK)
+	RegisterConstant("F_RDLCK", syscall.F_RDLCK)
+	RegisterConstant("F_SETFD", syscall.F_SETFD)
+	RegisterConstant("F_SETFL", syscall.F_SETFL)
+	RegisterConstant("F_SETLEASE", syscall.F_SETLEASE)
+	RegisterConstant("F_SETLK", syscall.F_SETLK)
+	RegisterConstant("F_SETLK64", syscall.F_SETLK64)
+	RegisterConstant("F_SETLKW", syscall.F_SETLKW)
+	RegisterConstant("F_SETLKW64", syscall.F_SETLKW64)
+	RegisterConstant("F_SETOWN", syscall.F_SETOWN)
+	RegisterConstant("F_SETOWN_EX", syscall.F_SETOWN_EX)
+	RegisterConstant("F_SETPIPE_SZ", syscall.F_SETPIPE_SZ)
+	RegisterConstant("F_SETSIG", syscall.F_SETSIG)
+	RegisterConstant("F_SHLCK", syscall.F_SHLCK)
+	RegisterConstant("F_TEST", syscall.F_TEST)
+	RegisterConstant("F_TLOCK", syscall.F_TLOCK)
+	RegisterConstant("F_ULOCK", syscall.F_ULOCK)
+	RegisterConstant("F_UNLCK", syscall.F_UNLCK)
+	RegisterConstant("F_WRLCK", syscall.F_WRLCK)
+	RegisterConstant("ICMPV6_FILTER", syscall.ICMPV6_FILTER)
+	RegisterConstant("IFA_F_DADFAILED", syscall.IFA_F_DADFAILED)
+	RegisterConstant("IFA_F_DEPRECATED", syscall.IFA_F_DEPRECATED)
+	RegisterConstant("IFA_F_HOMEADDRESS", syscall.IFA_F_HOMEADDRESS)
+	RegisterConstant("IFA_F_NODAD", syscall.IFA_F_NODAD)
+	RegisterConstant("IFA_F_OPTIMISTIC", syscall.IFA_F_OPTIMISTIC)
+	RegisterConstant("IFA_F_PERMANENT", syscall.IFA_F_PERMANENT)
+	RegisterConstant("IFA_F_SECONDARY", syscall.IFA_F_SECONDARY)
+	RegisterConstant("IFA_F_TEMPORARY", syscall.IFA_F_TEMPORARY)
+	RegisterConstant("IFA_F_TENTATIVE", syscall.IFA_F_TENTATIVE)
+	RegisterConstant("IFA_MAX", syscall.IFA_MAX)
+	RegisterConstant("IFF_ALLMULTI", syscall.IFF_ALLMULTI)
+	RegisterConstant("IFF_AUTOMEDIA", syscall.IFF_AUTOMEDIA)
+	RegisterConstant("IFF_BROADCAST", syscall.IFF_BROADCAST)
+	RegisterConstant("IFF_DEBUG", syscall.IFF_DEBUG)
+	RegisterConstant("IFF_DYNAMIC", syscall.IFF_DYNAMIC)
+	RegisterConstant("IFF_LOOPBACK", syscall.IFF_LOOPBACK)
+	RegisterConstant("IFF_MASTER", syscall.IFF_MASTER)
+	RegisterConstant("IFF_MULTICAST", syscall.IFF_MULTICAST)
+	RegisterConstant("IFF_NOARP", syscall.IFF_NOARP)
+	RegisterConstant("IFF_NOTRAILERS", syscall.IFF_NOTRAILERS)
+	RegisterConstant("IFF_NO_PI", syscall.IFF_NO_PI)
+	RegisterConstant("IFF_ONE_QUEUE", syscall.IFF_ONE_QUEUE)
+	RegisterConstant("IFF_POINTOPOINT", syscall.IFF_POINTOPOINT)
+	RegisterConstant("IFF_PORTSEL", syscall.IFF_PORTSEL)
+	RegisterConstant("IFF_PROMISC", syscall.IFF_PROMISC)
+	RegisterConstant("IFF_RUNNING", syscall.IFF_RUNNING)
+	RegisterConstant("IFF_SLAVE", syscall.IFF_SLAVE)
+	RegisterConstant("IFF_TAP", syscall.IFF_TAP)
+	RegisterConstant("IFF_TUN", syscall.IFF_TUN)
+	RegisterConstant("IFF_TUN_EXCL", syscall.IFF_TUN_EXCL)
+	RegisterConstant("IFF_UP", syscall.IFF_UP)
+	RegisterConstant("IFF_VNET_HDR", syscall.IFF_VNET_HDR)
+	RegisterConstant("IFNAMSIZ", syscall.IFNAMSIZ)
+	RegisterConstant("IN_ACCESS", syscall.IN_ACCESS)
+	RegisterConstant("IN_ALL_EVENTS", syscall.IN_ALL_EVENTS)
+	RegisterConstant("IN_ATTRIB", syscall.IN_ATTRIB)
+	RegisterConstant("IN_CLASSA_HOST", syscall.IN_CLASSA_HOST)
+	RegisterConstant("IN_CLASSA_MAX", syscall.IN_CLASSA_MAX)
+	RegisterConstant("IN_CLASSA_NET", syscall.IN_CLASSA_NET)
+	RegisterConstant("IN_CLASSA_NSHIFT", syscall.IN_CLASSA_NSHIFT)
+	RegisterConstant("IN_CLASSB_HOST", syscall.IN_CLASSB_HOST)
+	RegisterConstant("IN_CLASSB_MAX", syscall.IN_CLASSB_MAX)
+	RegisterConstant("IN_CLASSB_NET", syscall.IN_CLASSB_NET)
+	RegisterConstant("IN_CLASSB_NSHIFT", syscall.IN_CLASSB_NSHIFT)
+	RegisterConstant("IN_CLASSC_HOST", syscall.IN_CLASSC_HOST)
+	RegisterConstant("IN_CLASSC_NET", syscall.IN_CLASSC_NET)
+	RegisterConstant("IN_CLASSC_NSHIFT", syscall.IN_CLASSC_NSHIFT)
+	RegisterConstant("IN_CLOEXEC", syscall.IN_CLOEXEC)
+	RegisterConstant("IN_CLOSE", syscall.IN_CLOSE)
+	RegisterConstant("IN_CLOSE_NOWRITE", syscall.IN_CLOSE_NOWRITE)
+	RegisterConstant("IN_CLOSE_WRITE", syscall.IN_CLOSE_WRITE)
+	RegisterConstant("IN_CREATE", syscall.IN_CREATE)
+	RegisterConstant("IN_DELETE", syscall.IN_DELETE)
+	RegisterConstant("IN_DELETE_SELF", syscall.IN_DELETE_SELF)
+	RegisterConstant("IN_DONT_FOLLOW", syscall.IN_DONT_FOLLOW)
+	RegisterConstant("IN_EXCL_UNLINK", syscall.IN_EXCL_UNLINK)
+	RegisterConstant("IN_IGNORED", syscall.IN_IGNORED)
+	RegisterConstant("IN_ISDIR", syscall.IN_ISDIR)
+	RegisterConstant("IN_LOOPBACKNET", syscall.IN_LOOPBACKNET)
+	RegisterConstant("IN_MASK_ADD", syscall.IN_MASK_ADD)
+	RegisterConstant("IN_MODIFY", syscall.IN_MODIFY)
+	RegisterConstant("IN_MOVE", syscall.IN_MOVE)
+	RegisterConstant("IN_MOVED_FROM", syscall.IN_MOVED_FROM)
+	RegisterConstant("IN_MOVED_TO", syscall.IN_MOVED_TO)
+	RegisterConstant("IN_MOVE_SELF", syscall.IN_MOVE_SELF)
+	RegisterConstant("IN_NONBLOCK", syscall.IN_NONBLOCK)
+	RegisterConstant("IN_ONESHOT", syscall.IN_ONESHOT)
+	RegisterConstant("IN_ONLYDIR", syscall.IN_ONLYDIR)
+	RegisterConstant("IN_OPEN", syscall.IN_OPEN)
+	RegisterConstant("IN_Q_OVERFLOW", syscall.IN_Q_OVERFLOW)
+	RegisterConstant("IN_UNMOUNT", syscall.IN_UNMOUNT)
+	RegisterConstant("IPPROTO_AH", syscall.IPPROTO_AH)
+	RegisterConstant("IPPROTO_COMP", syscall.IPPROTO_COMP)
+	RegisterConstant("IPPROTO_DCCP", syscall.IPPROTO_DCCP)
+	RegisterConstant("IPPROTO_DSTOPTS", syscall.IPPROTO_DSTOPTS)
+	RegisterConstant("IPPROTO_EGP", syscall.IPPROTO_EGP)
+	RegisterConstant("IPPROTO_ENCAP", syscall.IPPROTO_ENCAP)
+	RegisterConstant("IPPROTO_ESP", syscall.IPPROTO_ESP)
+	RegisterConstant("IPPROTO_FRAGMENT", syscall.IPPROTO_FRAGMENT)
+	RegisterConstant("IPPROTO_GRE", syscall.IPPROTO_GRE)
+	RegisterConstant("IPPROTO_HOPOPTS", syscall.IPPROTO_HOPOPTS)
+	RegisterConstant("IPPROTO_ICMP", syscall.IPPROTO_ICMP)
+	RegisterConstant("IPPROTO_ICMPV6", syscall.IPPROTO_ICMPV6)
+	RegisterConstant("IPPROTO_IDP", syscall.IPPROTO_IDP)
+	RegisterConstant("IPPROTO_IGMP", syscall.IPPROTO_IGMP)
+	RegisterConstant("IPPROTO_IP", syscall.IPPROTO_IP)
+	RegisterConstant("IPPROTO_IPIP", syscall.IPPROTO_IPIP)
+	RegisterConstant("IPPROTO_IPV6", syscall.IPPROTO_IPV6)
+	RegisterConstant("IPPROTO_MTP", syscall.IPPROTO_MTP)
+	RegisterConstant("IPPROTO_NONE", syscall.IPPROTO_NONE)
+	RegisterConstant("IPPROTO_PIM", syscall.IPPROTO_PIM)
+	RegisterConstant("IPPROTO_PUP", syscall.IPPROTO_PUP)
+	RegisterConstant("IPPROTO_RAW", syscall.IPPROTO_RAW)
+	RegisterConstant("IPPROTO_ROUTING", syscall.IPPROTO_ROUTING)
+	RegisterConstant("IPPROTO_RSVP", syscall.IPPROTO_RSVP)
+	RegisterConstant("IPPROTO_SCTP", syscall.IPPROTO_SCTP)
+	RegisterConstant("IPPROTO_TCP", syscall.IPPROTO_TCP)
+	RegisterConstant("IPPROTO_TP", syscall.IPPROTO_TP)
+	RegisterConstant("IPPROTO_UDP", syscall.IPPROTO_UDP)
+	RegisterConstant("IPPROTO_UDPLITE", syscall.IPPROTO_UDPLITE)
+	RegisterConstant("IPV6_2292DSTOPTS", syscall.IPV6_2292DSTOPTS)
+	RegisterConstant("IPV6_2292HOPLIMIT", syscall.IPV6_2292HOPLIMIT)
+	RegisterConstant("IPV6_2292HOPOPTS", syscall.IPV6_2292HOPOPTS)
+	RegisterConstant("IPV6_2292PKTINFO", syscall.IPV6_2292PKTINFO)
+	RegisterConstant("IPV6_2292PKTOPTIONS", syscall.IPV6_2292PKTOPTIONS)
+	RegisterConstant("IPV6_2292RTHDR", syscall.IPV6_2292RTHDR)
+	RegisterConstant("IPV6_ADDRFORM", syscall.IPV6_ADDRFORM)
+	RegisterConstant("IPV6_ADD_MEMBERSHIP", syscall.IPV6_ADD_MEMBERSHIP)
+	RegisterConstant("IPV6_AUTHHDR", syscall.IPV6_AUTHHDR)
+	RegisterConstant("IPV6_CHECKSUM", syscall.IPV6_CHECKSUM)
+	RegisterConstant("IPV6_DROP_MEMBERSHIP", syscall.IPV6_DROP_MEMBERSHIP)
+	RegisterConstant("IPV6_DSTOPTS", syscall.IPV6_DSTOPTS)
+	RegisterConstant("IPV6_HOPLIMIT", syscall.IPV6_HOPLIMIT)
+	RegisterConstant("IPV6_HOPOPTS", syscall.IPV6_HOPOPTS)
+	RegisterConstant("IPV6_IPSEC_POLICY", syscall.IPV6_IPSEC_POLICY)
+	RegisterConstant("IPV6_JOIN_ANYCAST", syscall.IPV6_JOIN_ANYCAST)
+	RegisterConstant("IPV6_JOIN_GROUP", syscall.IPV6_JOIN_GROUP)
+	RegisterConstant("IPV6_LEAVE_ANYCAST", syscall.IPV6_LEAVE_ANYCAST)
+	RegisterConstant("IPV6_LEAVE_GROUP", syscall.IPV6_LEAVE_GROUP)
+	RegisterConstant("IPV6_MTU", syscall.IPV6_MTU)
+	RegisterConstant("IPV6_MTU_DISCOVER", syscall.IPV6_MTU_DISCOVER)
+	RegisterConstant("IPV6_MULTICAST_HOPS", syscall.IPV6_MULTICAST_HOPS)
+	RegisterConstant("IPV6_MULTICAST_IF", syscall.IPV6_MULTICAST_IF)
+	RegisterConstant("IPV6_MULTICAST_LOOP", syscall.IPV6_MULTICAST_LOOP)
+	RegisterConstant("IPV6_NEXTHOP", syscall.IPV6_NEXTHOP)
+	RegisterConstant("IPV6_PKTINFO", syscall.IPV6_PKTINFO)
+	RegisterConstant("IPV6_PMTUDISC_DO", syscall.IPV6_PMTUDISC_DO)
+	RegisterConstant("IPV6_PMTUDISC_DONT", syscall.IPV6_PMTUDISC_DONT)
+	RegisterConstant("IPV6_PMTUDISC_PROBE", syscall.IPV6_PMTUDISC_PROBE)
+	RegisterConstant("IPV6_PMTUDISC_WANT", syscall.IPV6_PMTUDISC_WANT)
+	RegisterConstant("IPV6_RECVDSTOPTS", syscall.IPV6_RECVDSTOPTS)
+	RegisterConstant("IPV6_RECVERR", syscall.IPV6_RECVERR)
+	RegisterConstant("IPV6_RECVHOPLIMIT", syscall.IPV6_RECVHOPLIMIT)
+	RegisterConstant("IPV6_RECVHOPOPTS", syscall.IPV6_RECVHOPOPTS)
+	RegisterConstant("IPV6_RECVPKTINFO", syscall.IPV6_RECVPKTINFO)
+	RegisterConstant("IPV6_RECVRTHDR", syscall.IPV6_RECVRTHDR)
+	RegisterConstant("IPV6_RECVTCLASS", syscall.IPV6_RECVTCLASS)
+	RegisterConstant("IPV6_ROUTER_ALERT", syscall.IPV6_ROUTER_ALERT)
+	RegisterConstant("IPV6_RTHDR", syscall.IPV6_RTHDR)
+	RegisterConstant("IPV6_RTHDRDSTOPTS", syscall.IPV6_RTHDRDSTOPTS)
+	RegisterConstant("IPV6_RTHDR_LOOSE", syscall.IPV6_RTHDR_LOOSE)
+	RegisterConstant("IPV6_RTHDR_STRICT", syscall.IPV6_RTHDR_STRICT)
+	RegisterConstant("IPV6_RTHDR_TYPE_0", syscall.IPV6_RTHDR_TYPE_0)
+	RegisterConstant("IPV6_RXDSTOPTS", syscall.IPV6_RXDSTOPTS)
+	RegisterConstant("IPV6_RXHOPOPTS", syscall.IPV6_RXHOPOPTS)
+	RegisterConstant("IPV6_TCLASS", syscall.IPV6_TCLASS)
+	RegisterConstant("IPV6_UNICAST_HOPS", syscall.IPV6_UNICAST_HOPS)
+	RegisterConstant("IPV6_V6ONLY", syscall.IPV6_V6ONLY)
+	RegisterConstant("IPV6_XFRM_POLICY", syscall.IPV6_XFRM_POLICY)
+	RegisterConstant("IP_ADD_MEMBERSHIP", syscall.IP_ADD_MEMBERSHIP)
+	RegisterConstant("IP_ADD_SOURCE_MEMBERSHIP", syscall.IP_ADD_SOURCE_MEMBERSHIP)
+	RegisterConstant("IP_BLOCK_SOURCE", syscall.IP_BLOCK_SOURCE)
+	RegisterConstant("IP_DEFAULT_MULTICAST_LOOP", syscall.IP_DEFAULT_MULTICAST_LOOP)
+	RegisterConstant("IP_DEFAULT_MULTICAST_TTL", syscall.IP_DEFAULT_MULTICAST_TTL)
+	RegisterConstant("IP_DF", syscall.IP_DF)
+	RegisterConstant("IP_DROP_MEMBERSHIP", syscall.IP_DROP_MEMBERSHIP)
+	RegisterConstant("IP_DROP_SOURCE_MEMBERSHIP", syscall.IP_DROP_SOURCE_MEMBERSHIP)
+	RegisterConstant("IP_FREEBIND", syscall.IP_FREEBIND)
+	RegisterConstant("IP_HDRINCL", syscall.IP_HDRINCL)
+	RegisterConstant("IP_IPSEC_POLICY", syscall.IP_IPSEC_POLICY)
+	RegisterConstant("IP_MAXPACKET", syscall.IP_MAXPACKET)
+	RegisterConstant("IP_MAX_MEMBERSHIPS", syscall.IP_MAX_MEMBERSHIPS)
+	RegisterConstant("IP_MF", syscall.IP_MF)
+	RegisterConstant("IP_MINTTL", syscall.IP_MINTTL)
+	RegisterConstant("IP_MSFILTER", syscall.IP_MSFILTER)
+	RegisterConstant("IP_MSS", syscall.IP_MSS)
+	RegisterConstant("IP_MTU", syscall.IP_MTU)
+	RegisterConstant("IP_MTU_DISCOVER", syscall.IP_MTU_DISCOVER)
+	RegisterConstant("IP_MULTICAST_IF", syscall.IP_MULTICAST_IF)
+	RegisterConstant("IP_MULTICAST_LOOP", syscall.IP_MULTICAST_LOOP)
+	RegisterConstant("IP_MULTICAST_TTL", syscall.IP_MULTICAST_TTL)
+	RegisterConstant("IP_OFFMASK", syscall.IP_OFFMASK)
+	RegisterConstant("IP_OPTIONS", syscall.IP_OPTIONS)
+	RegisterConstant("IP_ORIGDSTADDR", syscall.IP_ORIGDSTADDR)
+	RegisterConstant("IP_PASSSEC", syscall.IP_PASSSEC)
+	RegisterConstant("IP_PKTINFO", syscall.IP_PKTINFO)
+	RegisterConstant("IP_PKTOPTIONS", syscall.IP_PKTOPTIONS)
+	RegisterConstant("IP_PMTUDISC", syscall.IP_PMTUDISC)
+	RegisterConstant("IP_PMTUDISC_DO", syscall.IP_PMTUDISC_DO)
+	RegisterConstant("IP_PMTUDISC_DONT", syscall.IP_PMTUDISC_DONT)
+	RegisterConstant("IP_PMTUDISC_PROBE", syscall.IP_PMTUDISC_PROBE)
+	RegisterConstant("IP_PMTUDISC_WANT", syscall.IP_PMTUDISC_WANT)
+	RegisterConstant("IP_RECVERR", syscall.IP_RECVERR)
+	RegisterConstant("IP_RECVOPTS", syscall.IP_RECVOPTS)
+	RegisterConstant("IP_RECVORIGDSTADDR", syscall.IP_RECVORIGDSTADDR)
+	RegisterConstant("IP_RECVRETOPTS", syscall.IP_RECVRETOPTS)
+	RegisterConstant("IP_RECVTOS", syscall.IP_RECVTOS)
+	RegisterConstant("IP_RECVTTL", syscall.IP_RECVTTL)
+	RegisterConstant("IP_RETOPTS", syscall.IP_RETOPTS)
+	RegisterConstant("IP_RF", syscall.IP_RF)
+	RegisterConstant("IP_ROUTER_ALERT", syscall.IP_ROUTER_ALERT)
+	RegisterConstant("IP_TOS", syscall.IP_TOS)
+	RegisterConstant("IP_TRANSPARENT", syscall.IP_TRANSPARENT)
+	RegisterConstant("IP_TTL", syscall.IP_TTL)
+	RegisterConstant("IP_UNBLOCK_SOURCE", syscall.IP_UNBLOCK_SOURCE)
+	RegisterConstant("IP_XFRM_POLICY", syscall.IP_XFRM_POLICY)
+	RegisterConstant("IUCLC", syscall.IUCLC)
+	RegisterConstant("LINUX_REBOOT_CMD_CAD_OFF", syscall.LINUX_REBOOT_CMD_CAD_OFF)
+	RegisterConstant("LINUX_REBOOT_CMD_CAD_ON", syscall.LINUX_REBOOT_CMD_CAD_ON)
+	RegisterConstant("LINUX_REBOOT_CMD_HALT", syscall.LINUX_REBOOT_CMD_HALT)
+	RegisterConstant("LINUX_REBOOT_CMD_KEXEC", syscall.LINUX_REBOOT_CMD_KEXEC)
+	RegisterConstant("LINUX_REBOOT_CMD_POWER_OFF", syscall.LINUX_REBOOT_CMD_POWER_OFF)
+	RegisterConstant("LINUX_REBOOT_CMD_RESTART", syscall.LINUX_REBOOT_CMD_RESTART)
+	RegisterConstant("LINUX_REBOOT_CMD_RESTART2", syscall.LINUX_REBOOT_CMD_RESTART2)
+	RegisterConstant("LINUX_REBOOT_CMD_SW_SUSPEND", syscall.LINUX_REBOOT_CMD_SW_SUSPEND)
+	RegisterConstant("LINUX_REBOOT_MAGIC1", syscall.LINUX_REBOOT_MAGIC1)
+	RegisterConstant("LINUX_REBOOT_MAGIC2", syscall.LINUX_REBOOT_MAGIC2)
+	RegisterConstant("LOCK_EX", syscall.LOCK_EX)
+	RegisterConstant("LOCK_NB", syscall.LOCK_NB)
+	RegisterConstant("LOCK_SH", syscall.LOCK_SH)
+	RegisterConstant("LOCK_UN", syscall.LOCK_UN)
+	RegisterConstant("MADV_DOFORK", syscall.MADV_DOFORK)
+	RegisterConstant("MADV_DONTFORK", syscall.MADV_DONTFORK)
+	RegisterConstant("MADV_DONTNEED", syscall.MADV_DONTNEED)
+	RegisterConstant("MADV_HUGEPAGE", syscall.MADV_HUGEPAGE)
+	RegisterConstant("MADV_HWPOISON", syscall.MADV_HWPOISON)
+	RegisterConstant("MADV_MERGEABLE", syscall.MADV_MERGEABLE)
+	RegisterConstant("MADV_NOHUGEPAGE", syscall.MADV_NOHUGEPAGE)
+	RegisterConstant("MADV_NORMAL", syscall.MADV_NORMAL)
+	RegisterConstant("MADV_RANDOM", syscall.MADV_RANDOM)
+	RegisterConstant("MADV_REMOVE", syscall.MADV_REMOVE)
+	RegisterConstant("MADV_SEQUENTIAL", syscall.MADV_SEQUENTIAL)
+	RegisterConstant("MADV_UNMERGEABLE", syscall.MADV_UNMERGEABLE)
+	RegisterConstant("MADV_WILLNEED", syscall.MADV_WILLNEED)
+	RegisterConstant("MAP_32BIT", syscall.MAP_32BIT)
+	RegisterConstant("MAP_ANON", syscall.MAP_ANON)
+	RegisterConstant("MAP_ANONYMOUS", syscall.MAP_ANONYMOUS)
+	RegisterConstant("MAP_DENYWRITE", syscall.MAP_DENYWRITE)
+	RegisterConstant("MAP_EXECUTABLE", syscall.MAP_EXECUTABLE)
+	RegisterConstant("MAP_FILE", syscall.MAP_FILE)
+	RegisterConstant("MAP_FIXED", syscall.MAP_FIXED)
+	RegisterConstant("MAP_GROWSDOWN", syscall.MAP_GROWSDOWN)
+	RegisterConstant("MAP_HUGETLB", syscall.MAP_HUGETLB)
+	RegisterConstant("MAP_LOCKED", syscall.MAP_LOCKED)
+	RegisterConstant("MAP_NONBLOCK", syscall.MAP_NONBLOCK)
+	RegisterConstant("MAP_NORESERVE", syscall.MAP_NORESERVE)
+	RegisterConstant("MAP_POPULATE", syscall.MAP_POPULATE)
+	RegisterConstant("MAP_PRIVATE", syscall.MAP_PRIVATE)
+	RegisterConstant("MAP_SHARED", syscall.MAP_SHARED)
+	RegisterConstant("MAP_STACK", syscall.MAP_STACK)
+	RegisterConstant("MAP_TYPE", syscall.MAP_TYPE)
+	RegisterConstant("MCL_CURRENT", syscall.MCL_CURRENT)
+	RegisterConstant("MCL_FUTURE", syscall.MCL_FUTURE)
+	RegisterConstant("MNT_DETACH", syscall.MNT_DETACH)
+	RegisterConstant("MNT_EXPIRE", syscall.MNT_EXPIRE)
+	RegisterConstant("MNT_FORCE", syscall.MNT_FORCE)
+	RegisterConstant("MSG_CMSG_CLOEXEC", syscall.MSG_CMSG_CLOEXEC)
+	RegisterConstant("MSG_CONFIRM", syscall.MSG_CONFIRM)
+	RegisterConstant("MSG_CTRUNC", syscall.MSG_CTRUNC)
+	RegisterConstant("MSG_DONTROUTE", syscall.MSG_DONTROUTE)
+	RegisterConstant("MSG_DONTWAIT", syscall.MSG_DONTWAIT)
+	RegisterConstant("MSG_EOR", syscall.MSG_EOR)
+	RegisterConstant("MSG_ERRQUEUE", syscall.MSG_ERRQUEUE)
+	RegisterConstant("MSG_FASTOPEN", syscall.MSG_FASTOPEN)
+	RegisterConstant("MSG_FIN", syscall.MSG_FIN)
+	RegisterConstant("MSG_MORE", syscall.MSG_MORE)
+	RegisterConstant("MSG_NOSIGNAL", syscall.MSG_NOSIGNAL)
+	RegisterConstant("MSG_OOB", syscall.MSG_OOB)
+	RegisterConstant("MSG_PEEK", syscall.MSG_PEEK)
+	RegisterConstant("MSG_PROXY", syscall.MSG_PROXY)
+	RegisterConstant("MSG_RST", syscall.MSG_RST)
+	RegisterConstant("MSG_SYN", syscall.MSG_SYN)
+	RegisterConstant("MSG_TRUNC", syscall.MSG_TRUNC)
+	RegisterConstant("MSG_TRYHARD", syscall.MSG_TRYHARD)
+	RegisterConstant("MSG_WAITALL", syscall.MSG_WAITALL)
+	RegisterConstant("MSG_WAITFORONE", syscall.MSG_WAITFORONE)
+	RegisterConstant("MS_ACTIVE", syscall.MS_ACTIVE)
+	RegisterConstant("MS_ASYNC", syscall.MS_ASYNC)
+	RegisterConstant("MS_BIND", syscall.MS_BIND)
+	RegisterConstant("MS_DIRSYNC", syscall.MS_DIRSYNC)
+	RegisterConstant("MS_INVALIDATE", syscall.MS_INVALIDATE)
+	RegisterConstant("MS_I_VERSION", syscall.MS_I_VERSION)
+	RegisterConstant("MS_KERNMOUNT", syscall.MS_KERNMOUNT)
+	RegisterConstant("MS_MANDLOCK", syscall.MS_MANDLOCK)
+	RegisterConstant("MS_MGC_MSK", syscall.MS_MGC_MSK)
+	RegisterConstant("MS_MGC_VAL", syscall.MS_MGC_VAL)
+	RegisterConstant("MS_MOVE", syscall.MS_MOVE)
+	RegisterConstant("MS_NOATIME", syscall.MS_NOATIME)
+	RegisterConstant("MS_NODEV", syscall.MS_NODEV)
+	RegisterConstant("MS_NODIRATIME", syscall.MS_NODIRATIME)
+	RegisterConstant("MS_NOEXEC", syscall.MS_NOEXEC)
+	RegisterConstant("MS_NOSUID", syscall.MS_NOSUID)
+	RegisterConstant("MS_NOUSER", syscall.MS_NOUSER)
+	RegisterConstant("MS_POSIXACL", syscall.MS_POSIXACL)
+	RegisterConstant("MS_PRIVATE", syscall.MS_PRIVATE)
+	RegisterConstant("MS_RDONLY", syscall.MS_RDONLY)
+	RegisterConstant("MS_REC", syscall.MS_REC)
+	RegisterConstant("MS_RELATIME", syscall.MS_RELATIME)
+	RegisterConstant("MS_REMOUNT", syscall.MS_REMOUNT)
+	RegisterConstant("MS_RMT_MASK", syscall.MS_RMT_MASK)
+	RegisterConstant("MS_SHARED", syscall.MS_SHARED)
+	RegisterConstant("MS_SILENT", syscall.MS_SILENT)
+	RegisterConstant("MS_SLAVE", syscall.MS_SLAVE)
+	RegisterConstant("MS_STRICTATIME", syscall.MS_STRICTATIME)
+	RegisterConstant("MS_SYNC", syscall.MS_SYNC)
+	RegisterConstant("MS_SYNCHRONOUS", syscall.MS_SYNCHRONOUS)
+	RegisterConstant("MS_UNBINDABLE", syscall.MS_UNBINDABLE)
+	RegisterConstant("NAME_MAX", syscall.NAME_MAX)
+	RegisterConstant("NETLINK_ADD_MEMBERSHIP", syscall.NETLINK_ADD_MEMBERSHIP)
+	RegisterConstant("NETLINK_AUDIT", syscall.NETLINK_AUDIT)
+	RegisterConstant("NETLINK_BROADCAST_ERROR", syscall.NETLINK_BROADCAST_ERROR)
+	RegisterConstant("NETLINK_CONNECTOR", syscall.NETLINK_CONNECTOR)
+	RegisterConstant("NETLINK_DNRTMSG", syscall.NETLINK_DNRTMSG)
+	RegisterConstant("NETLINK_DROP_MEMBERSHIP", syscall.NETLINK_DROP_MEMBERSHIP)
+	RegisterConstant("NETLINK_ECRYPTFS", syscall.NETLINK_ECRYPTFS)
+	RegisterConstant("NETLINK_FIB_LOOKUP", syscall.NETLINK_FIB_LOOKUP)
+	RegisterConstant("NETLINK_FIREWALL", syscall.NETLINK_FIREWALL)
+	RegisterConstant("NETLINK_GENERIC", syscall.NETLINK_GENERIC)
+	RegisterConstant("NETLINK_INET_DIAG", syscall.NETLINK_INET_DIAG)
+	RegisterConstant("NETLINK_IP6_FW", syscall.NETLINK_IP6_FW)
+	RegisterConstant("NETLINK_ISCSI", syscall.NETLINK_ISCSI)
+	RegisterConstant("NETLINK_KOBJECT_UEVENT", syscall.NETLINK_KOBJECT_UEVENT)
+	RegisterConstant("NETLINK_NETFILTER", syscall.NETLINK_NETFILTER)
+	RegisterConstant("NETLINK_NFLOG", syscall.NETLINK_NFLOG)
+	RegisterConstant("NETLINK_NO_ENOBUFS", syscall.NETLINK_NO_ENOBUFS)
+	RegisterConstant("NETLINK_PKTINFO", syscall.NETLINK_PKTINFO)
+	RegisterConstant("NETLINK_ROUTE", syscall.NETLINK_ROUTE)
+	RegisterConstant("NETLINK_SCSITRANSPORT", syscall.NETLINK_SCSITRANSPORT)
+	RegisterConstant("NETLINK_SELINUX", syscall.NETLINK_SELINUX)
+	RegisterConstant("NETLINK_UNUSED", syscall.NETLINK_UNUSED)
+	RegisterConstant("NETLINK_USERSOCK", syscall.NETLINK_USERSOCK)
+	RegisterConstant("NETLINK_XFRM", syscall.NETLINK_XFRM)
+	RegisterConstant("NLA_ALIGNTO", syscall.NLA_ALIGNTO)
+	RegisterConstant("NLA_F_NESTED", syscall.NLA_F_NESTED)
+	RegisterConstant("NLA_F_NET_BYTEORDER", syscall.NLA_F_NET_BYTEORDER)
+	RegisterConstant("NLA_HDRLEN", syscall.NLA_HDRLEN)
+	RegisterConstant("NLMSG_ALIGNTO", syscall.NLMSG_ALIGNTO)
+	RegisterConstant("NLMSG_DONE", syscall.NLMSG_DONE)
+	RegisterConstant("NLMSG_ERROR", syscall.NLMSG_ERROR)
+	RegisterConstant("NLMSG_HDRLEN", syscall.NLMSG_HDRLEN)
+	RegisterConstant("NLMSG_MIN_TYPE", syscall.NLMSG_MIN_TYPE)
+	RegisterConstant("NLMSG_NOOP", syscall.NLMSG_NOOP)
+	RegisterConstant("NLMSG_OVERRUN", syscall.NLMSG_OVERRUN)
+	RegisterConstant("NLM_F_ACK", syscall.NLM_F_ACK)
+	RegisterConstant("NLM_F_APPEND", syscall.NLM_F_APPEND)
+	RegisterConstant("NLM_F_ATOMIC", syscall.NLM_F_ATOMIC)
+	RegisterConstant("NLM_F_CREATE", syscall.NLM_F_CREATE)
+	RegisterConstant("NLM_F_DUMP", syscall.NLM_F_DUMP)
+	RegisterConstant("NLM_F_ECHO", syscall.NLM_F_ECHO)
+	RegisterConstant("NLM_F_EXCL", syscall.NLM_F_EXCL)
+	RegisterConstant("NLM_F_MATCH", syscall.NLM_F_MATCH)
+	RegisterConstant("NLM_F_MULTI", syscall.NLM_F_MULTI)
+	RegisterConstant("NLM_F_REPLACE", syscall.NLM_F_REPLACE)
+	RegisterConstant("NLM_F_REQUEST", syscall.NLM_F_REQUEST)
+	RegisterConstant("NLM_F_ROOT", syscall.NLM_F_ROOT)
+	RegisterConstant("OLCUC", syscall.OLCUC)
+	RegisterConstant("O_ACCMODE", syscall.O_ACCMODE)
+	RegisterConstant("O_APPEND", syscall.O_APPEND)
+	RegisterConstant("O_ASYNC", syscall.O_ASYNC)
+	RegisterConstant("O_CLOEXEC", syscall.O_CLOEXEC)
+	RegisterConstant("O_CREAT", syscall.O_CREAT)
+	RegisterConstant("O_DIRECT", syscall.O_DIRECT)
+	RegisterConstant("O_DIRECTORY", syscall.O_DIRECTORY)
+	RegisterConstant("O_DSYNC", syscall.O_DSYNC)
+	RegisterConstant("O_EXCL", syscall.O_EXCL)
+	RegisterConstant("O_FSYNC", syscall.O_FSYNC)
+	RegisterConstant("O_LARGEFILE", syscall.O_LARGEFILE)
+	RegisterConstant("O_NDELAY", syscall.O_NDELAY)
+	RegisterConstant("O_NOATIME", syscall.O_NOATIME)
+	RegisterConstant("O_NOCTTY", syscall.O_NOCTTY)
+	RegisterConstant("O_NOFOLLOW", syscall.O_NOFOLLOW)
+	RegisterConstant("O_NONBLOCK", syscall.O_NONBLOCK)
+	RegisterConstant("O_RDONLY", syscall.O_RDONLY)
+	RegisterConstant("O_RDWR", syscall.O_RDWR)
+	RegisterConstant("O_RSYNC", syscall.O_RSYNC)
+	RegisterConstant("O_SYNC", syscall.O_SYNC)
+	RegisterConstant("O_TRUNC", syscall.O_TRUNC)
+	RegisterConstant("O_WRONLY", syscall.O_WRONLY)
+	RegisterConstant("PACKET_ADD_MEMBERSHIP", syscall.PACKET_ADD_MEMBERSHIP)
+	RegisterConstant("PACKET_BROADCAST", syscall.PACKET_BROADCAST)
+	RegisterConstant("PACKET_DROP_MEMBERSHIP", syscall.PACKET_DROP_MEMBERSHIP)
+	RegisterConstant("PACKET_FASTROUTE", syscall.PACKET_FASTROUTE)
+	RegisterConstant("PACKET_HOST", syscall.PACKET_HOST)
+	RegisterConstant("PACKET_LOOPBACK", syscall.PACKET_LOOPBACK)
+	RegisterConstant("PACKET_MR_ALLMULTI", syscall.PACKET_MR_ALLMULTI)
+	RegisterConstant("PACKET_MR_MULTICAST", syscall.PACKET_MR_MULTICAST)
+	RegisterConstant("PACKET_MR_PROMISC", syscall.PACKET_MR_PROMISC)
+	RegisterConstant("PACKET_MULTICAST", syscall.PACKET_MULTICAST)
+	RegisterConstant("PACKET_OTHERHOST", syscall.PACKET_OTHERHOST)
+	RegisterConstant("PACKET_OUTGOING", syscall.PACKET_OUTGOING)
+	RegisterConstant("PACKET_RECV_OUTPUT", syscall.PACKET_RECV_OUTPUT)
+	RegisterConstant("PACKET_RX_RING", syscall.PACKET_RX_RING)
+	RegisterConstant("PACKET_STATISTICS", syscall.PACKET_STATISTICS)
+	RegisterConstant("PRIO_PGRP", syscall.PRIO_PGRP)
+	RegisterConstant("PRIO_PROCESS", syscall.PRIO_PROCESS)
+	RegisterConstant("PRIO_USER", syscall.PRIO_USER)
+	RegisterConstant("PROT_EXEC", syscall.PROT_EXEC)
+	RegisterConstant("PROT_GROWSDOWN", syscall.PROT_GROWSDOWN)
+	RegisterConstant("PROT_GROWSUP", syscall.PROT_GROWSUP)
+	RegisterConstant("PROT_NONE", syscall.PROT_NONE)
+	RegisterConstant("PROT_READ", syscall.PROT_READ)
+	RegisterConstant("PROT_WRITE", syscall.PROT_WRITE)
+	RegisterConstant("PR_CAPBSET_DROP", syscall.PR_CAPBSET_DROP)
+	RegisterConstant("PR_CAPBSET_READ", syscall.PR_CAPBSET_READ)
+	RegisterConstant("PR_ENDIAN_BIG", syscall.PR_ENDIAN_BIG)
+	RegisterConstant("PR_ENDIAN_LITTLE", syscall.PR_ENDIAN_LITTLE)
+	RegisterConstant("PR_ENDIAN_PPC_LITTLE", syscall.PR_ENDIAN_PPC_LITTLE)
+	RegisterConstant("PR_FPEMU_NOPRINT", syscall.PR_FPEMU_NOPRINT)
+	RegisterConstant("PR_FPEMU_SIGFPE", syscall.PR_FPEMU_SIGFPE)
+	RegisterConstant("PR_FP_EXC_ASYNC", syscall.PR_FP_EXC_ASYNC)
+	RegisterConstant("PR_FP_EXC_DISABLED", syscall.PR_FP_EXC_DISABLED)
+	RegisterConstant("PR_FP_EXC_DIV", syscall.PR_FP_EXC_DIV)
+	RegisterConstant("PR_FP_EXC_INV", syscall.PR_FP_EXC_INV)
+	RegisterConstant("PR_FP_EXC_NONRECOV", syscall.PR_FP_EXC_NONRECOV)
+	RegisterConstant("PR_FP_EXC_OVF", syscall.PR_FP_EXC_OVF)
+	RegisterConstant("PR_FP_EXC_PRECISE", syscall.PR_FP_EXC_PRECISE)
+	RegisterConstant("PR_FP_EXC_RES", syscall.PR_FP_EXC_RES)
+	RegisterConstant("PR_FP_EXC_SW_ENABLE", syscall.PR_FP_EXC_SW_ENABLE)
+	RegisterConstant("PR_FP_EXC_UND", syscall.PR_FP_EXC_UND)
+	RegisterConstant("PR_GET_DUMPABLE", syscall.PR_GET_DUMPABLE)
+	RegisterConstant("PR_GET_ENDIAN", syscall.PR_GET_ENDIAN)
+	RegisterConstant("PR_GET_FPEMU", syscall.PR_GET_FPEMU)
+	RegisterConstant("PR_GET_FPEXC", syscall.PR_GET_FPEXC)
+	RegisterConstant("PR_GET_KEEPCAPS", syscall.PR_GET_KEEPCAPS)
+	RegisterConstant("PR_GET_NAME", syscall.PR_GET_NAME)
+	RegisterConstant("PR_GET_PDEATHSIG", syscall.PR_GET_PDEATHSIG)
+	RegisterConstant("PR_GET_SECCOMP", syscall.PR_GET_SECCOMP)
+	RegisterConstant("PR_GET_SECUREBITS", syscall.PR_GET_SECUREBITS)
+	RegisterConstant("PR_GET_TIMERSLACK", syscall.PR_GET_TIMERSLACK)
+	RegisterConstant("PR_GET_TIMING", syscall.PR_GET_TIMING)
+	RegisterConstant("PR_GET_TSC", syscall.PR_GET_TSC)
+	RegisterConstant("PR_GET_UNALIGN", syscall.PR_GET_UNALIGN)
+	RegisterConstant("PR_MCE_KILL", syscall.PR_MCE_KILL)
+	RegisterConstant("PR_MCE_KILL_CLEAR", syscall.PR_MCE_KILL_CLEAR)
+	RegisterConstant("PR_MCE_KILL_DEFAULT", syscall.PR_MCE_KILL_DEFAULT)
+	RegisterConstant("PR_MCE_KILL_EARLY", syscall.PR_MCE_KILL_EARLY)
+	RegisterConstant("PR_MCE_KILL_GET", syscall.PR_MCE_KILL_GET)
+	RegisterConstant("PR_MCE_KILL_LATE", syscall.PR_MCE_KILL_LATE)
+	RegisterConstant("PR_MCE_KILL_SET", syscall.PR_MCE_KILL_SET)
+	RegisterConstant("PR_SET_DUMPABLE", syscall.PR_SET_DUMPABLE)
+	RegisterConstant("PR_SET_ENDIAN", syscall.PR_SET_ENDIAN)
+	RegisterConstant("PR_SET_FPEMU", syscall.PR_SET_FPEMU)
+	RegisterConstant("PR_SET_FPEXC", syscall.PR_SET_FPEXC)
+	RegisterConstant("PR_SET_KEEPCAPS", syscall.PR_SET_KEEPCAPS)
+	RegisterConstant("PR_SET_NAME", syscall.PR_SET_NAME)
+	RegisterConstant("PR_SET_PDEATHSIG", syscall.PR_SET_PDEATHSIG)
+	RegisterConstant("PR_SET_PTRACER", syscall.PR_SET_PTRACER)
+	RegisterConstant("PR_SET_SECCOMP", syscall.PR_SET_SECCOMP)
+	RegisterConstant("PR_SET_SECUREBITS", syscall.PR_SET_SECUREBITS)
+	RegisterConstant("PR_SET_TIMERSLACK", syscall.PR_SET_TIMERSLACK)
+	RegisterConstant("PR_SET_TIMING", syscall.PR_SET_TIMING)
+	RegisterConstant("PR_SET_TSC", syscall.PR_SET_TSC)
+	RegisterConstant("PR_SET_UNALIGN", syscall.PR_SET_UNALIGN)
+	RegisterConstant("PR_TASK_PERF_EVENTS_DISABLE", syscall.PR_TASK_PERF_EVENTS_DISABLE)
+	RegisterConstant("PR_TASK_PERF_EVENTS_ENABLE", syscall.PR_TASK_PERF_EVENTS_ENABLE)
+	RegisterConstant("PR_TIMING_STATISTICAL", syscall.PR_TIMING_STATISTICAL)
+	RegisterConstant("PR_TIMING_TIMESTAMP", syscall.PR_TIMING_TIMESTAMP)
+	RegisterConstant("PR_TSC_ENABLE", syscall.PR_TSC_ENABLE)
+	RegisterConstant("PR_TSC_SIGSEGV", syscall.PR_TSC_SIGSEGV)
+	RegisterConstant("PR_UNALIGN_NOPRINT", syscall.PR_UNALIGN_NOPRINT)
+	RegisterConstant("PR_UNALIGN_SIGBUS", syscall.PR_UNALIGN_SIGBUS)
+	RegisterConstant("PTRACE_ARCH_PRCTL", syscall.PTRACE_ARCH_PRCTL)
+	RegisterConstant("PTRACE_ATTACH", syscall.PTRACE_ATTACH)
+	RegisterConstant("PTRACE_CONT", syscall.PTRACE_CONT)
+	RegisterConstant("PTRACE_DETACH", syscall.PTRACE_DETACH)
+	RegisterConstant("PTRACE_EVENT_CLONE", syscall.PTRACE_EVENT_CLONE)
+	RegisterConstant("PTRACE_EVENT_EXEC", syscall.PTRACE_EVENT_EXEC)
+	RegisterConstant("PTRACE_EVENT_EXIT", syscall.PTRACE_EVENT_EXIT)
+	RegisterConstant("PTRACE_EVENT_FORK", syscall.PTRACE_EVENT_FORK)
+	RegisterConstant("PTRACE_EVENT_VFORK", syscall.PTRACE_EVENT_VFORK)
+	RegisterConstant("PTRACE_EVENT_VFORK_DONE", syscall.PTRACE_EVENT_VFORK_DONE)
+	RegisterConstant("PTRACE_GETEVENTMSG", syscall.PTRACE_GETEVENTMSG)
+	RegisterConstant("PTRACE_GETFPREGS", syscall.PTRACE_GETFPREGS)
+	RegisterConstant("PTRACE_GETFPXREGS", syscall.PTRACE_GETFPXREGS)
+	RegisterConstant("PTRACE_GETREGS", syscall.PTRACE_GETREGS)
+	RegisterConstant("PTRACE_GETREGSET", syscall.PTRACE_GETREGSET)
+	RegisterConstant("PTRACE_GETSIGINFO", syscall.PTRACE_GETSIGINFO)
+	RegisterConstant("PTRACE_GET_THREAD_AREA", syscall.PTRACE_GET_THREAD_AREA)
+	RegisterConstant("PTRACE_KILL", syscall.PTRACE_KILL)
+	RegisterConstant("PTRACE_OLDSETOPTIONS", syscall.PTRACE_OLDSETOPTIONS)
+	RegisterConstant("PTRACE_O_MASK", syscall.PTRACE_O_MASK)
+	RegisterConstant("PTRACE_O_TRACECLONE", syscall.PTRACE_O_TRACECLONE)
+	RegisterConstant("PTRACE_O_TRACEEXEC", syscall.PTRACE_O_TRACEEXEC)
+	RegisterConstant("PTRACE_O_TRACEEXIT", syscall.PTRACE_O_TRACEEXIT)
+	RegisterConstant("PTRACE_O_TRACEFORK", syscall.PTRACE_O_TRACEFORK)
+	RegisterConstant("PTRACE_O_TRACESYSGOOD", syscall.PTRACE_O_TRACESYSGOOD)
+	RegisterConstant("PTRACE_O_TRACEVFORK", syscall.PTRACE_O_TRACEVFORK)
+	RegisterConstant("PTRACE_O_TRACEVFORKDONE", syscall.PTRACE_O_TRACEVFORKDONE)
+	RegisterConstant("PTRACE_PEEKDATA", syscall.PTRACE_PEEKDATA)
+	RegisterConstant("PTRACE_PEEKTEXT", syscall.PTRACE_PEEKTEXT)
+	RegisterConstant("PTRACE_PEEKUSR", syscall.PTRACE_PEEKUSR)
+	RegisterConstant("PTRACE_POKEDATA", syscall.PTRACE_POKEDATA)
+	RegisterConstant("PTRACE_POKETEXT", syscall.PTRACE_POKETEXT)
+	RegisterConstant("PTRACE_POKEUSR", syscall.PTRACE_POKEUSR)
+	RegisterConstant("PTRACE_SETFPREGS", syscall.PTRACE_SETFPREGS)
+	RegisterConstant("PTRACE_SETFPXREGS", syscall.PTRACE_SETFPXREGS)
+	RegisterConstant("PTRACE_SETOPTIONS", syscall.PTRACE_SETOPTIONS)
+	RegisterConstant("PTRACE_SETREGS", syscall.PTRACE_SETREGS)
+	RegisterConstant("PTRACE_SETREGSET", syscall.PTRACE_SETREGSET)
+	RegisterConstant("PTRACE_SETSIGINFO", syscall.PTRACE_SETSIGINFO)
+	RegisterConstant("PTRACE_SET_THREAD_AREA", syscall.PTRACE_SET_THREAD_AREA)
+	RegisterConstant("PTRACE_SINGLEBLOCK", syscall.PTRACE_SINGLEBLOCK)
+	RegisterConstant("PTRACE_SINGLESTEP", syscall.PTRACE_SINGLESTEP)
+	RegisterConstant("PTRACE_SYSCALL", syscall.PTRACE_SYSCALL)
+	RegisterConstant("PTRACE_SYSEMU", syscall.PTRACE_SYSEMU)
+	RegisterConstant("PTRACE_SYSEMU_SINGLESTEP", syscall.PTRACE_SYSEMU_SINGLESTEP)
+	RegisterConstant("PTRACE_TRACEME", syscall.PTRACE_TRACEME)
+	RegisterConstant("RLIMIT_AS", syscall.RLIMIT_AS)
+	RegisterConstant("RLIMIT_CORE", syscall.RLIMIT_CORE)
+	RegisterConstant("RLIMIT_CPU", syscall.RLIMIT_CPU)
+	RegisterConstant("RLIMIT_DATA", syscall.RLIMIT_DATA)
+	RegisterConstant("RLIMIT_FSIZE", syscall.RLIMIT_FSIZE)
+	RegisterConstant("RLIMIT_NOFILE", syscall.RLIMIT_NOFILE)
+	RegisterConstant("RLIMIT_STACK", syscall.RLIMIT_STACK)
+	RegisterConstant("RLIM_INFINITY", syscall.RLIM_INFINITY)
+	RegisterConstant("RTAX_ADVMSS", syscall.RTAX_ADVMSS)
+	RegisterConstant("RTAX_CWND", syscall.RTAX_CWND)
+	RegisterConstant("RTAX_FEATURES", syscall.RTAX_FEATURES)
+	RegisterConstant("RTAX_FEATURE_ALLFRAG", syscall.RTAX_FEATURE_ALLFRAG)
+	RegisterConstant("RTAX_FEATURE_ECN", syscall.RTAX_FEATURE_ECN)
+	RegisterConstant("RTAX_FEATURE_SACK", syscall.RTAX_FEATURE_SACK)
+	RegisterConstant("RTAX_FEATURE_TIMESTAMP", syscall.RTAX_FEATURE_TIMESTAMP)
+	RegisterConstant("RTAX_HOPLIMIT", syscall.RTAX_HOPLIMIT)
+	RegisterConstant("RTAX_INITCWND", syscall.RTAX_INITCWND)
+	RegisterConstant("RTAX_INITRWND", syscall.RTAX_INITRWND)
+	RegisterConstant("RTAX_LOCK", syscall.RTAX_LOCK)
+	RegisterConstant("RTAX_MAX", syscall.RTAX_MAX)
+	RegisterConstant("RTAX_MTU", syscall.RTAX_MTU)
+	RegisterConstant("RTAX_REORDERING", syscall.RTAX_REORDERING)
+	RegisterConstant("RTAX_RTO_MIN", syscall.RTAX_RTO_MIN)
+	RegisterConstant("RTAX_RTT", syscall.RTAX_RTT)
+	RegisterConstant("RTAX_RTTVAR", syscall.RTAX_RTTVAR)
+	RegisterConstant("RTAX_SSTHRESH", syscall.RTAX_SSTHRESH)
+	RegisterConstant("RTAX_UNSPEC", syscall.RTAX_UNSPEC)
+	RegisterConstant("RTAX_WINDOW", syscall.RTAX_WINDOW)
+	RegisterConstant("RTA_ALIGNTO", syscall.RTA_ALIGNTO)
+	RegisterConstant("RTA_MAX", syscall.RTA_MAX)
+	RegisterConstant("RTCF_DIRECTSRC", syscall.RTCF_DIRECTSRC)
+	RegisterConstant("RTCF_DOREDIRECT", syscall.RTCF_DOREDIRECT)
+	RegisterConstant("RTCF_LOG", syscall.RTCF_LOG)
+	RegisterConstant("RTCF_MASQ", syscall.RTCF_MASQ)
+	RegisterConstant("RTCF_NAT", syscall.RTCF_NAT)
+	RegisterConstant("RTCF_VALVE", syscall.RTCF_VALVE)
+	RegisterConstant("RTF_ADDRCLASSMASK", syscall.RTF_ADDRCLASSMASK)
+	RegisterConstant("RTF_ADDRCONF", syscall.RTF_ADDRCONF)
+	RegisterConstant("RTF_ALLONLINK", syscall.RTF_ALLONLINK)
+	RegisterConstant("RTF_BROADCAST", syscall.RTF_BROADCAST)
+	RegisterConstant("RTF_CACHE", syscall.RTF_CACHE)
+	RegisterConstant("RTF_DEFAULT", syscall.RTF_DEFAULT)
+	RegisterConstant("RTF_DYNAMIC", syscall.RTF_DYNAMIC)
+	RegisterConstant("RTF_FLOW", syscall.RTF_FLOW)
+	RegisterConstant("RTF_GATEWAY", syscall.RTF_GATEWAY)
+	RegisterConstant("RTF_HOST", syscall.RTF_HOST)
+	RegisterConstant("RTF_INTERFACE", syscall.RTF_INTERFACE)
+	RegisterConstant("RTF_IRTT", syscall.RTF_IRTT)
+	RegisterConstant("RTF_LINKRT", syscall.RTF_LINKRT)
+	RegisterConstant("RTF_LOCAL", syscall.RTF_LOCAL)
+	RegisterConstant("RTF_MODIFIED", syscall.RTF_MODIFIED)
+	RegisterConstant("RTF_MSS", syscall.RTF_MSS)
+	RegisterConstant("RTF_MTU", syscall.RTF_MTU)
+	RegisterConstant("RTF_MULTICAST", syscall.RTF_MULTICAST)
+	RegisterConstant("RTF_NAT", syscall.RTF_NAT)
+	RegisterConstant("RTF_NOFORWARD", syscall.RTF_NOFORWARD)
+	RegisterConstant("RTF_NONEXTHOP", syscall.RTF_NONEXTHOP)
+	RegisterConstant("RTF_NOPMTUDISC", syscall.RTF_NOPMTUDISC)
+	RegisterConstant("RTF_POLICY", syscall.RTF_POLICY)
+	RegisterConstant("RTF_REINSTATE", syscall.RTF_REINSTATE)
+	RegisterConstant("RTF_REJECT", syscall.RTF_REJECT)
+	RegisterConstant("RTF_STATIC", syscall.RTF_STATIC)
+	RegisterConstant("RTF_THROW", syscall.RTF_THROW)
+	RegisterConstant("RTF_UP", syscall.RTF_UP)
+	RegisterConstant("RTF_WINDOW", syscall.RTF_WINDOW)
+	RegisterConstant("RTF_XRESOLVE", syscall.RTF_XRESOLVE)
+	RegisterConstant("RTM_BASE", syscall.RTM_BASE)
+	RegisterConstant("RTM_DELACTION", syscall.RTM_DELACTION)
+	RegisterConstant("RTM_DELADDR", syscall.RTM_DELADDR)
+	RegisterConstant("RTM_DELADDRLABEL", syscall.RTM_DELADDRLABEL)
+	RegisterConstant("RTM_DELLINK", syscall.RTM_DELLINK)
+	RegisterConstant("RTM_DELNEIGH", syscall.RTM_DELNEIGH)
+	RegisterConstant("RTM_DELQDISC", syscall.RTM_DELQDISC)
+	RegisterConstant("RTM_DELROUTE", syscall.RTM_DELROUTE)
+	RegisterConstant("RTM_DELRULE", syscall.RTM_DELRULE)
+	RegisterConstant("RTM_DELTCLASS", syscall.RTM_DELTCLASS)
+	RegisterConstant("RTM_DELTFILTER", syscall.RTM_DELTFILTER)
+	RegisterConstant("RTM_F_CLONED", syscall.RTM_F_CLONED)
+	RegisterConstant("RTM_F_EQUALIZE", syscall.RTM_F_EQUALIZE)
+	RegisterConstant("RTM_F_NOTIFY", syscall.RTM_F_NOTIFY)
+	RegisterConstant("RTM_F_PREFIX", syscall.RTM_F_PREFIX)
+	RegisterConstant("RTM_GETACTION", syscall.RTM_GETACTION)
+	RegisterConstant("RTM_GETADDR", syscall.RTM_GETADDR)
+	RegisterConstant("RTM_GETADDRLABEL", syscall.RTM_GETADDRLABEL)
+	RegisterConstant("RTM_GETANYCAST", syscall.RTM_GETANYCAST)
+	RegisterConstant("RTM_GETDCB", syscall.RTM_GETDCB)
+	RegisterConstant("RTM_GETLINK", syscall.RTM_GETLINK)
+	RegisterConstant("RTM_GETMULTICAST", syscall.RTM_GETMULTICAST)
+	RegisterConstant("RTM_GETNEIGH", syscall.RTM_GETNEIGH)
+	RegisterConstant("RTM_GETNEIGHTBL", syscall.RTM_GETNEIGHTBL)
+	RegisterConstant("RTM_GETQDISC", syscall.RTM_GETQDISC)
+	RegisterConstant("RTM_GETROUTE", syscall.RTM_GETROUTE)
+	RegisterConstant("RTM_GETRULE", syscall.RTM_GETRULE)
+	RegisterConstant("RTM_GETTCLASS", syscall.RTM_GETTCLASS)
+	RegisterConstant("RTM_GETTFILTER", syscall.RTM_GETTFILTER)
+	RegisterConstant("RTM_MAX", syscall.RTM_MAX)
+	RegisterConstant("RTM_NEWACTION", syscall.RTM_NEWACTION)
+	RegisterConstant("RTM_NEWADDR", syscall.RTM_NEWADDR)
+	RegisterConstant("RTM_NEWADDRLABEL", syscall.RTM_NEWADDRLABEL)
+	RegisterConstant("RTM_NEWLINK", syscall.RTM_NEWLINK)
+	RegisterConstant("RTM_NEWNDUSEROPT", syscall.RTM_NEWNDUSEROPT)
+	RegisterConstant("RTM_NEWNEIGH", syscall.RTM_NEWNEIGH)
+	RegisterConstant("RTM_NEWNEIGHTBL", syscall.RTM_NEWNEIGHTBL)
+	RegisterConstant("RTM_NEWPREFIX", syscall.RTM_NEWPREFIX)
+	RegisterConstant("RTM_NEWQDISC", syscall.RTM_NEWQDISC)
+	RegisterConstant("RTM_NEWROUTE", syscall.RTM_NEWROUTE)
+	RegisterConstant("RTM_NEWRULE", syscall.RTM_NEWRULE)
+	RegisterConstant("RTM_NEWTCLASS", syscall.RTM_NEWTCLASS)
+	RegisterConstant("RTM_NEWTFILTER", syscall.RTM_NEWTFILTER)
+	RegisterConstant("RTM_NR_FAMILIES", syscall.RTM_NR_FAMILIES)
+	RegisterConstant("RTM_NR_MSGTYPES", syscall.RTM_NR_MSGTYPES)
+	RegisterConstant("RTM_SETDCB", syscall.RTM_SETDCB)
+	RegisterConstant("RTM_SETLINK", syscall.RTM_SETLINK)
+	RegisterConstant("RTM_SETNEIGHTBL", syscall.RTM_SETNEIGHTBL)
+	RegisterConstant("RTNH_ALIGNTO", syscall.RTNH_ALIGNTO)
+	RegisterConstant("RTNH_F_DEAD", syscall.RTNH_F_DEAD)
+	RegisterConstant("RTNH_F_ONLINK", syscall.RTNH_F_ONLINK)
+	RegisterConstant("RTNH_F_PERVASIVE", syscall.RTNH_F_PERVASIVE)
+	RegisterConstant("RTN_MAX", syscall.RTN_MAX)
+	RegisterConstant("RTPROT_BIRD", syscall.RTPROT_BIRD)
+	RegisterConstant("RTPROT_BOOT", syscall.RTPROT_BOOT)
+	RegisterConstant("RTPROT_DHCP", syscall.RTPROT_DHCP)
+	RegisterConstant("RTPROT_DNROUTED", syscall.RTPROT_DNROUTED)
+	RegisterConstant("RTPROT_GATED", syscall.RTPROT_GATED)
+	RegisterConstant("RTPROT_KERNEL", syscall.RTPROT_KERNEL)
+	RegisterConstant("RTPROT_MRT", syscall.RTPROT_MRT)
+	RegisterConstant("RTPROT_NTK", syscall.RTPROT_NTK)
+	RegisterConstant("RTPROT_RA", syscall.RTPROT_RA)
+	RegisterConstant("RTPROT_REDIRECT", syscall.RTPROT_REDIRECT)
+	RegisterConstant("RTPROT_STATIC", syscall.RTPROT_STATIC)
+	RegisterConstant("RTPROT_UNSPEC", syscall.RTPROT_UNSPEC)
+	RegisterConstant("RTPROT_XORP", syscall.RTPROT_XORP)
+	RegisterConstant("RTPROT_ZEBRA", syscall.RTPROT_ZEBRA)
+	RegisterConstant("RT_CLASS_DEFAULT", syscall.RT_CLASS_DEFAULT)
+	RegisterConstant("RT_CLASS_LOCAL", syscall.RT_CLASS_LOCAL)
+	RegisterConstant("RT_CLASS_MAIN", syscall.RT_CLASS_MAIN)
+	RegisterConstant("RT_CLASS_MAX", syscall.RT_CLASS_MAX)
+	RegisterConstant("RT_CLASS_UNSPEC", syscall.RT_CLASS_UNSPEC)
+	RegisterConstant("RUSAGE_CHILDREN", syscall.RUSAGE_CHILDREN)
+	RegisterConstant("RUSAGE_SELF", syscall.RUSAGE_SELF)
+	RegisterConstant("RUSAGE_THREAD", syscall.RUSAGE_THREAD)
+	RegisterConstant("SCM_CREDENTIALS", syscall.SCM_CREDENTIALS)
+	RegisterConstant("SCM_RIGHTS", syscall.SCM_RIGHTS)
+	RegisterConstant("SCM_TIMESTAMP", syscall.SCM_TIMESTAMP)
+	RegisterConstant("SCM_TIMESTAMPING", syscall.SCM_TIMESTAMPING)
+	RegisterConstant("SCM_TIMESTAMPNS", syscall.SCM_TIMESTAMPNS)
+	RegisterConstant("SHUT_RD", syscall.SHUT_RD)
+	RegisterConstant("SHUT_RDWR", syscall.SHUT_RDWR)
+	RegisterConstant("SHUT_WR", syscall.SHUT_WR)
+	RegisterConstant("SIOCADDDLCI", syscall.SIOCADDDLCI)
+	RegisterConstant("SIOCADDMULTI", syscall.SIOCADDMULTI)
+	RegisterConstant("SIOCADDRT", syscall.SIOCADDRT)
+	RegisterConstant("SIOCATMARK", syscall.SIOCATMARK)
+	RegisterConstant("SIOCDARP", syscall.SIOCDARP)
+	RegisterConstant("SIOCDELDLCI", syscall.SIOCDELDLCI)
+	RegisterConstant("SIOCDELMULTI", syscall.SIOCDELMULTI)
+	RegisterConstant("SIOCDELRT", syscall.SIOCDELRT)
+	RegisterConstant("SIOCDEVPRIVATE", syscall.SIOCDEVPRIVATE)
+	RegisterConstant("SIOCDIFADDR", syscall.SIOCDIFADDR)
+	RegisterConstant("SIOCDRARP", syscall.SIOCDRARP)
+	RegisterConstant("SIOCGARP", syscall.SIOCGARP)
+	RegisterConstant("SIOCGIFADDR", syscall.SIOCGIFADDR)
+	RegisterConstant("SIOCGIFBR", syscall.SIOCGIFBR)
+	RegisterConstant("SIOCGIFBRDADDR", syscall.SIOCGIFBRDADDR)
+	RegisterConstant("SIOCGIFCONF", syscall.SIOCGIFCONF)
+	RegisterConstant("SIOCGIFCOUNT", syscall.SIOCGIFCOUNT)
+	RegisterConstant("SIOCGIFDSTADDR", syscall.SIOCGIFDSTADDR)
+	RegisterConstant("SIOCGIFENCAP", syscall.SIOCGIFENCAP)
+	RegisterConstant("SIOCGIFFLAGS", syscall.SIOCGIFFLAGS)
+	RegisterConstant("SIOCGIFHWADDR", syscall.SIOCGIFHWADDR)
+	RegisterConstant("SIOCGIFINDEX", syscall.SIOCGIFINDEX)
+	RegisterConstant("SIOCGIFMAP", syscall.SIOCGIFMAP)
+	RegisterConstant("SIOCGIFMEM", syscall.SIOCGIFMEM)
+	RegisterConstant("SIOCGIFMETRIC", syscall.SIOCGIFMETRIC)
+	RegisterConstant("SIOCGIFMTU", syscall.SIOCGIFMTU)
+	RegisterConstant("SIOCGIFNAME", syscall.SIOCGIFNAME)
+	RegisterConstant("SIOCGIFNETMASK", syscall.SIOCGIFNETMASK)
+	RegisterConstant("SIOCGIFPFLAGS", syscall.SIOCGIFPFLAGS)
+	RegisterConstant("SIOCGIFSLAVE", syscall.SIOCGIFSLAVE)
+	RegisterConstant("SIOCGIFTXQLEN", syscall.SIOCGIFTXQLEN)
+	RegisterConstant("SIOCGPGRP", syscall.SIOCGPGRP)
+	RegisterConstant("SIOCGRARP", syscall.SIOCGRARP)
+	RegisterConstant("SIOCGSTAMP", syscall.SIOCGSTAMP)
+	RegisterConstant("SIOCGSTAMPNS", syscall.SIOCGSTAMPNS)
+	RegisterConstant("SIOCPROTOPRIVATE", syscall.SIOCPROTOPRIVATE)
+	RegisterConstant("SIOCRTMSG", syscall.SIOCRTMSG)
+	RegisterConstant("SIOCSARP", syscall.SIOCSARP)
+	RegisterConstant("SIOCSIFADDR", syscall.SIOCSIFADDR)
+	RegisterConstant("SIOCSIFBR", syscall.SIOCSIFBR)
+	RegisterConstant("SIOCSIFBRDADDR", syscall.SIOCSIFBRDADDR)
+	RegisterConstant("SIOCSIFDSTADDR", syscall.SIOCSIFDSTADDR)
+	RegisterConstant("SIOCSIFENCAP", syscall.SIOCSIFENCAP)
+	RegisterConstant("SIOCSIFFLAGS", syscall.SIOCSIFFLAGS)
+	RegisterConstant("SIOCSIFHWADDR", syscall.SIOCSIFHWADDR)
+	RegisterConstant("SIOCSIFHWBROADCAST", syscall.SIOCSIFHWBROADCAST)
+	RegisterConstant("SIOCSIFLINK", syscall.SIOCSIFLINK)
+	RegisterConstant("SIOCSIFMAP", syscall.SIOCSIFMAP)
+	RegisterConstant("SIOCSIFMEM", syscall.SIOCSIFMEM)
+	RegisterConstant("SIOCSIFMETRIC", syscall.SIOCSIFMETRIC)
+	RegisterConstant("SIOCSIFMTU", syscall.SIOCSIFMTU)
+	RegisterConstant("SIOCSIFNAME", syscall.SIOCSIFNAME)
+	RegisterConstant("SIOCSIFNETMASK", syscall.SIOCSIFNETMASK)
+	RegisterConstant("SIOCSIFPFLAGS", syscall.SIOCSIFPFLAGS)
+	RegisterConstant("SIOCSIFSLAVE", syscall.SIOCSIFSLAVE)
+	RegisterConstant("SIOCSIFTXQLEN", syscall.SIOCSIFTXQLEN)
+	RegisterConstant("SIOCSPGRP", syscall.SIOCSPGRP)
+	RegisterConstant("SIOCSRARP", syscall.SIOCSRARP)
+	RegisterConstant("SOCK_CLOEXEC", syscall.SOCK_CLOEXEC)
+	RegisterConstant("SOCK_DCCP", syscall.SOCK_DCCP)
+	RegisterConstant("SOCK_DGRAM", syscall.SOCK_DGRAM)
+	RegisterConstant("SOCK_NONBLOCK", syscall.SOCK_NONBLOCK)
+	RegisterConstant("SOCK_PACKET", syscall.SOCK_PACKET)
+	RegisterConstant("SOCK_RAW", syscall.SOCK_RAW)
+	RegisterConstant("SOCK_RDM", syscall.SOCK_RDM)
+	RegisterConstant("SOCK_SEQPACKET", syscall.SOCK_SEQPACKET)
+	RegisterConstant("SOCK_STREAM", syscall.SOCK_STREAM)
+	RegisterConstant("SOL_AAL", syscall.SOL_AAL)
+	RegisterConstant("SOL_ATM", syscall.SOL_ATM)
+	RegisterConstant("SOL_DECNET", syscall.SOL_DECNET)
+	RegisterConstant("SOL_ICMPV6", syscall.SOL_ICMPV6)
+	RegisterConstant("SOL_IP", syscall.SOL_IP)
+	RegisterConstant("SOL_IPV6", syscall.SOL_IPV6)
+	RegisterConstant("SOL_IRDA", syscall.SOL_IRDA)
+	RegisterConstant("SOL_PACKET", syscall.SOL_PACKET)
+	RegisterConstant("SOL_RAW", syscall.SOL_RAW)
+	RegisterConstant("SOL_SOCKET", syscall.SOL_SOCKET)
+	RegisterConstant("SOL_TCP", syscall.SOL_TCP)
+	RegisterConstant("SOL_X25", syscall.SOL_X25)
+	RegisterConstant("SOMAXCONN", syscall.SOMAXCONN)
+	RegisterConstant("SO_ACCEPTCONN", syscall.SO_ACCEPTCONN)
+	RegisterConstant("SO_ATTACH_FILTER", syscall.SO_ATTACH_FILTER)
+	RegisterConstant("SO_BINDTODEVICE", syscall.SO_BINDTODEVICE)
+	RegisterConstant("SO_BROADCAST", syscall.SO_BROADCAST)
+	RegisterConstant("SO_BSDCOMPAT", syscall.SO_BSDCOMPAT)
+	RegisterConstant("SO_DEBUG", syscall.SO_DEBUG)
+	RegisterConstant("SO_DETACH_FILTER", syscall.SO_DETACH_FILTER)
+	RegisterConstant("SO_DOMAIN", syscall.SO_DOMAIN)
+	RegisterConstant("SO_DONTROUTE", syscall.SO_DONTROUTE)
+	RegisterConstant("SO_ERROR", syscall.SO_ERROR)
+	RegisterConstant("SO_KEEPALIVE", syscall.SO_KEEPALIVE)
+	RegisterConstant("SO_LINGER", syscall.SO_LINGER)
+	RegisterConstant("SO_MARK", syscall.SO_MARK)
+	RegisterConstant("SO_NO_CHECK", syscall.SO_NO_CHECK)
+	RegisterConstant("SO_OOBINLINE", syscall.SO_OOBINLINE)
+	RegisterConstant("SO_PASSCRED", syscall.SO_PASSCRED)
+	RegisterConstant("SO_PASSSEC", syscall.SO_PASSSEC)
+	RegisterConstant("SO_PEERCRED", syscall.SO_PEERCRED)
+	RegisterConstant("SO_PEERNAME", syscall.SO_PEERNAME)
+	RegisterConstant("SO_PEERSEC", syscall.SO_PEERSEC)
+	RegisterConstant("SO_PRIORITY", syscall.SO_PRIORITY)
+	RegisterConstant("SO_PROTOCOL", syscall.SO_PROTOCOL)
+	RegisterConstant("SO_RCVBUF", syscall.SO_RCVBUF)
+	RegisterConstant("SO_RCVBUFFORCE", syscall.SO_RCVBUFFORCE)
+	RegisterConstant("SO_RCVLOWAT", syscall.SO_RCVLOWAT)
+	RegisterConstant("SO_RCVTIMEO", syscall.SO_RCVTIMEO)
+	RegisterConstant("SO_REUSEADDR", syscall.SO_REUSEADDR)
+	RegisterConstant("SO_RXQ_OVFL", syscall.SO_RXQ_OVFL)
+	RegisterConstant("SO_SECURITY_AUTHENTICATION", syscall.SO_SECURITY_AUTHENTICATION)
+	RegisterConstant("SO_SECURITY_ENCRYPTION_NETWORK", syscall.SO_SECURITY_ENCRYPTION_NETWORK)
+	RegisterConstant("SO_SECURITY_ENCRYPTION_TRANSPORT", syscall.SO_SECURITY_ENCRYPTION_TRANSPORT)
+	RegisterConstant("SO_SNDBUF", syscall.SO_SNDBUF)
+	RegisterConstant("SO_SNDBUFFORCE", syscall.SO_SNDBUFFORCE)
+	RegisterConstant("SO_SNDLOWAT", syscall.SO_SNDLOWAT)
+	RegisterConstant("SO_SNDTIMEO", syscall.SO_SNDTIMEO)
+	RegisterConstant("SO_TIMESTAMP", syscall.SO_TIMESTAMP)
+	RegisterConstant("SO_TIMESTAMPING", syscall.SO_TIMESTAMPING)
+	RegisterConstant("SO_TIMESTAMPNS", syscall.SO_TIMESTAMPNS)
+	RegisterConstant("SO_TYPE", syscall.SO_TYPE)
+	RegisterConstant("S_BLKSIZE", syscall.S_BLKSIZE)
+	RegisterConstant("S_IEXEC", syscall.S_IEXEC)
+	RegisterConstant("S_IFBLK", syscall.S_IFBLK)
+	RegisterConstant("S_IFCHR", syscall.S_IFCHR)
+	RegisterConstant("S_IFDIR", syscall.S_IFDIR)
+	RegisterConstant("S_IFIFO", syscall.S_IFIFO)
+	RegisterConstant("S_IFLNK", syscall.S_IFLNK)
+	RegisterConstant("S_IFMT", syscall.S_IFMT)
+	RegisterConstant("S_IFREG", syscall.S_IFREG)
+	RegisterConstant("S_IFSOCK", syscall.S_IFSOCK)
+	RegisterConstant("S_IREAD", syscall.S_IREAD)
+	RegisterConstant("S_IRGRP", syscall.S_IRGRP)
+	RegisterConstant("S_IROTH", syscall.S_IROTH)
+	RegisterConstant("S_IRUSR", syscall.S_IRUSR)
+	RegisterConstant("S_IRWXG", syscall.S_IRWXG)
+	RegisterConstant("S_IRWXO", syscall.S_IRWXO)
+	RegisterConstant("S_IRWXU", syscall.S_IRWXU)
+	RegisterConstant("S_ISGID", syscall.S_ISGID)
+	RegisterConstant("S_ISUID", syscall.S_ISUID)
+	RegisterConstant("S_ISVTX", syscall.S_ISVTX)
+	RegisterConstant("S_IWGRP", syscall.S_IWGRP)
+	RegisterConstant("S_IWOTH", syscall.S_IWOTH)
+	RegisterConstant("S_IWRITE", syscall.S_IWRITE)
+	RegisterConstant("S_IWUSR", syscall.S_IWUSR)
+	RegisterConstant("S_IXGRP", syscall.S_IXGRP)
+	RegisterConstant("S_IXOTH", syscall.S_IXOTH)
+	RegisterConstant("S_IXUSR", syscall.S_IXUSR)
+	RegisterConstant("TCGETS", syscall.TCGETS)
+	RegisterConstant("TCIFLUSH", syscall.TCIFLUSH)
+	RegisterConstant("TCIOFLUSH", syscall.TCIOFLUSH)
+	RegisterConstant("TCOFLUSH", syscall.TCOFLUSH)
+	RegisterConstant("TCP_CONGESTION", syscall.TCP_CONGESTION)
+	RegisterConstant("TCP_CORK", syscall.TCP_CORK)
+	RegisterConstant("TCP_DEFER_ACCEPT", syscall.TCP_DEFER_ACCEPT)
+	RegisterConstant("TCP_INFO", syscall.TCP_INFO)
+	RegisterConstant("TCP_KEEPCNT", syscall.TCP_KEEPCNT)
+	RegisterConstant("TCP_KEEPIDLE", syscall.TCP_KEEPIDLE)
+	RegisterConstant("TCP_KEEPINTVL", syscall.TCP_KEEPINTVL)
+	RegisterConstant("TCP_LINGER2", syscall.TCP_LINGER2)
+	RegisterConstant("TCP_MAXSEG", syscall.TCP_MAXSEG)
+	RegisterConstant("TCP_MAXWIN", syscall.TCP_MAXWIN)
+	RegisterConstant("TCP_MAX_WINSHIFT", syscall.TCP_MAX_WINSHIFT)
+	RegisterConstant("TCP_MD5SIG", syscall.TCP_MD5SIG)
+	RegisterConstant("TCP_MD5SIG_MAXKEYLEN", syscall.TCP_MD5SIG_MAXKEYLEN)
+	RegisterConstant("TCP_MSS", syscall.TCP_MSS)
+	RegisterConstant("TCP_NODELAY", syscall.TCP_NODELAY)
+	RegisterConstant("TCP_QUICKACK", syscall.TCP_QUICKACK)
+	RegisterConstant("TCP_SYNCNT", syscall.TCP_SYNCNT)
+	RegisterConstant("TCP_WINDOW_CLAMP", syscall.TCP_WINDOW_CLAMP)
+	RegisterConstant("TCSETS", syscall.TCSETS)
+	RegisterConstant("TIOCCBRK", syscall.TIOCCBRK)
+	RegisterConstant("TIOCCONS", syscall.TIOCCONS)
+	RegisterConstant("TIOCEXCL", syscall.TIOCEXCL)
+	RegisterConstant("TIOCGDEV", syscall.TIOCGDEV)
+	RegisterConstant("TIOCGETD", syscall.TIOCGETD)
+	RegisterConstant("TIOCGICOUNT", syscall.TIOCGICOUNT)
+	RegisterConstant("TIOCGLCKTRMIOS", syscall.TIOCGLCKTRMIOS)
+	RegisterConstant("TIOCGPGRP", syscall.TIOCGPGRP)
+	RegisterConstant("TIOCGPTN", syscall.TIOCGPTN)
+	RegisterConstant("TIOCGRS485", syscall.TIOCGRS485)
+	RegisterConstant("TIOCGSERIAL", syscall.TIOCGSERIAL)
+	RegisterConstant("TIOCGSID", syscall.TIOCGSID)
+	RegisterConstant("TIOCGSOFTCAR", syscall.TIOCGSOFTCAR)
+	RegisterConstant("TIOCGWINSZ", syscall.TIOCGWINSZ)
+	RegisterConstant("TIOCINQ", syscall.TIOCINQ)
+	RegisterConstant("TIOCLINUX", syscall.TIOCLINUX)
+	RegisterConstant("TIOCMBIC", syscall.TIOCMBIC)
+	RegisterConstant("TIOCMBIS", syscall.TIOCMBIS)
+	RegisterConstant("TIOCMGET", syscall.TIOCMGET)
+	RegisterConstant("TIOCMIWAIT", syscall.TIOCMIWAIT)
+	RegisterConstant("TIOCMSET", syscall.TIOCMSET)
+	RegisterConstant("TIOCM_CAR", syscall.TIOCM_CAR)
+	RegisterConstant("TIOCM_CD", syscall.TIOCM_CD)
+	RegisterConstant("TIOCM_CTS", syscall.TIOCM_CTS)
+	RegisterConstant("TIOCM_DSR", syscall.TIOCM_DSR)
+	RegisterConstant("TIOCM_DTR", syscall.TIOCM_DTR)
+	RegisterConstant("TIOCM_LE", syscall.TIOCM_LE)
+	RegisterConstant("TIOCM_RI", syscall.TIOCM_RI)
+	RegisterConstant("TIOCM_RNG", syscall.TIOCM_RNG)
+	RegisterConstant("TIOCM_RTS", syscall.TIOCM_RTS)
+	RegisterConstant("TIOCM_SR", syscall.TIOCM_SR)
+	RegisterConstant("TIOCM_ST", syscall.TIOCM_ST)
+	RegisterConstant("TIOCNOTTY", syscall.TIOCNOTTY)
+	RegisterConstant("TIOCNXCL", syscall.TIOCNXCL)
+	RegisterConstant("TIOCOUTQ", syscall.TIOCOUTQ)
+	RegisterConstant("TIOCPKT", syscall.TIOCPKT)
+	RegisterConstant("TIOCPKT_DATA", syscall.TIOCPKT_DATA)
+	RegisterConstant("TIOCPKT_DOSTOP", syscall.TIOCPKT_DOSTOP)
+	RegisterConstant("TIOCPKT_FLUSHREAD", syscall.TIOCPKT_FLUSHREAD)
+	RegisterConstant("TIOCPKT_FLUSHWRITE", syscall.TIOCPKT_FLUSHWRITE)
+	RegisterConstant("TIOCPKT_IOCTL", syscall.TIOCPKT_IOCTL)
+	RegisterConstant("TIOCPKT_NOSTOP", syscall.TIOCPKT_NOSTOP)
+	RegisterConstant("TIOCPKT_START", syscall.TIOCPKT_START)
+	RegisterConstant("TIOCPKT_STOP", syscall.TIOCPKT_STOP)
+	RegisterConstant("TIOCSBRK", syscall.TIOCSBRK)
+	RegisterConstant("TIOCSCTTY", syscall.TIOCSCTTY)
+	RegisterConstant("TIOCSERCONFIG", syscall.TIOCSERCONFIG)
+	RegisterConstant("TIOCSERGETLSR", syscall.TIOCSERGETLSR)
+	RegisterConstant("TIOCSERGETMULTI", syscall.TIOCSERGETMULTI)
+	RegisterConstant("TIOCSERGSTRUCT", syscall.TIOCSERGSTRUCT)
+	RegisterConstant("TIOCSERGWILD", syscall.TIOCSERGWILD)
+	RegisterConstant("TIOCSERSETMULTI", syscall.TIOCSERSETMULTI)
+	RegisterConstant("TIOCSERSWILD", syscall.TIOCSERSWILD)
+	RegisterConstant("TIOCSER_TEMT", syscall.TIOCSER_TEMT)
+	RegisterConstant("TIOCSETD", syscall.TIOCSETD)
+	RegisterConstant("TIOCSIG", syscall.TIOCSIG)
+	RegisterConstant("TIOCSLCKTRMIOS", syscall.TIOCSLCKTRMIOS)
+	RegisterConstant("TIOCSPGRP", syscall.TIOCSPGRP)
+	RegisterConstant("TIOCSPTLCK", syscall.TIOCSPTLCK)
+	RegisterConstant("TIOCSRS485", syscall.TIOCSRS485)
+	RegisterConstant("TIOCSSERIAL", syscall.TIOCSSERIAL)
+	RegisterConstant("TIOCSSOFTCAR", syscall.TIOCSSOFTCAR)
+	RegisterConstant("TIOCSTI", syscall.TIOCSTI)
+	RegisterConstant("TIOCSWINSZ", syscall.TIOCSWINSZ)
+	RegisterConstant("TUNATTACHFILTER", syscall.TUNATTACHFILTER)
+	RegisterConstant("TUNDETACHFILTER", syscall.TUNDETACHFILTER)
+	RegisterConstant("TUNGETFEATURES", syscall.TUNGETFEATURES)
+	RegisterConstant("TUNGETIFF", syscall.TUNGETIFF)
+	RegisterConstant("TUNGETSNDBUF", syscall.TUNGETSNDBUF)
+	RegisterConstant("TUNGETVNETHDRSZ", syscall.TUNGETVNETHDRSZ)
+	RegisterConstant("TUNSETDEBUG", syscall.TUNSETDEBUG)
+	RegisterConstant("TUNSETGROUP", syscall.TUNSETGROUP)
+	RegisterConstant("TUNSETIFF", syscall.TUNSETIFF)
+	RegisterConstant("TUNSETLINK", syscall.TUNSETLINK)
+	RegisterConstant("TUNSETNOCSUM", syscall.TUNSETNOCSUM)
+	RegisterConstant("TUNSETOFFLOAD", syscall.TUNSETOFFLOAD)
+	RegisterConstant("TUNSETOWNER", syscall.TUNSETOWNER)
+	RegisterConstant("TUNSETPERSIST", syscall.TUNSETPERSIST)
+	RegisterConstant("TUNSETSNDBUF", syscall.TUNSETSNDBUF)
+	RegisterConstant("TUNSETTXFILTER", syscall.TUNSETTXFILTER)
+	RegisterConstant("TUNSETVNETHDRSZ", syscall.TUNSETVNETHDRSZ)
+	RegisterConstant("WALL", syscall.WALL)
+	RegisterConstant("WCLONE", syscall.WCLONE)
+	RegisterConstant("WCONTINUED", syscall.WCONTINUED)
+	RegisterConstant("WEXITED", syscall.WEXITED)
+	RegisterConstant("WNOHANG", syscall.WNOHANG)
+	RegisterConstant("WNOTHREAD", syscall.WNOTHREAD)
+	RegisterConstant("WNOWAIT", syscall.WNOWAIT)
+	RegisterConstant("WORDSIZE", syscall.WORDSIZE)
+	RegisterConstant("WSTOPPED", syscall.WSTOPPED)
+	RegisterConstant("WUNTRACED", syscall.WUNTRACED)
+	RegisterConstant("XCASE", syscall.XCASE)
 
-	AllConstants["E2BIG"] = int(syscall.E2BIG)
-	AllConstants["EACCES"] = int(syscall.EACCES)
-	AllConstants["EADDRINUSE"] = int(syscall.EADDRINUSE)
-	AllConstants["EADDRNOTAVAIL"] = int(syscall.EADDRNOTAVAIL)
-	AllConstants["EADV"] = int(syscall.EADV)
-	AllConstants["EAFNOSUPPORT"] = int(syscall.EAFNOSUPPORT)
-	AllConstants["EAGAIN"] = int(syscall.EAGAIN)
-	AllConstants["EALREADY"] = int(syscall.EALREADY)
-	AllConstants["EBADE"] = int(syscall.EBADE)
-	AllConstants["EBADF"] = int(syscall.EBADF)
-	AllConstants["EBADFD"] = int(syscall.EBADFD)
-	AllConstants["EBADMSG"] = int(syscall.EBADMSG)
-	AllConstants["EBADR"] = int(syscall.EBADR)
-	AllConstants["EBADRQC"] = int(syscall.EBADRQC)
-	AllConstants["EBADSLT"] = int(syscall.EBADSLT)
-	AllConstants["EBFONT"] = int(syscall.EBFONT)
-	AllConstants["EBUSY"] = int(syscall.EBUSY)
-	AllConstants["ECANCELED"] = int(syscall.ECANCELED)
-	AllConstants["ECHILD"] = int(syscall.ECHILD)
-	AllConstants["ECHRNG"] = int(syscall.ECHRNG)
-	AllConstants["ECOMM"] = int(syscall.ECOMM)
-	AllConstants["ECONNABORTED"] = int(syscall.ECONNABORTED)
-	AllConstants["ECONNREFUSED"] = int(syscall.ECONNREFUSED)
-	AllConstants["ECONNRESET"] = int(syscall.ECONNRESET)
-	AllConstants["EDEADLK"] = int(syscall.EDEADLK)
-	AllConstants["EDEADLOCK"] = int(syscall.EDEADLOCK)
-	AllConstants["EDESTADDRREQ"] = int(syscall.EDESTADDRREQ)
-	AllConstants["EDOM"] = int(syscall.EDOM)
-	AllConstants["EDOTDOT"] = int(syscall.EDOTDOT)
-	AllConstants["EDQUOT"] = int(syscall.EDQUOT)
-	AllConstants["EEXIST"] = int(syscall.EEXIST)
-	AllConstants["EFAULT"] = int(syscall.EFAULT)
-	AllConstants["EFBIG"] = int(syscall.EFBIG)
-	AllConstants["EHOSTDOWN"] = int(syscall.EHOSTDOWN)
-	AllConstants["EHOSTUNREACH"] = int(syscall.EHOSTUNREACH)
-	AllConstants["EIDRM"] = int(syscall.EIDRM)
-	AllConstants["EILSEQ"] = int(syscall.EILSEQ)
-	AllConstants["EINPROGRESS"] = int(syscall.EINPROGRESS)
-	AllConstants["EINTR"] = int(syscall.EINTR)
-	AllConstants["EINVAL"] = int(syscall.EINVAL)
-	AllConstants["EIO"] = int(syscall.EIO)
-	AllConstants["EISCONN"] = int(syscall.EISCONN)
-	AllConstants["EISDIR"] = int(syscall.EISDIR)
-	AllConstants["EISNAM"] = int(syscall.EISNAM)
-	AllConstants["EKEYEXPIRED"] = int(syscall.EKEYEXPIRED)
-	AllConstants["EKEYREJECTED"] = int(syscall.EKEYREJECTED)
-	AllConstants["EKEYREVOKED"] = int(syscall.EKEYREVOKED)
-	AllConstants["EL2HLT"] = int(syscall.EL2HLT)
-	AllConstants["EL2NSYNC"] = int(syscall.EL2NSYNC)
-	AllConstants["EL3HLT"] = int(syscall.EL3HLT)
-	AllConstants["EL3RST"] = int(syscall.EL3RST)
-	AllConstants["ELIBACC"] = int(syscall.ELIBACC)
-	AllConstants["ELIBBAD"] = int(syscall.ELIBBAD)
-	AllConstants["ELIBEXEC"] = int(syscall.ELIBEXEC)
-	AllConstants["ELIBMAX"] = int(syscall.ELIBMAX)
-	AllConstants["ELIBSCN"] = int(syscall.ELIBSCN)
-	AllConstants["ELNRNG"] = int(syscall.ELNRNG)
-	AllConstants["ELOOP"] = int(syscall.ELOOP)
-	AllConstants["EMEDIUMTYPE"] = int(syscall.EMEDIUMTYPE)
-	AllConstants["EMFILE"] = int(syscall.EMFILE)
-	AllConstants["EMLINK"] = int(syscall.EMLINK)
-	AllConstants["EMSGSIZE"] = int(syscall.EMSGSIZE)
-	AllConstants["EMULTIHOP"] = int(syscall.EMULTIHOP)
-	AllConstants["ENAMETOOLONG"] = int(syscall.ENAMETOOLONG)
-	AllConstants["ENAVAIL"] = int(syscall.ENAVAIL)
-	AllConstants["ENETDOWN"] = int(syscall.ENETDOWN)
-	AllConstants["ENETRESET"] = int(syscall.ENETRESET)
-	AllConstants["ENETUNREACH"] = int(syscall.ENETUNREACH)
-	AllConstants["ENFILE"] = int(syscall.ENFILE)
-	AllConstants["ENOANO"] = int(syscall.ENOANO)
-	AllConstants["ENOBUFS"] = int(syscall.ENOBUFS)
-	AllConstants["ENOCSI"] = int(syscall.ENOCSI)
-	AllConstants["ENODATA"] = int(syscall.ENODATA)
-	AllConstants["ENODEV"] = int(syscall.ENODEV)
-	AllConstants["ENOENT"] = int(syscall.ENOENT)
-	AllConstants["ENOEXEC"] = int(syscall.ENOEXEC)
-	AllConstants["ENOKEY"] = int(syscall.ENOKEY)
-	AllConstants["ENOLCK"] = int(syscall.ENOLCK)
-	AllConstants["ENOLINK"] = int(syscall.ENOLINK)
-	AllConstants["ENOMEDIUM"] = int(syscall.ENOMEDIUM)
-	AllConstants["ENOMEM"] = int(syscall.ENOMEM)
-	AllConstants["ENOMSG"] = int(syscall.ENOMSG)
-	AllConstants["ENONET"] = int(syscall.ENONET)
-	AllConstants["ENOPKG"] = int(syscall.ENOPKG)
-	AllConstants["ENOPROTOOPT"] = int(syscall.ENOPROTOOPT)
-	AllConstants["ENOSPC"] = int(syscall.ENOSPC)
-	AllConstants["ENOSR"] = int(syscall.ENOSR)
-	AllConstants["ENOSTR"] = int(syscall.ENOSTR)
-	AllConstants["ENOSYS"] = int(syscall.ENOSYS)
-	AllConstants["ENOTBLK"] = int(syscall.ENOTBLK)
-	AllConstants["ENOTCONN"] = int(syscall.ENOTCONN)
-	AllConstants["ENOTDIR"] = int(syscall.ENOTDIR)
-	AllConstants["ENOTEMPTY"] = int(syscall.ENOTEMPTY)
-	AllConstants["ENOTNAM"] = int(syscall.ENOTNAM)
-	AllConstants["ENOTRECOVERABLE"] = int(syscall.ENOTRECOVERABLE)
-	AllConstants["ENOTSOCK"] = int(syscall.ENOTSOCK)
-	AllConstants["ENOTSUP"] = int(syscall.ENOTSUP)
-	AllConstants["ENOTTY"] = int(syscall.ENOTTY)
-	AllConstants["ENOTUNIQ"] = int(syscall.ENOTUNIQ)
-	AllConstants["ENXIO"] = int(syscall.ENXIO)
-	AllConstants["EOPNOTSUPP"] = int(syscall.EOPNOTSUPP)
-	AllConstants["EOVERFLOW"] = int(syscall.EOVERFLOW)
-	AllConstants["EOWNERDEAD"] = int(syscall.EOWNERDEAD)
-	AllConstants["EPERM"] = int(syscall.EPERM)
-	AllConstants["EPFNOSUPPORT"] = int(syscall.EPFNOSUPPORT)
-	AllConstants["EPIPE"] = int(syscall.EPIPE)
-	AllConstants["EPROTO"] = int(syscall.EPROTO)
-	AllConstants["EPROTONOSUPPORT"] = int(syscall.EPROTONOSUPPORT)
-	AllConstants["EPROTOTYPE"] = int(syscall.EPROTOTYPE)
-	AllConstants["ERANGE"] = int(syscall.ERANGE)
-	AllConstants["EREMCHG"] = int(syscall.EREMCHG)
-	AllConstants["EREMOTE"] = int(syscall.EREMOTE)
-	AllConstants["EREMOTEIO"] = int(syscall.EREMOTEIO)
-	AllConstants["ERESTART"] = int(syscall.ERESTART)
-	AllConstants["ERFKILL"] = int(syscall.ERFKILL)
-	AllConstants["EROFS"] = int(syscall.EROFS)
-	AllConstants["ESHUTDOWN"] = int(syscall.ESHUTDOWN)
-	AllConstants["ESOCKTNOSUPPORT"] = int(syscall.ESOCKTNOSUPPORT)
-	AllConstants["ESPIPE"] = int(syscall.ESPIPE)
-	AllConstants["ESRCH"] = int(syscall.ESRCH)
-	AllConstants["ESRMNT"] = int(syscall.ESRMNT)
-	AllConstants["ESTALE"] = int(syscall.ESTALE)
-	AllConstants["ESTRPIPE"] = int(syscall.ESTRPIPE)
-	AllConstants["ETIME"] = int(syscall.ETIME)
-	AllConstants["ETIMEDOUT"] = int(syscall.ETIMEDOUT)
-	AllConstants["ETOOMANYREFS"] = int(syscall.ETOOMANYREFS)
-	AllConstants["ETXTBSY"] = int(syscall.ETXTBSY)
-	AllConstants["EUCLEAN"] = int(syscall.EUCLEAN)
-	AllConstants["EUNATCH"] = int(syscall.EUNATCH)
-	AllConstants["EUSERS"] = int(syscall.EUSERS)
-	AllConstants["EWOULDBLOCK"] = int(syscall.EWOULDBLOCK)
-	AllConstants["EXDEV"] = int(syscall.EXDEV)
-	AllConstants["EXFULL"] = int(syscall.EXFULL)
+	RegisterError("E2BIG", int(syscall.E2BIG))
+	RegisterError("EACCES", int(syscall.EACCES))
+	RegisterError("EADDRINUSE", int(syscall.EADDRINUSE))
+	RegisterError("EADDRNOTAVAIL", int(syscall.EADDRNOTAVAIL))
+	RegisterError("EADV", int(syscall.EADV))
+	RegisterError("EAFNOSUPPORT", int(syscall.EAFNOSUPPORT))
+	RegisterError("EAGAIN", int(syscall.EAGAIN))
+	RegisterError("EALREADY", int(syscall.EALREADY))
+	RegisterError("EBADE", int(syscall.EBADE))
+	RegisterError("EBADF", int(syscall.EBADF))
+	RegisterError("EBADFD", int(syscall.EBADFD))
+	RegisterError("EBADMSG", int(syscall.EBADMSG))
+	RegisterError("EBADR", int(syscall.EBADR))
+	RegisterError("EBADRQC", int(syscall.EBADRQC))
+	RegisterError("EBADSLT", int(syscall.EBADSLT))
+	RegisterError("EBFONT", int(syscall.EBFONT))
+	RegisterError("EBUSY", int(syscall.EBUSY))
+	RegisterError("ECANCELED", int(syscall.ECANCELED))
+	RegisterError("ECHILD", int(syscall.ECHILD))
+	RegisterError("ECHRNG", int(syscall.ECHRNG))
+	RegisterError("ECOMM", int(syscall.ECOMM))
+	RegisterError("ECONNABORTED", int(syscall.ECONNABORTED))
+	RegisterError("ECONNREFUSED", int(syscall.ECONNREFUSED))
+	RegisterError("ECONNRESET", int(syscall.ECONNRESET))
+	RegisterError("EDEADLK", int(syscall.EDEADLK))
+	RegisterError("EDEADLOCK", int(syscall.EDEADLOCK))
+	RegisterError("EDESTADDRREQ", int(syscall.EDESTADDRREQ))
+	RegisterError("EDOM", int(syscall.EDOM))
+	RegisterError("EDOTDOT", int(syscall.EDOTDOT))
+	RegisterError("EDQUOT", int(syscall.EDQUOT))
+	RegisterError("EEXIST", int(syscall.EEXIST))
+	RegisterError("EFAULT", int(syscall.EFAULT))
+	RegisterError("EFBIG", int(syscall.EFBIG))
+	RegisterError("EHOSTDOWN", int(syscall.EHOSTDOWN))
+	RegisterError("EHOSTUNREACH", int(syscall.EHOSTUNREACH))
+	RegisterError("EIDRM", int(syscall.EIDRM))
+	RegisterError("EILSEQ", int(syscall.EILSEQ))
+	RegisterError("EINPROGRESS", int(syscall.EINPROGRESS))
+	RegisterError("EINTR", int(syscall.EINTR))
+	RegisterError("EINVAL", int(syscall.EINVAL))
+	RegisterError("EIO", int(syscall.EIO))
+	RegisterError("EISCONN", int(syscall.EISCONN))
+	RegisterError("EISDIR", int(syscall.EISDIR))
+	RegisterError("EISNAM", int(syscall.EISNAM))
+	RegisterError("EKEYEXPIRED", int(syscall.EKEYEXPIRED))
+	RegisterError("EKEYREJECTED", int(syscall.EKEYREJECTED))
+	RegisterError("EKEYREVOKED", int(syscall.EKEYREVOKED))
+	RegisterError("EL2HLT", int(syscall.EL2HLT))
+	RegisterError("EL2NSYNC", int(syscall.EL2NSYNC))
+	RegisterError("EL3HLT", int(syscall.EL3HLT))
+	RegisterError("EL3RST", int(syscall.EL3RST))
+	RegisterError("ELIBACC", int(syscall.ELIBACC))
+	RegisterError("ELIBBAD", int(syscall.ELIBBAD))
+	RegisterError("ELIBEXEC", int(syscall.ELIBEXEC))
+	RegisterError("ELIBMAX", int(syscall.ELIBMAX))
+	RegisterError("ELIBSCN", int(syscall.ELIBSCN))
+	RegisterError("ELNRNG", int(syscall.ELNRNG))
+	RegisterError("ELOOP", int(syscall.ELOOP))
+	RegisterError("EMEDIUMTYPE", int(syscall.EMEDIUMTYPE))
+	RegisterError("EMFILE", int(syscall.EMFILE))
+	RegisterError("EMLINK", int(syscall.EMLINK))
+	RegisterError("EMSGSIZE", int(syscall.EMSGSIZE))
+	RegisterError("EMULTIHOP", int(syscall.EMULTIHOP))
+	RegisterError("ENAMETOOLONG", int(syscall.ENAMETOOLONG))
+	RegisterError("ENAVAIL", int(syscall.ENAVAIL))
+	RegisterError("ENETDOWN", int(syscall.ENETDOWN))
+	RegisterError("ENETRESET", int(syscall.ENETRESET))
+	RegisterError("ENETUNREACH", int(syscall.ENETUNREACH))
+	RegisterError("ENFILE", int(syscall.ENFILE))
+	RegisterError("ENOANO", int(syscall.ENOANO))
+	RegisterError("ENOBUFS", int(syscall.ENOBUFS))
+	RegisterError("ENOCSI", int(syscall.ENOCSI))
+	RegisterError("ENODATA", int(syscall.ENODATA))
+	RegisterError("ENODEV", int(syscall.ENODEV))
+	RegisterError("ENOENT", int(syscall.ENOENT))
+	RegisterError("ENOEXEC", int(syscall.ENOEXEC))
+	RegisterError("ENOKEY", int(syscall.ENOKEY))
+	RegisterError("ENOLCK", int(syscall.ENOLCK))
+	RegisterError("ENOLINK", int(syscall.ENOLINK))
+	RegisterError("ENOMEDIUM", int(syscall.ENOMEDIUM))
+	RegisterError("ENOMEM", int(syscall.ENOMEM))
+	RegisterError("ENOMSG", int(syscall.ENOMSG))
+	RegisterError("ENONET", int(syscall.ENONET))
+	RegisterError("ENOPKG", int(syscall.ENOPKG))
+	RegisterError("ENOPROTOOPT", int(syscall.ENOPROTOOPT))
+	RegisterError("ENOSPC", int(syscall.ENOSPC))
+	RegisterError("ENOSR", int(syscall.ENOSR))
+	RegisterError("ENOSTR", int(syscall.ENOSTR))
+	RegisterError("ENOSYS", int(syscall.ENOSYS))
+	RegisterError("ENOTBLK", int(syscall.ENOTBLK))
+	RegisterError("ENOTCONN", int(syscall.ENOTCONN))
+	RegisterError("ENOTDIR", int(syscall.ENOTDIR))
+	RegisterError("ENOTEMPTY", int(syscall.ENOTEMPTY))
+	RegisterError("ENOTNAM", int(syscall.ENOTNAM))
+	RegisterError("ENOTRECOVERABLE", int(syscall.ENOTRECOVERABLE))
+	RegisterError("ENOTSOCK", int(syscall.ENOTSOCK))
+	RegisterError("ENOTSUP", int(syscall.ENOTSUP))
+	RegisterError("ENOTTY", int(syscall.ENOTTY))
+	RegisterError("ENOTUNIQ", int(syscall.ENOTUNIQ))
+	RegisterError("ENXIO", int(syscall.ENXIO))
+	RegisterError("EOPNOTSUPP", int(syscall.EOPNOTSUPP))
+	RegisterError("EOVERFLOW", int(syscall.EOVERFLOW))
+	RegisterError("EOWNERDEAD", int(syscall.EOWNERDEAD))
+	RegisterError("EPERM", int(syscall.EPERM))
+	RegisterError("EPFNOSUPPORT", int(syscall.EPFNOSUPPORT))
+	RegisterError("EPIPE", int(syscall.EPIPE))
+	RegisterError("EPROTO", int(syscall.EPROTO))
+	RegisterError("EPROTONOSUPPORT", int(syscall.EPROTONOSUPPORT))
+	RegisterError("EPROTOTYPE", int(syscall.EPROTOTYPE))
+	RegisterError("ERANGE", int(syscall.ERANGE))
+	RegisterError("EREMCHG", int(syscall.EREMCHG))
+	RegisterError("EREMOTE", int(syscall.EREMOTE))
+	RegisterError("EREMOTEIO", int(syscall.EREMOTEIO))
+	RegisterError("ERESTART", int(syscall.ERESTART))
+	RegisterError("ERFKILL", int(syscall.ERFKILL))
+	RegisterError("EROFS", int(syscall.EROFS))
+	RegisterError("ESHUTDOWN", int(syscall.ESHUTDOWN))
+	RegisterError("ESOCKTNOSUPPORT", int(syscall.ESOCKTNOSUPPORT))
+	RegisterError("ESPIPE", int(syscall.ESPIPE))
+	RegisterError("ESRCH", int(syscall.ESRCH))
+	RegisterError("ESRMNT", int(syscall.ESRMNT))
+	RegisterError("ESTALE", int(syscall.ESTALE))
+	RegisterError("ESTRPIPE", int(syscall.ESTRPIPE))
+	RegisterError("ETIME", int(syscall.ETIME))
+	RegisterError("ETIMEDOUT", int(syscall.ETIMEDOUT))
+	RegisterError("ETOOMANYREFS", int(syscall.ETOOMANYREFS))
+	RegisterError("ETXTBSY", int(syscall.ETXTBSY))
+	RegisterError("EUCLEAN", int(syscall.EUCLEAN))
+	RegisterError("EUNATCH", int(syscall.EUNATCH))
+	RegisterError("EUSERS", int(syscall.EUSERS))
+	RegisterError("EWOULDBLOCK", int(syscall.EWOULDBLOCK))
+	RegisterError("EXDEV", int(syscall.EXDEV))
+	RegisterError("EXFULL", int(syscall.EXFULL))
 
-	AllErrors["E2BIG"] = int(syscall.E2BIG)
-	AllErrors["EACCES"] = int(syscall.EACCES)
-	AllErrors["EADDRINUSE"] = int(syscall.EADDRINUSE)
-	AllErrors["EADDRNOTAVAIL"] = int(syscall.EADDRNOTAVAIL)
-	AllErrors["EADV"] = int(syscall.EADV)
-	AllErrors["EAFNOSUPPORT"] = int(syscall.EAFNOSUPPORT)
-	AllErrors["EAGAIN"] = int(syscall.EAGAIN)
-	AllErrors["EALREADY"] = int(syscall.EALREADY)
-	AllErrors["EBADE"] = int(syscall.EBADE)
-	AllErrors["EBADF"] = int(syscall.EBADF)
-	AllErrors["EBADFD"] = int(syscall.EBADFD)
-	AllErrors["EBADMSG"] = int(syscall.EBADMSG)
-	AllErrors["EBADR"] = int(syscall.EBADR)
-	AllErrors["EBADRQC"] = int(syscall.EBADRQC)
-	AllErrors["EBADSLT"] = int(syscall.EBADSLT)
-	AllErrors["EBFONT"] = int(syscall.EBFONT)
-	AllErrors["EBUSY"] = int(syscall.EBUSY)
-	AllErrors["ECANCELED"] = int(syscall.ECANCELED)
-	AllErrors["ECHILD"] = int(syscall.ECHILD)
-	AllErrors["ECHRNG"] = int(syscall.ECHRNG)
-	AllErrors["ECOMM"] = int(syscall.ECOMM)
-	AllErrors["ECONNABORTED"] = int(syscall.ECONNABORTED)
-	AllErrors["ECONNREFUSED"] = int(syscall.ECONNREFUSED)
-	AllErrors["ECONNRESET"] = int(syscall.ECONNRESET)
-	AllErrors["EDEADLK"] = int(syscall.EDEADLK)
-	AllErrors["EDEADLOCK"] = int(syscall.EDEADLOCK)
-	AllErrors["EDESTADDRREQ"] = int(syscall.EDESTADDRREQ)
-	AllErrors["EDOM"] = int(syscall.EDOM)
-	AllErrors["EDOTDOT"] = int(syscall.EDOTDOT)
-	AllErrors["EDQUOT"] = int(syscall.EDQUOT)
-	AllErrors["EEXIST"] = int(syscall.EEXIST)
-	AllErrors["EFAULT"] = int(syscall.EFAULT)
-	AllErrors["EFBIG"] = int(syscall.EFBIG)
-	AllErrors["EHOSTDOWN"] = int(syscall.EHOSTDOWN)
-	AllErrors["EHOSTUNREACH"] = int(syscall.EHOSTUNREACH)
-	AllErrors["EIDRM"] = int(syscall.EIDRM)
-	AllErrors["EILSEQ"] = int(syscall.EILSEQ)
-	AllErrors["EINPROGRESS"] = int(syscall.EINPROGRESS)
-	AllErrors["EINTR"] = int(syscall.EINTR)
-	AllErrors["EINVAL"] = int(syscall.EINVAL)
-	AllErrors["EIO"] = int(syscall.EIO)
-	AllErrors["EISCONN"] = int(syscall.EISCONN)
-	AllErrors["EISDIR"] = int(syscall.EISDIR)
-	AllErrors["EISNAM"] = int(syscall.EISNAM)
-	AllErrors["EKEYEXPIRED"] = int(syscall.EKEYEXPIRED)
-	AllErrors["EKEYREJECTED"] = int(syscall.EKEYREJECTED)
-	AllErrors["EKEYREVOKED"] = int(syscall.EKEYREVOKED)
-	AllErrors["EL2HLT"] = int(syscall.EL2HLT)
-	AllErrors["EL2NSYNC"] = int(syscall.EL2NSYNC)
-	AllErrors["EL3HLT"] = int(syscall.EL3HLT)
-	AllErrors["EL3RST"] = int(syscall.EL3RST)
-	AllErrors["ELIBACC"] = int(syscall.ELIBACC)
-	AllErrors["ELIBBAD"] = int(syscall.ELIBBAD)
-	AllErrors["ELIBEXEC"] = int(syscall.ELIBEXEC)
-	AllErrors["ELIBMAX"] = int(syscall.ELIBMAX)
-	AllErrors["ELIBSCN"] = int(syscall.ELIBSCN)
-	AllErrors["ELNRNG"] = int(syscall.ELNRNG)
-	AllErrors["ELOOP"] = int(syscall.ELOOP)
-	AllErrors["EMEDIUMTYPE"] = int(syscall.EMEDIUMTYPE)
-	AllErrors["EMFILE"] = int(syscall.EMFILE)
-	AllErrors["EMLINK"] = int(syscall.EMLINK)
-	AllErrors["EMSGSIZE"] = int(syscall.EMSGSIZE)
-	AllErrors["EMULTIHOP"] = int(syscall.EMULTIHOP)
-	AllErrors["ENAMETOOLONG"] = int(syscall.ENAMETOOLONG)
-	AllErrors["ENAVAIL"] = int(syscall.ENAVAIL)
-	AllErrors["ENETDOWN"] = int(syscall.ENETDOWN)
-	AllErrors["ENETRESET"] = int(syscall.ENETRESET)
-	AllErrors["ENETUNREACH"] = int(syscall.ENETUNREACH)
-	AllErrors["ENFILE"] = int(syscall.ENFILE)
-	AllErrors["ENOANO"] = int(syscall.ENOANO)
-	AllErrors["ENOBUFS"] = int(syscall.ENOBUFS)
-	AllErrors["ENOCSI"] = int(syscall.ENOCSI)
-	AllErrors["ENODATA"] = int(syscall.ENODATA)
-	AllErrors["ENODEV"] = int(syscall.ENODEV)
-	AllErrors["ENOENT"] = int(syscall.ENOENT)
-	AllErrors["ENOEXEC"] = int(syscall.ENOEXEC)
-	AllErrors["ENOKEY"] = int(syscall.ENOKEY)
-	AllErrors["ENOLCK"] = int(syscall.ENOLCK)
-	AllErrors["ENOLINK"] = int(syscall.ENOLINK)
-	AllErrors["ENOMEDIUM"] = int(syscall.ENOMEDIUM)
-	AllErrors["ENOMEM"] = int(syscall.ENOMEM)
-	AllErrors["ENOMSG"] = int(syscall.ENOMSG)
-	AllErrors["ENONET"] = int(syscall.ENONET)
-	AllErrors["ENOPKG"] = int(syscall.ENOPKG)
-	AllErrors["ENOPROTOOPT"] = int(syscall.ENOPROTOOPT)
-	AllErrors["ENOSPC"] = int(syscall.ENOSPC)
-	AllErrors["ENOSR"] = int(syscall.ENOSR)
-	AllErrors["ENOSTR"] = int(syscall.ENOSTR)
-	AllErrors["ENOSYS"] = int(syscall.ENOSYS)
-	AllErrors["ENOTBLK"] = int(syscall.ENOTBLK)
-	AllErrors["ENOTCONN"] = int(syscall.ENOTCONN)
-	AllErrors["ENOTDIR"] = int(syscall.ENOTDIR)
-	AllErrors["ENOTEMPTY"] = int(syscall.ENOTEMPTY)
-	AllErrors["ENOTNAM"] = int(syscall.ENOTNAM)
-	AllErrors["ENOTRECOVERABLE"] = int(syscall.ENOTRECOVERABLE)
-	AllErrors["ENOTSOCK"] = int(syscall.ENOTSOCK)
-	AllErrors["ENOTSUP"] = int(syscall.ENOTSUP)
-	AllErrors["ENOTTY"] = int(syscall.ENOTTY)
-	AllErrors["ENOTUNIQ"] = int(syscall.ENOTUNIQ)
-	AllErrors["ENXIO"] = int(syscall.ENXIO)
-	AllErrors["EOPNOTSUPP"] = int(syscall.EOPNOTSUPP)
-	AllErrors["EOVERFLOW"] = int(syscall.EOVERFLOW)
-	AllErrors["EOWNERDEAD"] = int(syscall.EOWNERDEAD)
-	AllErrors["EPERM"] = int(syscall.EPERM)
-	AllErrors["EPFNOSUPPORT"] = int(syscall.EPFNOSUPPORT)
-	AllErrors["EPIPE"] = int(syscall.EPIPE)
-	AllErrors["EPROTO"] = int(syscall.EPROTO)
-	AllErrors["EPROTONOSUPPORT"] = int(syscall.EPROTONOSUPPORT)
-	AllErrors["EPROTOTYPE"] = int(syscall.EPROTOTYPE)
-	AllErrors["ERANGE"] = int(syscall.ERANGE)
-	AllErrors["EREMCHG"] = int(syscall.EREMCHG)
-	AllErrors["EREMOTE"] = int(syscall.EREMOTE)
-	AllErrors["EREMOTEIO"] = int(syscall.EREMOTEIO)
-	AllErrors["ERESTART"] = int(syscall.ERESTART)
-	AllErrors["ERFKILL"] = int(syscall.ERFKILL)
-	AllErrors["EROFS"] = int(syscall.EROFS)
-	AllErrors["ESHUTDOWN"] = int(syscall.ESHUTDOWN)
-	AllErrors["ESOCKTNOSUPPORT"] = int(syscall.ESOCKTNOSUPPORT)
-	AllErrors["ESPIPE"] = int(syscall.ESPIPE)
-	AllErrors["ESRCH"] = int(syscall.ESRCH)
-	AllErrors["ESRMNT"] = int(syscall.ESRMNT)
-	AllErrors["ESTALE"] = int(syscall.ESTALE)
-	AllErrors["ESTRPIPE"] = int(syscall.ESTRPIPE)
-	AllErrors["ETIME"] = int(syscall.ETIME)
-	AllErrors["ETIMEDOUT"] = int(syscall.ETIMEDOUT)
-	AllErrors["ETOOMANYREFS"] = int(syscall.ETOOMANYREFS)
-	AllErrors["ETXTBSY"] = int(syscall.ETXTBSY)
-	AllErrors["EUCLEAN"] = int(syscall.EUCLEAN)
-	AllErrors["EUNATCH"] = int(syscall.EUNATCH)
-	AllErrors["EUSERS"] = int(syscall.EUSERS)
-	AllErrors["EWOULDBLOCK"] = int(syscall.EWOULDBLOCK)
-	AllErrors["EXDEV"] = int(syscall.EXDEV)
-	AllErrors["EXFULL"] = int(syscall.EXFULL)
+	RegisterConstant("SIGABRT", int(syscall.SIGABRT))
+	RegisterConstant("SIGALRM", int(syscall.SIGALRM))
+	RegisterConstant("SIGBUS", int(syscall.SIGBUS))
+	RegisterConstant("SIGCHLD", int(syscall.SIGCHLD))
+	RegisterConstant("SIGCLD", int(syscall.SIGCLD))
+	RegisterConstant("SIGCONT", int(syscall.SIGCONT))
+	RegisterConstant("SIGFPE", int(syscall.SIGFPE))
+	RegisterConstant("SIGHUP", int(syscall.SIGHUP))
+	RegisterConstant("SIGILL", int(syscall.SIGILL))
+	RegisterConstant("SIGINT", int(syscall.SIGINT))
+	RegisterConstant("SIGIO", int(syscall.SIGIO))
+	RegisterConstant("SIGIOT", int(syscall.SIGIOT))
+	RegisterConstant("SIGKILL", int(syscall.SIGKILL))
+	RegisterConstant("SIGPIPE", int(syscall.SIGPIPE))
+	RegisterConstant("SIGPOLL", int(syscall.SIGPOLL))
+	RegisterConstant("SIGPROF", int(syscall.SIGPROF))
+	RegisterConstant("SIGPWR", int(syscall.SIGPWR))
+	RegisterConstant("SIGQUIT", int(syscall.SIGQUIT))
+	RegisterConstant("SIGSEGV", int(syscall.SIGSEGV))
+	RegisterConstant("SIGSTKFLT", int(syscall.SIGSTKFLT))
+	RegisterConstant("SIGSTOP", int(syscall.SIGSTOP))
+	RegisterConstant("SIGSYS", int(syscall.SIGSYS))
+	RegisterConstant("SIGTERM", int(syscall.SIGTERM))
+	RegisterConstant("SIGTRAP", int(syscall.SIGTRAP))
+	RegisterConstant("SIGTSTP", int(syscall.SIGTSTP))
+	RegisterConstant("SIGTTIN", int(syscall.SIGTTIN))
+	RegisterConstant("SIGTTOU", int(syscall.SIGTTOU))
+	RegisterConstant("SIGUNUSED", int(syscall.SIGUNUSED))
+	RegisterConstant("SIGURG", int(syscall.SIGURG))
+	RegisterConstant("SIGUSR1", int(syscall.SIGUSR1))
+	RegisterConstant("SIGUSR2", int(syscall.SIGUSR2))
+	RegisterConstant("SIGVTALRM", int(syscall.SIGVTALRM))
+	RegisterConstant("SIGWINCH", int(syscall.SIGWINCH))
+	RegisterConstant("SIGXCPU", int(syscall.SIGXCPU))
+	RegisterConstant("SIGXFSZ", int(syscall.SIGXFSZ))
 
-	AllConstants["SIGABRT"] = int(syscall.SIGABRT)
-	AllConstants["SIGALRM"] = int(syscall.SIGALRM)
-	AllConstants["SIGBUS"] = int(syscall.SIGBUS)
-	AllConstants["SIGCHLD"] = int(syscall.SIGCHLD)
-	AllConstants["SIGCLD"] = int(syscall.SIGCLD)
-	AllConstants["SIGCONT"] = int(syscall.SIGCONT)
-	AllConstants["SIGFPE"] = int(syscall.SIGFPE)
-	AllConstants["SIGHUP"] = int(syscall.SIGHUP)
-	AllConstants["SIGILL"] = int(syscall.SIGILL)
-	AllConstants["SIGINT"] = int(syscall.SIGINT)
-	AllConstants["SIGIO"] = int(syscall.SIGIO)
-	AllConstants["SIGIOT"] = int(syscall.SIGIOT)
-	AllConstants["SIGKILL"] = int(syscall.SIGKILL)
-	AllConstants["SIGPIPE"] = int(syscall.SIGPIPE)
-	AllConstants["SIGPOLL"] = int(syscall.SIGPOLL)
-	AllConstants["SIGPROF"] = int(syscall.SIGPROF)
-	AllConstants["SIGPWR"] = int(syscall.SIGPWR)
-	AllConstants["SIGQUIT"] = int(syscall.SIGQUIT)
-	AllConstants["SIGSEGV"] = int(syscall.SIGSEGV)
-	AllConstants["SIGSTKFLT"] = int(syscall.SIGSTKFLT)
-	AllConstants["SIGSTOP"] = int(syscall.SIGSTOP)
-	AllConstants["SIGSYS"] = int(syscall.SIGSYS)
-	AllConstants["SIGTERM"] = int(syscall.SIGTERM)
-	AllConstants["SIGTRAP"] = int(syscall.SIGTRAP)
-	AllConstants["SIGTSTP"] = int(syscall.SIGTSTP)
-	AllConstants["SIGTTIN"] = int(syscall.SIGTTIN)
-	AllConstants["SIGTTOU"] = int(syscall.SIGTTOU)
-	AllConstants["SIGUNUSED"] = int(syscall.SIGUNUSED)
-	AllConstants["SIGURG"] = int(syscall.SIGURG)
-	AllConstants["SIGUSR1"] = int(syscall.SIGUSR1)
-	AllConstants["SIGUSR2"] = int(syscall.SIGUSR2)
-	AllConstants["SIGVTALRM"] = int(syscall.SIGVTALRM)
-	AllConstants["SIGWINCH"] = int(syscall.SIGWINCH)
-	AllConstants["SIGXCPU"] = int(syscall.SIGXCPU)
-	AllConstants["SIGXFSZ"] = int(syscall.SIGXFSZ)
-
-	Syscalls["read"] = 0
-	Syscalls["write"] = 1
-	Syscalls["open"] = 2
-	Syscalls["close"] = 3
-	Syscalls["stat"] = 4
-	Syscalls["fstat"] = 5
-	Syscalls["lstat"] = 6
-	Syscalls["poll"] = 7
-	Syscalls["lseek"] = 8
-	Syscalls["mmap"] = 9
-	Syscalls["mprotect"] = 10
-	Syscalls["munmap"] = 11
-	Syscalls["brk"] = 12
-	Syscalls["rt_sigaction"] = 13
-	Syscalls["rt_sigprocmask"] = 14
-	Syscalls["rt_sigreturn"] = 15
-	Syscalls["ioctl"] = 16
-	Syscalls["pread64"] = 17
-	Syscalls["pwrite64"] = 18
-	Syscalls["readv"] = 19
-	Syscalls["writev"] = 20
-	Syscalls["access"] = 21
-	Syscalls["pipe"] = 22
-	Syscalls["select"] = 23
-	Syscalls["sched_yield"] = 24
-	Syscalls["mremap"] = 25
-	Syscalls["msync"] = 26
-	Syscalls["mincore"] = 27
-	Syscalls["madvise"] = 28
-	Syscalls["shmget"] = 29
-	Syscalls["shmat"] = 30
-	Syscalls["shmctl"] = 31
-	Syscalls["dup"] = 32
-	Syscalls["dup2"] = 33
-	Syscalls["pause"] = 34
-	Syscalls["nanosleep"] = 35
-	Syscalls["getitimer"] = 36
-	Syscalls["alarm"] = 37
-	Syscalls["setitimer"] = 38
-	Syscalls["getpid"] = 39
-	Syscalls["sendfile"] = 40
-	Syscalls["socket"] = 41
-	Syscalls["connect"] = 42
-	Syscalls["accept"] = 43
-	Syscalls["sendto"] = 44
-	Syscalls["recvfrom"] = 45
-	Syscalls["sendmsg"] = 46
-	Syscalls["recvmsg"] = 47
-	Syscalls["shutdown"] = 48
-	Syscalls["bind"] = 49
-	Syscalls["listen"] = 50
-	Syscalls["getsockname"] = 51
-	Syscalls["getpeername"] = 52
-	Syscalls["socketpair"] = 53
-	Syscalls["setsockopt"] = 54
-	Syscalls["getsockopt"] = 55
-	Syscalls["clone"] = 56
-	Syscalls["fork"] = 57
-	Syscalls["vfork"] = 58
-	Syscalls["execve"] = 59
-	Syscalls["exit"] = 60
-	Syscalls["wait4"] = 61
-	Syscalls["kill"] = 62
-	Syscalls["uname"] = 63
-	Syscalls["semget"] = 64
-	Syscalls["semop"] = 65
-	Syscalls["semctl"] = 66
-	Syscalls["shmdt"] = 67
-	Syscalls["msgget"] = 68
-	Syscalls["msgsnd"] = 69
-	Syscalls["msgrcv"] = 70
-	Syscalls["msgctl"] = 71
-	Syscalls["fcntl"] = 72
-	Syscalls["flock"] = 73
-	Syscalls["fsync"] = 74
-	Syscalls["fdatasync"] = 75
-	Syscalls["truncate"] = 76
-	Syscalls["ftruncate"] = 77
-	Syscalls["getdents"] = 78
-	Syscalls["getcwd"] = 79
-	Syscalls["chdir"] = 80
-	Syscalls["fchdir"] = 81
-	Syscalls["rename"] = 82
-	Syscalls["mkdir"] = 83
-	Syscalls["rmdir"] = 84
-	Syscalls["creat"] = 85
-	Syscalls["link"] = 86
-	Syscalls["unlink"] = 87
-	Syscalls["symlink"] = 88
-	Syscalls["readlink"] = 89
-	Syscalls["chmod"] = 90
-	Syscalls["fchmod"] = 91
-	Syscalls["chown"] = 92
-	Syscalls["fchown"] = 93
-	Syscalls["lchown"] = 94
-	Syscalls["umask"] = 95
-	Syscalls["gettimeofday"] = 96
-	Syscalls["getrlimit"] = 97
-	Syscalls["getrusage"] = 98
-	Syscalls["sysinfo"] = 99
-	Syscalls["times"] = 100
-	Syscalls["ptrace"] = 101
-	Syscalls["getuid"] = 102
-	Syscalls["syslog"] = 103
-	Syscalls["getgid"] = 104
-	Syscalls["setuid"] = 105
-	Syscalls["setgid"] = 106
-	Syscalls["geteuid"] = 107
-	Syscalls["getegid"] = 108
-	Syscalls["setpgid"] = 109
-	Syscalls["getppid"] = 110
-	Syscalls["getpgrp"] = 111
-	Syscalls["setsid"] = 112
-	Syscalls["setreuid"] = 113
-	Syscalls["setregid"] = 114
-	Syscalls["getgroups"] = 115
-	Syscalls["setgroups"] = 116
-	Syscalls["setresuid"] = 117
-	Syscalls["getresuid"] = 118
-	Syscalls["setresgid"] = 119
-	Syscalls["getresgid"] = 120
-	Syscalls["getpgid"] = 121
-	Syscalls["setfsuid"] = 122
-	Syscalls["setfsgid"] = 123
-	Syscalls["getsid"] = 124
-	Syscalls["capget"] = 125
-	Syscalls["capset"] = 126
-	Syscalls["rt_sigpending"] = 127
-	Syscalls["rt_sigtimedwait"] = 128
-	Syscalls["rt_sigqueueinfo"] = 129
-	Syscalls["rt_sigsuspend"] = 130
-	Syscalls["sigaltstack"] = 131
-	Syscalls["utime"] = 132
-	Syscalls["mknod"] = 133
-	Syscalls["uselib"] = 134
-	Syscalls["personality"] = 135
-	Syscalls["ustat"] = 136
-	Syscalls["statfs"] = 137
-	Syscalls["fstatfs"] = 138
-	Syscalls["sysfs"] = 139
-	Syscalls["getpriority"] = 140
-	Syscalls["setpriority"] = 141
-	Syscalls["sched_setparam"] = 142
-	Syscalls["sched_getparam"] = 143
-	Syscalls["sched_setscheduler"] = 144
-	Syscalls["sched_getscheduler"] = 145
-	Syscalls["sched_get_priority_max"] = 146
-	Syscalls["sched_get_priority_min"] = 147
-	Syscalls["sched_rr_get_interval"] = 148
-	Syscalls["mlock"] = 149
-	Syscalls["munlock"] = 150
-	Syscalls["mlockall"] = 151
-	Syscalls["munlockall"] = 152
-	Syscalls["vhangup"] = 153
-	Syscalls["modify_ldt"] = 154
-	Syscalls["pivot_root"] = 155
-	Syscalls["_sysctl"] = 156
-	Syscalls["prctl"] = 157
-	Syscalls["arch_prctl"] = 158
-	Syscalls["adjtimex"] = 159
-	Syscalls["setrlimit"] = 160
-	Syscalls["chroot"] = 161
-	Syscalls["sync"] = 162
-	Syscalls["acct"] = 163
-	Syscalls["settimeofday"] = 164
-	Syscalls["mount"] = 165
-	Syscalls["umount2"] = 166
-	Syscalls["swapon"] = 167
-	Syscalls["swapoff"] = 168
-	Syscalls["reboot"] = 169
-	Syscalls["sethostname"] = 170
-	Syscalls["setdomainname"] = 171
-	Syscalls["iopl"] = 172
-	Syscalls["ioperm"] = 173
-	Syscalls["create_module"] = 174
-	Syscalls["init_module"] = 175
-	Syscalls["delete_module"] = 176
-	Syscalls["get_kernel_syms"] = 177
-	Syscalls["query_module"] = 178
-	Syscalls["quotactl"] = 179
-	Syscalls["nfsservctl"] = 180
-	Syscalls["getpmsg"] = 181
-	Syscalls["putpmsg"] = 182
-	Syscalls["afs_syscall"] = 183
-	Syscalls["tuxcall"] = 184
-	Syscalls["security"] = 185
-	Syscalls["gettid"] = 186
-	Syscalls["readahead"] = 187
-	Syscalls["setxattr"] = 188
-	Syscalls["lsetxattr"] = 189
-	Syscalls["fsetxattr"] = 190
-	Syscalls["getxattr"] = 191
-	Syscalls["lgetxattr"] = 192
-	Syscalls["fgetxattr"] = 193
-	Syscalls["listxattr"] = 194
-	Syscalls["llistxattr"] = 195
-	Syscalls["flistxattr"] = 196
-	Syscalls["removexattr"] = 197
-	Syscalls["lremovexattr"] = 198
-	Syscalls["fremovexattr"] = 199
-	Syscalls["tkill"] = 200
-	Syscalls["time"] = 201
-	Syscalls["futex"] = 202
-	Syscalls["sched_setaffinity"] = 203
-	Syscalls["sched_getaffinity"] = 204
-	Syscalls["set_thread_area"] = 205
-	Syscalls["io_setup"] = 206
-	Syscalls["io_destroy"] = 207
-	Syscalls["io_getevents"] = 208
-	Syscalls["io_submit"] = 209
-	Syscalls["io_cancel"] = 210
-	Syscalls["get_thread_area"] = 211
-	Syscalls["lookup_dcookie"] = 212
-	Syscalls["epoll_create"] = 213
-	Syscalls["epoll_ctl_old"] = 214
-	Syscalls["epoll_wait_old"] = 215
-	Syscalls["remap_file_pages"] = 216
-	Syscalls["getdents64"] = 217
-	Syscalls["set_tid_address"] = 218
-	Syscalls["restart_syscall"] = 219
-	Syscalls["semtimedop"] = 220
-	Syscalls["fadvise64"] = 221
-	Syscalls["timer_create"] = 222
-	Syscalls["timer_settime"] = 223
-	Syscalls["timer_gettime"] = 224
-	Syscalls["timer_getoverrun"] = 225
-	Syscalls["timer_delete"] = 226
-	Syscalls["clock_settime"] = 227
-	Syscalls["clock_gettime"] = 228
-	Syscalls["clock_getres"] = 229
-	Syscalls["clock_nanosleep"] = 230
-	Syscalls["exit_group"] = 231
-	Syscalls["epoll_wait"] = 232
-	Syscalls["epoll_ctl"] = 233
-	Syscalls["tgkill"] = 234
-	Syscalls["utimes"] = 235
-	Syscalls["vserver"] = 236
-	Syscalls["mbind"] = 237
-	Syscalls["set_mempolicy"] = 238
-	Syscalls["get_mempolicy"] = 239
-	Syscalls["mq_open"] = 240
-	Syscalls["mq_unlink"] = 241
-	Syscalls["mq_timedsend"] = 242
-	Syscalls["mq_timedreceive"] = 243
-	Syscalls["mq_notify"] = 244
-	Syscalls["mq_getsetattr"] = 245
-	Syscalls["kexec_load"] = 246
-	Syscalls["waitid"] = 247
-	Syscalls["add_key"] = 248
-	Syscalls["request_key"] = 249
-	Syscalls["keyctl"] = 250
-	Syscalls["ioprio_set"] = 251
-	Syscalls["ioprio_get"] = 252
-	Syscalls["inotify_init"] = 253
-	Syscalls["inotify_add_watch"] = 254
-	Syscalls["inotify_rm_watch"] = 255
-	Syscalls["migrate_pages"] = 256
-	Syscalls["openat"] = 257
-	Syscalls["mkdirat"] = 258
-	Syscalls["mknodat"] = 259
-	Syscalls["fchownat"] = 260
-	Syscalls["futimesat"] = 261
-	Syscalls["newfstatat"] = 262
-	Syscalls["unlinkat"] = 263
-	Syscalls["renameat"] = 264
-	Syscalls["linkat"] = 265
-	Syscalls["symlinkat"] = 266
-	Syscalls["readlinkat"] = 267
-	Syscalls["fchmodat"] = 268
-	Syscalls["faccessat"] = 269
-	Syscalls["pselect6"] = 270
-	Syscalls["ppoll"] = 271
-	Syscalls["unshare"] = 272
-	Syscalls["set_robust_list"] = 273
-	Syscalls["get_robust_list"] = 274
-	Syscalls["splice"] = 275
-	Syscalls["tee"] = 276
-	Syscalls["sync_file_range"] = 277
-	Syscalls["vmsplice"] = 278
-	Syscalls["move_pages"] = 279
-	Syscalls["utimensat"] = 280
-	Syscalls["epoll_pwait"] = 281
-	Syscalls["signalfd"] = 282
-	Syscalls["timerfd_create"] = 283
-	Syscalls["eventfd"] = 284
-	Syscalls["fallocate"] = 285
-	Syscalls["timerfd_settime"] = 286
-	Syscalls["timerfd_gettime"] = 287
-	Syscalls["accept4"] = 288
-	Syscalls["signalfd4"] = 289
-	Syscalls["eventfd2"] = 290
-	Syscalls["epoll_create1"] = 291
-	Syscalls["dup3"] = 292
-	Syscalls["pipe2"] = 293
-	Syscalls["inotify_init1"] = 294
-	Syscalls["preadv"] = 295
-	Syscalls["pwritev"] = 296
-	Syscalls["rt_tgsigqueueinfo"] = 297
-	Syscalls["perf_event_open"] = 298
-	Syscalls["recvmmsg"] = 299
-	Syscalls["fanotify_init"] = 300
-	Syscalls["fanotify_mark"] = 301
-	Syscalls["prlimit64"] = 302
-	Syscalls["name_to_handle_at"] = 303
-	Syscalls["open_by_handle_at"] = 304
-	Syscalls["clock_adjtime"] = 305
-	Syscalls["syncfs"] = 306
-	Syscalls["sendmmsg"] = 307
-	Syscalls["setns"] = 308
-	Syscalls["getcpu"] = 309
-	Syscalls["process_vm_readv"] = 310
-	Syscalls["process_vm_writev"] = 311
-	Syscalls["kcmp"] = 312
-	Syscalls["finit_module"] = 313
-	Syscalls["sched_setattr"] = 314
-	Syscalls["sched_getattr"] = 315
-	Syscalls["renameat2"] = 316
-	Syscalls["seccomp"] = 317
-	Syscalls["getrandom"] = 318
-	Syscalls["memfd_create"] = 319
-	Syscalls["kexec_file_load"] = 320
-	Syscalls["bpf"] = 321
-	Syscalls["execveat"] = 322
+	RegisterSyscall("read", 0)
+	RegisterSyscall("write", 1)
+	RegisterSyscall("open", 2)
+	RegisterSyscall("close", 3)
+	RegisterSyscall("stat", 4)
+	RegisterSyscall("fstat", 5)
+	RegisterSyscall("lstat", 6)
+	RegisterSyscall("poll", 7)
+	RegisterSyscall("lseek", 8)
+	RegisterSyscall("mmap", 9)
+	RegisterSyscall("mprotect", 10)
+	RegisterSyscall("munmap", 11)
+	RegisterSyscall("brk", 12)
+	RegisterSyscall("rt_sigaction", 13)
+	RegisterSyscall("rt_sigprocmask", 14)
+	RegisterSyscall("rt_sigreturn", 15)
+	RegisterSyscall("ioctl", 16)
+	RegisterSyscall("pread64", 17)
+	RegisterSyscall("pwrite64", 18)
+	RegisterSyscall("readv", 19)
+	RegisterSyscall("writev", 20)
+	RegisterSyscall("access", 21)
+	RegisterSyscall("pipe", 22)
+	RegisterSyscall("select", 23)
+	RegisterSyscall("sched_yield", 24)
+	RegisterSyscall("mremap", 25)
+	RegisterSyscall("msync", 26)
+	RegisterSyscall("mincore", 27)
+	RegisterSyscall("madvise", 28)
+	RegisterSyscall("shmget", 29)
+	RegisterSyscall("shmat", 30)
+	RegisterSyscall("shmctl", 31)
+	RegisterSyscall("dup", 32)
+	RegisterSyscall("dup2", 33)
+	RegisterSyscall("pause", 34)
+	RegisterSyscall("nanosleep", 35)
+	RegisterSyscall("getitimer", 36)
+	RegisterSyscall("alarm", 37)
+	RegisterSyscall("setitimer", 38)
+	RegisterSyscall("getpid", 39)
+	RegisterSyscall("sendfile", 40)
+	RegisterSyscall("socket", 41)
+	RegisterSyscall("connect", 42)
+	RegisterSyscall("accept", 43)
+	RegisterSyscall("sendto", 44)
+	RegisterSyscall("recvfrom", 45)
+	RegisterSyscall("sendmsg", 46)
+	RegisterSyscall("recvmsg", 47)
+	RegisterSyscall("shutdown", 48)
+	RegisterSyscall("bind", 49)
+	RegisterSyscall("listen", 50)
+	RegisterSyscall("getsockname", 51)
+	RegisterSyscall("getpeername", 52)
+	RegisterSyscall("socketpair", 53)
+	RegisterSyscall("setsockopt", 54)
+	RegisterSyscall("getsockopt", 55)
+	RegisterSyscall("clone", 56)
+	RegisterSyscall("fork", 57)
+	RegisterSyscall("vfork", 58)
+	RegisterSyscall("execve", 59)
+	RegisterSyscall("exit", 60)
+	RegisterSyscall("wait4", 61)
+	RegisterSyscall("kill", 62)
+	RegisterSyscall("uname", 63)
+	RegisterSyscall("semget", 64)
+	RegisterSyscall("semop", 65)
+	RegisterSyscall("semctl", 66)
+	RegisterSyscall("shmdt", 67)
+	RegisterSyscall("msgget", 68)
+	RegisterSyscall("msgsnd", 69)
+	RegisterSyscall("msgrcv", 70)
+	RegisterSyscall("msgctl", 71)
+	RegisterSyscall("fcntl", 72)
+	RegisterSyscall("flock", 73)
+	RegisterSyscall("fsync", 74)
+	RegisterSyscall("fdatasync", 75)
+	RegisterSyscall("truncate", 76)
+	RegisterSyscall("ftruncate", 77)
+	RegisterSyscall("getdents", 78)
+	RegisterSyscall("getcwd", 79)
+	RegisterSyscall("chdir", 80)
+	RegisterSyscall("fchdir", 81)
+	RegisterSyscall("rename", 82)
+	RegisterSyscall("mkdir", 83)
+	RegisterSyscall("rmdir", 84)
+	RegisterSyscall("creat", 85)
+	RegisterSyscall("link", 86)
+	RegisterSyscall("unlink", 87)
+	RegisterSyscall("symlink", 88)
+	RegisterSyscall("readlink", 89)
+	RegisterSyscall("chmod", 90)
+	RegisterSyscall("fchmod", 91)
+	RegisterSyscall("chown", 92)
+	RegisterSyscall("fchown", 93)
+	RegisterSyscall("lchown", 94)
+	RegisterSyscall("umask", 95)
+	RegisterSyscall("gettimeofday", 96)
+	RegisterSyscall("getrlimit", 97)
+	RegisterSyscall("getrusage", 98)
+	RegisterSyscall("sysinfo", 99)
+	RegisterSyscall("times", 100)
+	RegisterSyscall("ptrace", 101)
+	RegisterSyscall("getuid", 102)
+	RegisterSyscall("syslog", 103)
+	RegisterSyscall("getgid", 104)
+	RegisterSyscall("setuid", 105)
+	RegisterSyscall("setgid", 106)
+	RegisterSyscall("geteuid", 107)
+	RegisterSyscall("getegid", 108)
+	RegisterSyscall("setpgid", 109)
+	RegisterSyscall("getppid", 110)
+	RegisterSyscall("getpgrp", 111)
+	RegisterSyscall("setsid", 112)
+	RegisterSyscall("setreuid", 113)
+	RegisterSyscall("setregid", 114)
+	RegisterSyscall("getgroups", 115)
+	RegisterSyscall("setgroups", 116)
+	RegisterSyscall("setresuid", 117)
+	RegisterSyscall("getresuid", 118)
+	RegisterSyscall("setresgid", 119)
+	RegisterSyscall("getresgid", 120)
+	RegisterSyscall("getpgid", 121)
+	RegisterSyscall("setfsuid", 122)
+	RegisterSyscall("setfsgid", 123)
+	RegisterSyscall("getsid", 124)
+	RegisterSyscall("capget", 125)
+	RegisterSyscall("capset", 126)
+	RegisterSyscall("rt_sigpending", 127)
+	RegisterSyscall("rt_sigtimedwait", 128)
+	RegisterSyscall("rt_sigqueueinfo", 129)
+	RegisterSyscall("rt_sigsuspend", 130)
+	RegisterSyscall("sigaltstack", 131)
+	RegisterSyscall("utime", 132)
+	RegisterSyscall("mknod", 133)
+	RegisterSyscall("uselib", 134)
+	RegisterSyscall("personality", 135)
+	RegisterSyscall("ustat", 136)
+	RegisterSyscall("statfs", 137)
+	RegisterSyscall("fstatfs", 138)
+	RegisterSyscall("sysfs", 139)
+	RegisterSyscall("getpriority", 140)
+	RegisterSyscall("setpriority", 141)
+	RegisterSyscall("sched_setparam", 142)
+	RegisterSyscall("sched_getparam", 143)
+	RegisterSyscall("sched_setscheduler", 144)
+	RegisterSyscall("sched_getscheduler", 145)
+	RegisterSyscall("sched_get_priority_max", 146)
+	RegisterSyscall("sched_get_priority_min", 147)
+	RegisterSyscall("sched_rr_get_interval", 148)
+	RegisterSyscall("mlock", 149)
+	RegisterSyscall("munlock", 150)
+	RegisterSyscall("mlockall", 151)
+	RegisterSyscall("munlockall", 152)
+	RegisterSyscall("vhangup", 153)
+	RegisterSyscall("modify_ldt", 154)
+	RegisterSyscall("pivot_root", 155)
+	RegisterSyscall("_sysctl", 156)
+	RegisterSyscall("prctl", 157)
+	RegisterSyscall("arch_prctl", 158)
+	RegisterSyscall("adjtimex", 159)
+	RegisterSyscall("setrlimit", 160)
+	RegisterSyscall("chroot", 161)
+	RegisterSyscall("sync", 162)
+	RegisterSyscall("acct", 163)
+	RegisterSyscall("settimeofday", 164)
+	RegisterSyscall("mount", 165)
+	RegisterSyscall("umount2", 166)
+	RegisterSyscall("swapon", 167)
+	RegisterSyscall("swapoff", 168)
+	RegisterSyscall("reboot", 169)
+	RegisterSyscall("sethostname", 170)
+	RegisterSyscall("setdomainname", 171)
+	RegisterSyscall("iopl", 172)
+	RegisterSyscall("ioperm", 173)
+	RegisterSyscall("create_module", 174)
+	RegisterSyscall("init_module", 175)
+	RegisterSyscall("delete_module", 176)
+	RegisterSyscall("get_kernel_syms", 177)
+	RegisterSyscall("query_module", 178)
+	RegisterSyscall("quotactl", 179)
+	RegisterSyscall("nfsservctl", 180)
+	RegisterSyscall("getpmsg", 181)
+	RegisterSyscall("putpmsg", 182)
+	RegisterSyscall("afs_syscall", 183)
+	RegisterSyscall("tuxcall", 184)
+	RegisterSyscall("security", 185)
+	RegisterSyscall("gettid", 186)
+	RegisterSyscall("readahead", 187)
+	RegisterSyscall("setxattr", 188)
+	RegisterSyscall("lsetxattr", 189)
+	RegisterSyscall("fsetxattr", 190)
+	RegisterSyscall("getxattr", 191)
+	RegisterSyscall("lgetxattr", 192)
+	RegisterSyscall("fgetxattr", 193)
+	RegisterSyscall("listxattr", 194)
+	RegisterSyscall("llistxattr", 195)
+	RegisterSyscall("flistxattr", 196)
+	RegisterSyscall("removexattr", 197)
+	RegisterSyscall("lremovexattr", 198)
+	RegisterSyscall("fremovexattr", 199)
+	RegisterSyscall("tkill", 200)
+	RegisterSyscall("time", 201)
+	RegisterSyscall("futex", 202)
+	RegisterSyscall("sched_setaffinity", 203)
+	RegisterSyscall("sched_getaffinity", 204)
+	RegisterSyscall("set_thread_area", 205)
+	RegisterSyscall("io_setup", 206)
+	RegisterSyscall("io_destroy", 207)
+	RegisterSyscall("io_getevents", 208)
+	RegisterSyscall("io_submit", 209)
+	RegisterSyscall("io_cancel", 210)
+	RegisterSyscall("get_thread_area", 211)
+	RegisterSyscall("lookup_dcookie", 212)
+	RegisterSyscall("epoll_create", 213)
+	RegisterSyscall("epoll_ctl_old", 214)
+	RegisterSyscall("epoll_wait_old", 215)
+	RegisterSyscall("remap_file_pages", 216)
+	RegisterSyscall("getdents64", 217)
+	RegisterSyscall("set_tid_address", 218)
+	RegisterSyscall("restart_syscall", 219)
+	RegisterSyscall("semtimedop", 220)
+	RegisterSyscall("fadvise64", 221)
+	RegisterSyscall("timer_create", 222)
+	RegisterSyscall("timer_settime", 223)
+	RegisterSyscall("timer_gettime", 224)
+	RegisterSyscall("timer_getoverrun", 225)
+	RegisterSyscall("timer_delete", 226)
+	RegisterSyscall("clock_settime", 227)
+	RegisterSyscall("clock_gettime", 228)
+	RegisterSyscall("clock_getres", 229)
+	RegisterSyscall("clock_nanosleep", 230)
+	RegisterSyscall("exit_group", 231)
+	RegisterSyscall("epoll_wait", 232)
+	RegisterSyscall("epoll_ctl", 233)
+	RegisterSyscall("tgkill", 234)
+	RegisterSyscall("utimes", 235)
+	RegisterSyscall("vserver", 236)
+	RegisterSyscall("mbind", 237)
+	RegisterSyscall("set_mempolicy", 238)
+	RegisterSyscall("get_mempolicy", 239)
+	RegisterSyscall("mq_open", 240)
+	RegisterSyscall("mq_unlink", 241)
+	RegisterSyscall("mq_timedsend", 242)
+	RegisterSyscall("mq_timedreceive", 243)
+	RegisterSyscall("mq_notify", 244)
+	RegisterSyscall("mq_getsetattr", 245)
+	RegisterSyscall("kexec_load", 246)
+	RegisterSyscall("waitid", 247)
+	RegisterSyscall("add_key", 248)
+	RegisterSyscall("request_key", 249)
+	RegisterSyscall("keyctl", 250)
+	RegisterSyscall("ioprio_set", 251)
+	RegisterSyscall("ioprio_get", 252)
+	RegisterSyscall("inotify_init", 253)
+	RegisterSyscall("inotify_add_watch", 254)
+	RegisterSyscall("inotify_rm_watch", 255)
+	RegisterSyscall("migrate_pages", 256)
+	RegisterSyscall("openat", 257)
+	RegisterSyscall("mkdirat", 258)
+	RegisterSyscall("mknodat", 259)
+	RegisterSyscall("fchownat", 260)
+	RegisterSyscall("futimesat", 261)
+	RegisterSyscall("newfstatat", 262)
+	RegisterSyscall("unlinkat", 263)
+	RegisterSyscall("renameat", 264)
+	RegisterSyscall("linkat", 265)
+	RegisterSyscall("symlinkat", 266)
+	RegisterSyscall("readlinkat", 267)
+	RegisterSyscall("fchmodat", 268)
+	RegisterSyscall("faccessat", 269)
+	RegisterSyscall("pselect6", 270)
+	RegisterSyscall("ppoll", 271)
+	RegisterSyscall("unshare", 272)
+	RegisterSyscall("set_robust_list", 273)
+	RegisterSyscall("get_robust_list", 274)
+	RegisterSyscall("splice", 275)
+	RegisterSyscall("tee", 276)
+	RegisterSyscall("sync_file_range", 277)
+	RegisterSyscall("vmsplice", 278)
+	RegisterSyscall("move_pages", 279)
+	RegisterSyscall("utimensat", 280)
+	RegisterSyscall("epoll_pwait", 281)
+	RegisterSyscall("signalfd", 282)
+	RegisterSyscall("timerfd_create", 283)
+	RegisterSyscall("eventfd", 284)
+	RegisterSyscall("fallocate", 285)
+	RegisterSyscall("timerfd_settime", 286)
+	RegisterSyscall("timerfd_gettime", 287)
+	RegisterSyscall("accept4", 288)
+	RegisterSyscall("signalfd4", 289)
+	RegisterSyscall("eventfd2", 290)
+	RegisterSyscall("epoll_create1", 291)
+	RegisterSyscall("dup3", 292)
+	RegisterSyscall("pipe2", 293)
+	RegisterSyscall("inotify_init1", 294)
+	RegisterSyscall("preadv", 295)
+	RegisterSyscall("pwritev", 296)
+	RegisterSyscall("rt_tgsigqueueinfo", 297)
+	RegisterSyscall("perf_event_open", 298)
+	RegisterSyscall("recvmmsg", 299)
+	RegisterSyscall("fanotify_init", 300)
+	RegisterSyscall("fanotify_mark", 301)
+	RegisterSyscall("prlimit64", 302)
+	RegisterSyscall("name_to_handle_at", 303)
+	RegisterSyscall("open_by_handle_at", 304)
+	RegisterSyscall("clock_adjtime", 305)
+	RegisterSyscall("syncfs", 306)
+	RegisterSyscall("sendmmsg", 307)
+	RegisterSyscall("setns", 308)
+	RegisterSyscall("getcpu", 309)
+	RegisterSyscall("process_vm_readv", 310)
+	RegisterSyscall("process_vm_writev", 311)
+	RegisterSyscall("kcmp", 312)
+	RegisterSyscall("finit_module", 313)
+	RegisterSyscall("sched_setattr", 314)
+	RegisterSyscall("sched_getattr", 315)
+	RegisterSyscall("renameat2", 316)
+	RegisterSyscall("seccomp", 317)
+	RegisterSyscall("getrandom", 318)
+	RegisterSyscall("memfd_create", 319)
+	RegisterSyscall("kexec_file_load", 320)
+	RegisterSyscall("bpf", 321)
+	RegisterSyscall("execveat", 322)
 }
 
 // GetSyscall returns the syscall number for the given name if it exists
