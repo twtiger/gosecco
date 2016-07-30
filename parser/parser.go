@@ -164,7 +164,7 @@ func (ctx *parseContext) equalityExpression() (tree.Expression, error) {
 		return nil, e
 	}
 	switch ctx.next() {
-	case EQL, NEQ:
+	case EQL, NEQ, BITSET:
 		op, _ := ctx.consume()
 		right, e := ctx.equalityExpression()
 		if e != nil {

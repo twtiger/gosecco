@@ -43,6 +43,8 @@ import "fmt"
       "/" => {f(DIV, nil)};
       "%" => {f(MOD, nil)};
 
+      "&?" => {f(BITSET, nil)};
+
       "&&" => {f(LAND, nil)};
       "||" => {f(LOR, nil)};
 

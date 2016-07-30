@@ -209,6 +209,24 @@ func (s *ParserSuite) Test_parseYetAnotherRule(c *C) {
 	})
 }
 
+func (s *ParserSuite) Test_parseYetAnotherRuleWithBitsetComparison(c *C) {
+	result, _, _, _ := parseExpression("arg0 == 4 || arg0 &? 5")
+
+	c.Assert(tree.ExpressionString(result), Equals, "(or (eq arg0 4) (bitset arg0 5))")
+	c.Assert(result, DeepEquals, tree.Or{
+		Left: tree.Comparison{
+			Left:  tree.Argument{Index: 0},
+			Op:    tree.EQL,
+			Right: tree.NumericLiteral{4},
+		},
+		Right: tree.Comparison{
+			Left:  tree.Argument{Index: 0},
+			Op:    tree.BITSET,
+			Right: tree.NumericLiteral{5},
+		},
+	})
+}
+
 func parseExpectSuccess(c *C, str string) string {
 	result, _, _, err := parseExpression(str)
 	c.Assert(err, IsNil)
@@ -381,6 +399,10 @@ func (s *ParserSuite) Test_parseArgumentsCorrectly_andIncorrectly(c *C) {
 		Op:    tree.EQL,
 		Right: tree.NumericLiteral{0},
 	})
+}
+
+func (s *ParserSuite) Test_parseBitSet(c *C) {
+	c.Assert(parseExpectSuccess(c, "arg0 &? 1"), Equals, "(bitset arg0 1)")
 }
 
 func (s *ParserSuite) Test_parseCallInBooleanContext(c *C) {

@@ -31,6 +31,28 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesEqualityWithArgAgai
 	c.Assert(tree.ExpressionString(sx), Equals, "(and (eq 2596069104 argL2) (eq 305419896 argH2))")
 }
 
+func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesBitandWithArgAgainstNumber(c *C) {
+	sx := createFullArgumentSplitterSimplifier().Transform(
+		tree.Comparison{
+			Op:    tree.BITSET,
+			Left:  tree.Argument{Type: tree.Full, Index: 2},
+			Right: tree.NumericLiteral{0x123456789ABCDEF0},
+		},
+	)
+
+	c.Assert(tree.ExpressionString(sx), Equals, "(and (eq (binand argL2 2596069104) 2596069104) (eq (binand argH2 305419896) 305419896))")
+
+	sx = createFullArgumentSplitterSimplifier().Transform(
+		tree.Comparison{
+			Op:    tree.BITSET,
+			Left:  tree.NumericLiteral{0x123456789ABCDEF0},
+			Right: tree.Argument{Type: tree.Full, Index: 2},
+		},
+	)
+
+	c.Assert(tree.ExpressionString(sx), Equals, "(and (eq (binand 2596069104 argL2) argL2) (eq (binand 305419896 argH2) argH2))")
+}
+
 func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesEqualityWithArgAgainstArg(c *C) {
 	sx := createFullArgumentSplitterSimplifier().Transform(
 		tree.Comparison{
@@ -41,6 +63,30 @@ func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesEqualityWithArgAgai
 	)
 
 	c.Assert(tree.ExpressionString(sx), Equals, "(and (eq argL2 argL4) (eq argH2 argH4))")
+}
+
+func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesBitsetWithArgAgainstArg(c *C) {
+	sx := createFullArgumentSplitterSimplifier().Transform(
+		tree.Comparison{
+			Op:    tree.BITSET,
+			Left:  tree.Argument{Type: tree.Full, Index: 2},
+			Right: tree.Argument{Type: tree.Full, Index: 4},
+		},
+	)
+
+	c.Assert(tree.ExpressionString(sx), Equals, "(and (eq (binand argL2 argL4) argL4) (eq (binand argH2 argH4) argH4))")
+}
+
+func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesBitsetWithArgAgainstExpression(c *C) {
+	sx := createFullArgumentSplitterSimplifier().Transform(
+		tree.Comparison{
+			Op:    tree.BITSET,
+			Left:  tree.Argument{Type: tree.Full, Index: 2},
+			Right: tree.Arithmetic{Op: tree.BINOR, Left: tree.NumericLiteral{0x1}, Right: tree.NumericLiteral{0x2}},
+		},
+	)
+
+	c.Assert(tree.ExpressionString(sx), Equals, "(and (eq argH2 0) (neq (binand argL2 (binor 1 2)) 0))")
 }
 
 func (s *FullArgumentSplitterSimplifierSuite) Test_simplifiesNonequalityWithArgAgainstNumber(c *C) {

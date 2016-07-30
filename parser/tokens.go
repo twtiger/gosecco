@@ -31,9 +31,10 @@ const (
 	GT  // >
 	NOT // !
 
-	NEQ // !=
-	LTE // <=
-	GTE // >=
+	NEQ    // !=
+	LTE    // <=
+	GTE    // >=
+	BITSET // &?
 
 	LPAREN // (
 	LBRACK // [

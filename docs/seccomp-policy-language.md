@@ -159,12 +159,4 @@ As a special case, the string "1" can be used as a short form of specifying the 
 
 ### Compatibility note
 
-The current language as defined is almost completely backwards compatible with the previous seccomp definition language, with one big difference. The bitset comparison operator & does not exist anymore, so if you have a rule like:
-
-    ioctl: arg0 & 0x07
-
-that will need to be changed to
-
-    ioctl: arg0 & 0x07 != 0
-
-The reason for this is that we have introduced the bitwise AND operator and parsing it as different in different contexts introduces a lot of fragility and problems in the parser. For robustness we decided to go this path. The type checker will warn about these kinds of instances, so it won't generate incorrect code.
+The current language as defined is almost completely backwards compatible with the previous seccomp definition language, with one big difference. The bitset comparison operator & has been moved to be &? instead. This was done to remove ambigous parsing rules.

@@ -19,10 +19,11 @@ var shiftOperator = map[token]tree.ArithmeticType{
 }
 
 var comparisonOperator = map[token]tree.ComparisonType{
-	EQL: tree.EQL,
-	NEQ: tree.NEQL,
-	LT:  tree.LT,
-	GT:  tree.GT,
-	LTE: tree.LTE,
-	GTE: tree.GTE,
+	EQL:    tree.EQL,
+	NEQ:    tree.NEQL,
+	LT:     tree.LT,
+	GT:     tree.GT,
+	LTE:    tree.LTE,
+	GTE:    tree.GTE,
+	BITSET: tree.BITSET,
 }
