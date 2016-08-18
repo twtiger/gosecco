@@ -45,7 +45,7 @@ Macros can take arguments - the argument list follows the usual rules and the ev
 
 ## Rules
 
-A rule can take several different forms. Each rule will be for one specific systemcall. That systemcall will be referred to by its common name. There can only be one rule per systemcall for each policy file. A rule can result in either a boolean result, or a direct return action.
+A rule can take several different forms. Each rule will be for one specific systemcall. That systemcall will be referred to by its common name. There can only be one rule per systemcall for each policy file - except if they are equal. A rule can result in either a boolean result, or a direct return action.
 If a boolean result happens, the rule will generate a return action based on the DEFAULT positive or negative action for that policy file. Specifically, a positive result from the rule, will return the DEFAULT POSITIVE action, and the negative result will return the DEFAULT NEGATIVE action.
 
 There are several different format for rules. They all start with the name of the system call, followed by possible spaces, followed by a colon and possible spaces. The first form takes a boolean expression after the colon, and will generate a positive or negative result depending on the outcome of that boolean expression:

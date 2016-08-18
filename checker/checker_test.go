@@ -330,8 +330,8 @@ func (s *CheckerSuite) Test_duplicateRules(c *C) {
 	toCheck := tree.Policy{Rules: []*tree.Rule{
 		&tree.Rule{Name: "read", Body: tree.BooleanLiteral{true}},
 		&tree.Rule{Name: "write", Body: tree.BooleanLiteral{true}},
-		&tree.Rule{Name: "read", Body: tree.BooleanLiteral{true}},
-		&tree.Rule{Name: "write", Body: tree.BooleanLiteral{true}},
+		&tree.Rule{Name: "read", Body: tree.BooleanLiteral{false}},
+		&tree.Rule{Name: "write", Body: tree.BooleanLiteral{false}},
 		&tree.Rule{Name: "fcntl", Body: tree.BooleanLiteral{true}},
 	}}
 
@@ -340,6 +340,20 @@ func (s *CheckerSuite) Test_duplicateRules(c *C) {
 	c.Assert(len(val), Equals, 2)
 	c.Assert(val[0], ErrorMatches, "\\[read\\] duplicate definition of syscall rule")
 	c.Assert(val[1], ErrorMatches, "\\[write\\] duplicate definition of syscall rule")
+}
+
+func (s *CheckerSuite) Test_duplicateRulesWithSameValue(c *C) {
+	toCheck := tree.Policy{Rules: []*tree.Rule{
+		&tree.Rule{Name: "read", Body: tree.BooleanLiteral{true}},
+		&tree.Rule{Name: "write", Body: tree.Comparison{Op: tree.EQL, Left: tree.Argument{Type: tree.Full, Index: 2}, Right: tree.NumericLiteral{42}}},
+		&tree.Rule{Name: "read", Body: tree.BooleanLiteral{true}},
+		&tree.Rule{Name: "write", Body: tree.Comparison{Op: tree.EQL, Left: tree.Argument{Type: tree.Full, Index: 2}, Right: tree.NumericLiteral{42}}},
+		&tree.Rule{Name: "fcntl", Body: tree.BooleanLiteral{true}},
+	}}
+
+	val := EnsureValid(toCheck)
+
+	c.Assert(len(val), Equals, 0)
 }
 
 func (s *CheckerSuite) Test_invalidSyscall(c *C) {

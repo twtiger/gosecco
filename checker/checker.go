@@ -24,13 +24,13 @@ import (
 // EnsureValid takes a policy and returns all the errors encounterered for the given rules
 // If everything is valid, the return will be empty
 func EnsureValid(p tree.Policy) []error {
-	v := &validityChecker{rules: p.Rules, seen: make(map[string]bool)}
+	v := &validityChecker{rules: p.Rules, seen: make(map[string]*tree.Rule)}
 	return v.check()
 }
 
 type validityChecker struct {
 	rules []*tree.Rule
-	seen  map[string]bool
+	seen  map[string]*tree.Rule
 }
 
 type ruleError struct {
@@ -54,10 +54,13 @@ func (v *validityChecker) check() []error {
 
 	for _, r := range v.rules {
 		var res error
-		if v.seen[r.Name] {
+		oldR, ok := v.seen[r.Name]
+		if ok && (r.PositiveAction != oldR.PositiveAction ||
+			r.NegativeAction != oldR.NegativeAction ||
+			r.Body != oldR.Body) {
 			res = errors.New("duplicate definition of syscall rule")
 		}
-		v.seen[r.Name] = true
+		v.seen[r.Name] = r
 		if res == nil {
 			res = checkValidSyscall(r)
 		}
