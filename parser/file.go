@@ -2,8 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"io/ioutil"
-	"strings"
 
 	"github.com/twtiger/gosecco/tree"
 )
@@ -48,15 +46,18 @@ func parseLines(path string, lines []string) (tree.RawPolicy, error) {
 }
 
 // ParseFile will parse the given file and return a raw parse tree or the error generated
+// This function is deprecated and shouldn't be used in new code
 func ParseFile(path string) (tree.RawPolicy, error) {
-	file, err := ioutil.ReadFile(path)
-	if err != nil {
-		return tree.RawPolicy{}, err
-	}
-	return parseLines(path, strings.Split(string(file), "\n"))
+	return Parse(&FileSource{path})
 }
 
 // ParseString will parse the given string and return a raw parse tree or the error generated
+// This function is deprecated and shouldn't be used in new code
 func ParseString(str string) (tree.RawPolicy, error) {
-	return parseLines("<string>", strings.Split(string(str), "\n"))
+	return Parse(&StringSource{"<string>", str})
+}
+
+// Parse will parse the given Source and return a raw parse tree or the error generated
+func Parse(s Source) (tree.RawPolicy, error) {
+	return s.parse()
 }

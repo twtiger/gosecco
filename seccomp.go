@@ -44,6 +44,7 @@ type SeccompSettings struct {
 	// up.
 	// If the path starts with the special marker InlineMarker, the rest of the string will
 	// be interpreted as an inline definition, not a path.
+	// ExtraDefinitions is softly deprecated - you should probably use parser.CombinedSources instead
 	ExtraDefinitions []string
 	// DefaultPositiveAction is the action to take when a syscall is matched, and the expression returns a positive result - and the rule
 	// doesn't have any specified custom actions.  It can be specified as one of "trap", "kill", "allow" or "trace". It can also be a number
@@ -69,11 +70,9 @@ type SeccompSettings struct {
 // specify it should be parsed as an inline string, not a path.
 const InlineMarker = "{inline}"
 
-// Prepare will take the given path and settings, parse and compile the given
+// PrepareSource will take the given source and settings, parse and compile the given
 // data, combined with the settings - and returns the bytecode
-// If path starts with the special marker InlineMarker, the rest of the string will
-// be interpreted as an inline definition, not a path.
-func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
+func PrepareSource(source parser.Source, s SeccompSettings) ([]unix.SockFilter, error) {
 	var e error
 	var rp tree.RawPolicy
 
@@ -96,11 +95,7 @@ func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
 	}
 
 	// Parsing
-	if strings.HasPrefix(path, InlineMarker) {
-		rp, e = parser.ParseString(strings.TrimPrefix(path, InlineMarker))
-	} else {
-		rp, e = parser.ParseFile(path)
-	}
+	rp, e = parser.Parse(source)
 	if e != nil {
 		return nil, e
 	}
@@ -128,6 +123,15 @@ func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
 
 	// Compilation
 	return compiler.Compile(pol)
+}
+
+// Prepare will take the given path and settings, parse and compile the given
+// data, combined with the settings - and returns the bytecode
+// If path starts with the special marker InlineMarker, the rest of the string will
+// be interpreted as an inline definition, not a path.
+// Prepare is now deprecated, and PrepareSource should be used instead
+func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
+	return PrepareSource(&parser.FileSource{path}, s)
 }
 
 // Compile provides the compatibility interface for gosecco - it has the same signature as
