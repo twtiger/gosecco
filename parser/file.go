@@ -59,5 +59,5 @@ func ParseString(str string) (tree.RawPolicy, error) {
 
 // Parse will parse the given Source and return a raw parse tree or the error generated
 func Parse(s Source) (tree.RawPolicy, error) {
-	return s.parse()
+	return s.Parse()
 }
