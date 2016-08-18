@@ -55,3 +55,8 @@ func ParseFile(path string) (tree.RawPolicy, error) {
 	}
 	return parseLines(path, strings.Split(string(file), "\n"))
 }
+
+// ParseString will parse the given string and return a raw parse tree or the error generated
+func ParseString(str string) (tree.RawPolicy, error) {
+	return parseLines("<string>", strings.Split(string(str), "\n"))
+}

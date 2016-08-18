@@ -3,6 +3,7 @@ package gosecco
 import (
 	"fmt"
 	"runtime"
+	"strings"
 	"syscall"
 
 	"github.com/twtiger/gosecco/checker"
@@ -41,6 +42,8 @@ type SeccompSettings struct {
 	// ExtraDefinitions contains paths to files with extra definitions to parse
 	// These files should only contain variables/macros - rules will not be picked
 	// up.
+	// If the path starts with the special marker InlineMarker, the rest of the string will
+	// be interpreted as an inline definition, not a path.
 	ExtraDefinitions []string
 	// DefaultPositiveAction is the action to take when a syscall is matched, and the expression returns a positive result - and the rule
 	// doesn't have any specified custom actions.  It can be specified as one of "trap", "kill", "allow" or "trace". It can also be a number
@@ -62,14 +65,26 @@ type SeccompSettings struct {
 	ActionOnAuditFailure string
 }
 
+// InlineMarker is the marker a string should start with in order to
+// specify it should be parsed as an inline string, not a path.
+const InlineMarker = "{inline}"
+
 // Prepare will take the given path and settings, parse and compile the given
 // data, combined with the settings - and returns the bytecode
+// If path starts with the special marker InlineMarker, the rest of the string will
+// be interpreted as an inline definition, not a path.
 func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
+	var e error
+	var rp tree.RawPolicy
 
 	// Parsing of extra files with definitions
 	extras := make([]map[string]tree.Macro, len(s.ExtraDefinitions))
 	for ix, ed := range s.ExtraDefinitions {
-		rp, e := parser.ParseFile(ed)
+		if strings.HasPrefix(ed, InlineMarker) {
+			rp, e = parser.ParseString(strings.TrimPrefix(ed, InlineMarker))
+		} else {
+			rp, e = parser.ParseFile(ed)
+		}
 		if e != nil {
 			return nil, e
 		}
@@ -81,9 +96,13 @@ func Prepare(path string, s SeccompSettings) ([]unix.SockFilter, error) {
 	}
 
 	// Parsing
-	rp, err := parser.ParseFile(path)
-	if err != nil {
-		return nil, err
+	if strings.HasPrefix(path, InlineMarker) {
+		rp, e = parser.ParseString(strings.TrimPrefix(path, InlineMarker))
+	} else {
+		rp, e = parser.ParseFile(path)
+	}
+	if e != nil {
+		return nil, e
 	}
 
 	// Unifying
