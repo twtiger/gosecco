@@ -44,7 +44,7 @@ type SeccompSettings struct {
 	// up.
 	// If the path starts with the special marker InlineMarker, the rest of the string will
 	// be interpreted as an inline definition, not a path.
-	// ExtraDefinitions is softly deprecated - you should probably use parser.CombinedSources instead
+	// ExtraDefinitions is softly deprecated - you should probably use parser.CombineSources instead
 	ExtraDefinitions []string
 	// DefaultPositiveAction is the action to take when a syscall is matched, and the expression returns a positive result - and the rule
 	// doesn't have any specified custom actions.  It can be specified as one of "trap", "kill", "allow" or "trace". It can also be a number
